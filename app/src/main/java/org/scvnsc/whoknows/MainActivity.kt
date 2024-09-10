@@ -11,9 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.scvnsc.whoknows.data.model.Question
 import org.scvnsc.whoknows.data.network.TriviaApiService
 import org.scvnsc.whoknows.ui.theme.WhoKnowsTheme
@@ -35,17 +37,23 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        retrieveQuestions()
-    }
-
-    private fun retrieveQuestions() {
-        val scope = CoroutineScope(Dispatchers.Main)
+        //TODO: da sistemare
         val triviaApiService = TriviaApiService(applicationContext)
-        scope.launch {
+        lifecycleScope.launch {
             val questions = triviaApiService.getQuestions(15)
             retrieveResult = questions
         }
+
     }
+
+//    private fun retrieveQuestions() {
+//        val scope = CoroutineScope(Dispatchers.Main)
+//
+//        scope.launch {
+//
+//            retrieveResult = questions
+//        }
+//    }
 }
 
 @Composable

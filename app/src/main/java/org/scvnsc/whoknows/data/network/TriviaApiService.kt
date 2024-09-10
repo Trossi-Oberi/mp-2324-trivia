@@ -4,11 +4,13 @@ import android.content.Context
 import android.util.Log
 import com.android.volley.Request
 import com.android.volley.RequestQueue
+import com.android.volley.VolleyLog.TAG
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.scvnsc.whoknows.data.model.Category
 import org.scvnsc.whoknows.data.model.Question
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -31,22 +33,33 @@ class TriviaApiService(private val context: Context){
                     val jsonString = response.toString()
 
                     //parsing JSON con Gson
-                    val gson = Gson()
-                    val triviaResponse: TriviaResponse = gson.fromJson(jsonString, TriviaResponse::class.java)
+                    try {
+                        val gson = Gson()
+                        val triviaResponse: TriviaResponse = gson.fromJson(jsonString, TriviaResponse::class.java)
 
-                    //estrai e converti in oggetti Question
-                    triviaResponse.results.forEach { triviaResult ->
-                        val question = Question(
-                            0,
-                            triviaResult.type,
-                            triviaResult.difficulty,
-                            triviaResult.category,
-                            triviaResult.question,
-                            triviaResult.correctAnswer,
-                            triviaResult.incorrectAnswers,
-                            0 //verrà aggiornato in un secondo momento
-                        )
-                        questions.add(question)
+                        // Stampa il JSON per verificare la struttura
+                        Log.d("Debug", "JSON Response: $jsonString")
+
+                        //estrai e converti in oggetti Question
+                        triviaResponse.results.forEach { triviaResult ->
+//                            Log.d("Debug", "correctAnswer: ${triviaResult.correct_answer}")
+//                            Log.d("Debug", "incorrectAnswers: ${triviaResult.incorrect_answers}")
+
+                            val question = Question(
+                                0,
+                                triviaResult.type,
+                                triviaResult.difficulty,
+                                triviaResult.category,
+                                triviaResult.question,
+                                triviaResult.correct_answer,
+                                triviaResult.incorrect_answers,
+                                0 //verrà aggiornato in un secondo momento
+                            )
+                            questions.add(question)
+                        }
+                    } catch (e: JsonSyntaxException) {
+                        Log.e(TAG, "Error parsing JSON: $e")
+                        // Gestisci l'errore in modo appropriato
                     }
                 },
                 { error ->
@@ -106,7 +119,7 @@ class TriviaApiService(private val context: Context){
 }
 
 data class TriviaResponse(
-    val responseCode: Int,
+    val response_code: Int,
     val results: List<TriviaResult>
 )
 
@@ -115,8 +128,8 @@ data class TriviaResult(
     val difficulty: String,
     val category: String,
     val question: String,
-    val correctAnswer: String,
-    val incorrectAnswers: List<String>,
+    val correct_answer: String,
+    val incorrect_answers: List<String>,
     val categoryId: Int
 )
 
