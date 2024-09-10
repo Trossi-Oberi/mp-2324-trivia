@@ -10,8 +10,9 @@ import com.example.whoknows.data.dao.UserDAO
 import com.example.whoknows.data.model.Category
 import com.example.whoknows.data.model.Question
 import com.example.whoknows.data.model.User
+import com.example.whoknows.data.model.UserPreference
 
-@Database(entities = [Category::class, Question::class, User::class], version = 1)
+@Database(entities = [Category::class, Question::class, User::class, UserPreference::class], version = 1)
 abstract class DatabaseWK : RoomDatabase() {
     abstract fun categoryDAO(): CategoryDAO
     abstract fun questionDAO(): QuestionDAO
