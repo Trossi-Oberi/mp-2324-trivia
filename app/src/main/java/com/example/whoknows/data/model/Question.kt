@@ -19,6 +19,6 @@ data class Question(
     @ColumnInfo(name = "category") val category: String,
     @ColumnInfo(name = "question") val question: String,
     @ColumnInfo(name = "correctAnswer") val correctAnswer: String,
-    @ColumnInfo(name = "incorrectAnswer") val incorrectAnswers: List<String>,
+    @ColumnInfo(name = "incorrectAnswer") val incorrectAnswers: String, //TODO: List<String> to StringJSON converter
     @ColumnInfo(name = "categoryId") val categoryId: Int
 )

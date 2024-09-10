@@ -11,8 +11,6 @@ import com.example.whoknows.data.model.Question
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.nio.charset.StandardCharsets
-import kotlin.coroutines.suspendCoroutine
 
 /*
 Questa classe si occuperà di effettuare le richieste HTTP utilizzando Volley e di convertire la risposta JSON in una lista di oggetti Question.
@@ -37,7 +35,6 @@ class TriviaApiService(private val context: Context){
                     val triviaResponse: TriviaResponse = gson.fromJson(jsonString, TriviaResponse::class.java)
 
                     //estrai e converti in oggetti Question
-                    //triviaResponse.results.map { it.toQuestion() }
                     triviaResponse.results.forEach { triviaResult ->
                         val question = Question(
                             triviaResult.type,
@@ -56,9 +53,6 @@ class TriviaApiService(private val context: Context){
                 }
             )
             requestQueue.add(questionsResponse)
-//            suspendCoroutine { continuation ->
-//                questionsResponse.tag = "getQuestions"
-//            }
 
             //se è andato tutto a buon fine ottengo l'id della categoria
             if (questions.isNotEmpty()) {
@@ -82,23 +76,31 @@ class TriviaApiService(private val context: Context){
     }
 
     private suspend fun fetchCategoryIds(categoryNames: Set<String>): List<Category> {
-        val categories = mutableListOf<Category>()
-        val categoryIdsUrl = "https://opentdb.com/api_category.php"
+        return withContext(Dispatchers.IO) {
+            val categories = mutableListOf<Category>()
+            val categoryIdsUrl = "https://opentdb.com/api_category.php"
 
-        val categoryRequest = JsonObjectRequest(
-            Request.Method.GET,
-            categoryIdsUrl,
-            null,
-            { response ->
-                val jsonString = response.toString()
+            val categoryRequest = JsonObjectRequest(
+                Request.Method.GET,
+                categoryIdsUrl,
+                null,
+                { response ->
+                    val jsonString = response.toString()
 
-                val gson = Gson()
-                val categoryResponse = gson.fromJson(jsonString, CategoryResponse::class.java)
+                    val gson = Gson()
+                    val categoryResponse = gson.fromJson(jsonString, CategoryResponse::class.java)
 
-            }
+                    categories.addAll(categoryResponse.triviaCategories)
 
+                },
+                { error ->
+                    Log.e(Log.ERROR.toString(),"Error fetching categories: $error")
+                }
+            )
 
-        )
+            requestQueue.add(categoryRequest)
+            categories.toList()
+        }
     }
 }
 
@@ -118,6 +120,10 @@ data class TriviaResult(
 )
 
 data class CategoryResponse(
-    val id: Int,
-    val name: String
+    val triviaCategories: List<Category>
 )
+
+//data class Category(
+//    val id: Int,
+//    val name: String
+//)

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.whoknows.data.dao.CategoryDAO
 import com.example.whoknows.data.dao.QuestionDAO
 import com.example.whoknows.data.dao.UserDAO
@@ -13,6 +14,7 @@ import com.example.whoknows.data.model.User
 import com.example.whoknows.data.model.UserPreference
 
 @Database(entities = [Category::class, Question::class, User::class, UserPreference::class], version = 1)
+@TypeConverters()
 abstract class DatabaseWK : RoomDatabase() {
     abstract fun categoryDAO(): CategoryDAO
     abstract fun questionDAO(): QuestionDAO
