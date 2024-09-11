@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
@@ -36,6 +37,7 @@ class HomeScreen() : ComponentActivity() {
                 Scaffold (
                     modifier = Modifier
                         .fillMaxSize(),
+
                     contentColor = Color.Blue,
                     topBar = {
                         TopAppBar(title = {Text("WhoKnows")})
@@ -64,11 +66,13 @@ class HomeScreen() : ComponentActivity() {
                             )
                         }
                     },
-                    content = {
+                    content = { padding ->
                         Column (
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(padding)
                         ){
                             Text("Benvenuto nella home!")
                         }
