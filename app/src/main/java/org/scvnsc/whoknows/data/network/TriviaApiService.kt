@@ -42,9 +42,6 @@ class TriviaApiService(private val context: Context){
 
                         //estrai e converti in oggetti Question
                         triviaResponse.results.forEach { triviaResult ->
-//                            Log.d("Debug", "correctAnswer: ${triviaResult.correct_answer}")
-//                            Log.d("Debug", "incorrectAnswers: ${triviaResult.incorrect_answers}")
-
                             val question = Question(
                                 0,
                                 triviaResult.type,
@@ -68,6 +65,7 @@ class TriviaApiService(private val context: Context){
             )
             requestQueue.add(questionsResponse)
 
+
             //se è andato tutto a buon fine ottengo l'id della categoria
             if (questions.isNotEmpty()) {
                 val categoryNames = questions.map { it.category }.toSet()
@@ -85,8 +83,6 @@ class TriviaApiService(private val context: Context){
             }
             questions.toList()
         }
-
-
     }
 
     private suspend fun fetchCategoryIds(categoryNames: Set<String>): List<Category> {

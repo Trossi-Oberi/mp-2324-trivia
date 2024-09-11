@@ -1,73 +1,84 @@
 package org.scvnsc.whoknows
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.scvnsc.whoknows.data.model.Question
-import org.scvnsc.whoknows.data.network.TriviaApiService
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import org.scvnsc.whoknows.ui.screens.HomeScreen
+import org.scvnsc.whoknows.ui.screens.LoginScreen
 import org.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 
 class MainActivity : ComponentActivity() {
-    private lateinit var retrieveResult: List<Question>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             WhoKnowsTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Scaffold(modifier = Modifier.fillMaxSize()) {
+                    //NavControlHost()
+                    navigateToLoginScreen()
                 }
             }
         }
 
         //TODO: da sistemare
-        val triviaApiService = TriviaApiService(applicationContext)
-        lifecycleScope.launch {
-            val questions = triviaApiService.getQuestions(15)
-            retrieveResult = questions
-        }
+//        val triviaApiService = TriviaApiService(applicationContext)
+//        lifecycleScope.launch {
+//            val questions = triviaApiService.getQuestions(15)
+//            questions.forEach { question ->
+//                Log.d("Debug", "Question: ${question.question}")
+//            }
+//        }
+
 
     }
 
-//    private fun retrieveQuestions() {
-//        val scope = CoroutineScope(Dispatchers.Main)
+    private fun navigateToLoginScreen() {
+        val intent = Intent(this, LoginScreen::class.java)
+        startActivity(intent)
+    }
+
+//    @Composable
+//    private fun NavControlHost() {
+//        val navController = rememberNavController()
 //
-//        scope.launch {
+//        NavHost(navController = navController, startDestination = "login" ) {
+//            composable("login") {
+//                LoginScreen()
+//            }
 //
-//            retrieveResult = questions
+//            composable("home") {
+//                HomeScreen(navController)
+//            }
+//        }
+//
+//        Log.d("Debug", "Sto navigando verso login...")
+//        navController.navigate("login")
+//
+//    }
+
+
+//    @Preview(showBackground = true)
+//    @Composable
+//    fun GreetingPreview() {
+//        WhoKnowsTheme {
+//            Greeting("Android")
 //        }
 //    }
+
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WhoKnowsTheme {
-        Greeting("Android")
-    }
-}
