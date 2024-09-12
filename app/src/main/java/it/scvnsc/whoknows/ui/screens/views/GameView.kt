@@ -62,6 +62,10 @@ fun GameView(navController: NavController){
                     )
                 }
             },
+            //Provvisorio
+            //TODO: fare stub per simulare esecuzione partita, quindi domande finte e risposta standard
+            //TODO: capire come implementare il logo come immagine nella home e nelle schermate
+            //TODO: prima di iniziare la partita schermata che chiede la difficolta': facile, medio, difficile, mista
             content = { padding ->
                 Column (
                     verticalArrangement = Arrangement.Center,

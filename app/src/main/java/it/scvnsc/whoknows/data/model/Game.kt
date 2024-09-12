@@ -12,6 +12,7 @@ data class Game(
     //game id defined progressively
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo val userID: Int,
+    @ColumnInfo val difficulty: String,
     //var questions: List<Question>, //l'entity game contiene la lista delle domande che sono state poste all'utente
     @ColumnInfo val date: String,
     @ColumnInfo var score: Int,
