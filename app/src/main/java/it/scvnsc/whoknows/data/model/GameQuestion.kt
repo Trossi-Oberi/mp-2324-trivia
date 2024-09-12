@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class GameQuestion(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Int,
     val gameId: Int,
     val questionId: Int,
 )

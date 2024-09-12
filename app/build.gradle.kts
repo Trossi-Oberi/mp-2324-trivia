@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.gson)
 
     //Room
+    implementation(libs.androidx.room.ktx)//KTX Extensions/Coroutines for Room
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
 

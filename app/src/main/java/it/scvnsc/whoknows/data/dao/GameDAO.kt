@@ -7,6 +7,6 @@ import it.scvnsc.whoknows.data.model.Game
 @Dao
 interface GameDAO {
     @Insert
-    fun insertGame(game: Game)
+    suspend fun insertGame(game: Game)
 
 }

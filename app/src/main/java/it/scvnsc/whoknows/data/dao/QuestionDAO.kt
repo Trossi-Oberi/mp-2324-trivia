@@ -9,11 +9,11 @@ import it.scvnsc.whoknows.data.model.Question
 @Dao
 interface QuestionDAO {
     @Insert
-    fun insert(question: Question)
+    suspend fun insert(question: Question)
     @Update
-    fun update(question: Question)
+    suspend fun update(question: Question)
     @Delete
-    fun delete(question: Question)
+    suspend fun delete(question: Question)
 
 
 }

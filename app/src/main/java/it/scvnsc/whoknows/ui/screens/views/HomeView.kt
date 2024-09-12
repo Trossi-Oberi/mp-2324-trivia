@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -78,6 +80,18 @@ fun HomeView(navController: NavHostController) {
                         color = Color.Red,
                         text = "Benvenuto nella home!"
                     )
+                    Button(
+                        onClick = {
+                            navController.navigate("game")
+                        },
+                        shape = ButtonDefaults.outlinedShape,
+
+                    ) {
+                        Text(
+                            text = "Play"
+                        )
+                    }
+
                 }
             }
         )
