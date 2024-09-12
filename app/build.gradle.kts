@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "org.scvnsc.whoknows"
+    namespace = "it.scvnsc.whoknows"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "org.scvnsc.whoknows"
+        applicationId = "it.scvnsc.whoknows"
         minSdk = 28
         targetSdk = 34
         versionCode = 1

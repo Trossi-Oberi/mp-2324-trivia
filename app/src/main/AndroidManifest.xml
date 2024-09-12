@@ -26,10 +26,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.screens.HomeScreen" />
-        <activity android:name=".ui.screens.LoginScreen" />
-
-
     </application>
 
 </manifest>
