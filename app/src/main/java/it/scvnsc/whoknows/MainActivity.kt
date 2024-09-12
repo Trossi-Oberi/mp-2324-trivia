@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.LoginForm
 import it.scvnsc.whoknows.ui.screens.RegistrationForm
+import it.scvnsc.whoknows.ui.screens.views.GameView
 import it.scvnsc.whoknows.ui.screens.views.SettingsView
 import it.scvnsc.whoknows.ui.screens.views.StatsView
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
@@ -73,6 +74,10 @@ class MainActivity : ComponentActivity() {
 
             composable("settings") {
                 SettingsView(navController)
+            }
+
+            composable("game") {
+                GameView(navController)
             }
         }
 

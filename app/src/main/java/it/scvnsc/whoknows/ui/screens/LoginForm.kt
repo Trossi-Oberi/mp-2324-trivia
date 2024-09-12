@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -40,20 +39,15 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.ui.viewmodels.LoginViewModel
 
@@ -102,7 +96,7 @@ fun LoginForm(loginViewModel: LoginViewModel, navController: NavHostController) 
                     //TODO: eseguo la verifica delle credenziali di login (stub con "admin" e "admin")
                     if(!loginViewModel.checkLogin(loginCredentials, context)) loginCredentials = LoginCredentials()
 
-                          },
+                },
                 enabled = loginCredentials.isNotEmpty(),
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -112,25 +106,7 @@ fun LoginForm(loginViewModel: LoginViewModel, navController: NavHostController) 
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            val annotatedString = buildAnnotatedString {
-                append("No account yet?")
-                withStyle(style = SpanStyle(color = Color.Blue, fontWeight = FontWeight.Bold)) {
-                    append("Register now")
-                    addStringAnnotation(tag = "register", annotation = "registerUser", start = 15, end = 25)
-                }
-            }
-
-            Text(
-                text = annotatedString,
-                modifier = Modifier
-                    .clickable {
-                        val annotation = annotatedString.getStringAnnotations(tag = "register", start = 15, end = 25).firstOrNull()
-                        annotation?.item?.let {
-                            navController.navigate(it)
-                        }
-                    }
-            )
-
+            RegistrationLink(navController)
         }
 
 
@@ -141,6 +117,30 @@ fun LoginForm(loginViewModel: LoginViewModel, navController: NavHostController) 
             }
         }
     }
+}
+
+@Composable
+fun RegistrationLink(
+    navController: NavHostController
+) {
+    val annotatedString = buildAnnotatedString {
+        append("No account yet? ")
+        withStyle(style = SpanStyle(color = Color.Blue, fontWeight = FontWeight.Bold)) {
+            append("Register now")
+            addStringAnnotation(tag = "register", annotation = "registration", start = 15, end = 25)
+        }
+    }
+
+    Text(
+        text = annotatedString,
+        modifier = Modifier
+            .clickable {
+                val annotation = annotatedString.getStringAnnotations(tag = "register", start = 15, end = 25).firstOrNull()
+                annotation?.item?.let {
+                    navController.navigate(it)
+                }
+            }
+    )
 }
 
 @Composable
