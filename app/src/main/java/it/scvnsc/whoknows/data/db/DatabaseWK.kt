@@ -2,6 +2,7 @@ package it.scvnsc.whoknows.data.db
 
 import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -17,6 +18,8 @@ import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.data.model.User
 import it.scvnsc.whoknows.data.model.UserPreference
 import it.scvnsc.whoknows.utils.Converters
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.internal.synchronized
 
 @Database(entities = [Category::class, Question::class, User::class, UserPreference::class, Game::class, GameQuestion::class], version = 1)
 @TypeConverters(Converters::class)
@@ -28,20 +31,34 @@ abstract class DatabaseWK : RoomDatabase() {
     abstract fun gameQuestionDAO(): GameQuestionDAO
 
     companion object {
-        private var instance: DatabaseWK? = null
+        @Volatile
+        private var INSTANCE: DatabaseWK? = null
 
         //singleton for database instance
+        @OptIn(InternalCoroutinesApi::class)
         fun getInstance(context: Context): DatabaseWK {
-            if (instance == null) {
-                instance = databaseBuilder(
-                    context,
+            //Se l'istanza è nulla costruiscila
+            //Altrimenti restituiscila in modo thread-safe
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
                     DatabaseWK::class.java,
                     "whoknows.db"
-                )
-                    .createFromAsset("whoknows.db")
-                    .build()
+                ).build()
+                INSTANCE = instance
+                instance
             }
-            return instance as DatabaseWK
+
+
+//            if (INSTANCE == null) {
+//                INSTANCE = databaseBuilder(
+//                    context,
+//                    DatabaseWK::class.java,
+//                    "whoknows.db"
+//                )
+//                    .build()
+//            }
+//            return INSTANCE as DatabaseWK
         }
 
     }
