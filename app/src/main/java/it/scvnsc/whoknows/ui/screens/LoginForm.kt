@@ -1,5 +1,8 @@
 package it.scvnsc.whoknows.ui.screens
 
+import android.content.Context
+import android.os.SystemClock.sleep
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -48,11 +51,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
+import it.scvnsc.whoknows.data.network.TriviaViewModel
 import it.scvnsc.whoknows.ui.viewmodels.LoginViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginForm(loginViewModel: LoginViewModel, navController: NavHostController) {
+
     Surface {
         var loginCredentials by remember { mutableStateOf(LoginCredentials()) }
         val context = LocalContext.current
@@ -255,3 +262,4 @@ data class LoginCredentials(
         return login.isNotEmpty() && password.isNotEmpty()
     }
 }
+

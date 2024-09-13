@@ -2,16 +2,20 @@ package it.scvnsc.whoknows
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.SystemClock.sleep
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import it.scvnsc.whoknows.data.network.TriviaViewModel
+//import it.scvnsc.whoknows.data.network.TriviaViewModel
 import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.LoginForm
 import it.scvnsc.whoknows.ui.screens.RegistrationForm
@@ -22,7 +26,7 @@ import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.LoginViewModel
 import it.scvnsc.whoknows.ui.viewmodels.RegistrationViewModel
-
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
@@ -30,7 +34,6 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //gameViewModel = ViewModelProvider(this)[GameViewModel::class.java]
         enableEdgeToEdge()
         setContent {
             WhoKnowsTheme {
@@ -41,24 +44,29 @@ class MainActivity : ComponentActivity() {
         }
 
         //TODO: da sistemare
-//        val triviaApiService = TriviaApiService(applicationContext)
-//        lifecycleScope.launch {
-//            val questions = triviaApiService.getQuestions(15)
-//            questions.forEach { question ->
-//                Log.d("Debug", "Question: ${question.question}")
-//            }
-//        }
-
+        lifecycleScope.launch {
+            val triviaViewModel = TriviaViewModel(application)
+            triviaViewModel.getQuestions(15)
+            val questions = triviaViewModel.questions
+            sleep(5000)
+            Log.d("Debug", "Questions MAIN size: ${questions.value?.size}")
+            questions.value?.forEach { question ->
+                Log.d("Debug", "Question: ${question.question}")
+            }
+        }
 
     }
+
+
 
     @Composable
     private fun NavControlHost() {
         val navController = rememberNavController()
 
-
-        NavHost(navController = navController, startDestination = "login" ) {
+        NavHost(navController = navController, startDestination = "login") {
             composable("login") {
+                //Solo per test inserisco il triviaViewModel qui
+                val triviaViewModel: TriviaViewModel = viewModel()
                 val loginViewModel = viewModel<LoginViewModel>()
                 LoginForm(loginViewModel, navController)
             }

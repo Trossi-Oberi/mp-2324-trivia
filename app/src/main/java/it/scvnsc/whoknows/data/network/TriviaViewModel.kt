@@ -1,7 +1,10 @@
 package it.scvnsc.whoknows.data.network
 
-import android.content.Context
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.VolleyLog.TAG
@@ -18,13 +21,13 @@ import kotlinx.coroutines.withContext
 Questa classe si occuperà di effettuare le richieste HTTP utilizzando Volley e di convertire la risposta JSON in una lista di oggetti Question.
  */
 
-class TriviaApiService(private val context: Context){
-    private val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+class TriviaViewModel(application: Application) : AndroidViewModel(application) {
+    private val requestQueue: RequestQueue = Volley.newRequestQueue(application.applicationContext)
+    private val _questions = MutableLiveData<List<Question>>()
+    val questions: LiveData<List<Question>> get() = _questions
 
-    suspend fun getQuestions(amount: Int): List<Question> {
-        return withContext(Dispatchers.IO) {
-            val questions = mutableListOf<Question>()
-
+    suspend fun getQuestions(amount: Int) {
+        withContext(Dispatchers.Main) {
             val questionsResponse = JsonObjectRequest(
                 Request.Method.GET,
                 "https://opentdb.com/api.php?amount=$amount",
@@ -35,10 +38,14 @@ class TriviaApiService(private val context: Context){
                     //parsing JSON con Gson
                     try {
                         val gson = Gson()
-                        val triviaResponse: TriviaResponse = gson.fromJson(jsonString, TriviaResponse::class.java)
+                        val triviaResponse: TriviaResponse =
+                            gson.fromJson(jsonString, TriviaResponse::class.java)
 
                         // Stampa il JSON per verificare la struttura
                         Log.d("Debug", "JSON Response: $jsonString")
+
+                        // Crea una nuova lista di Question e popolala
+                        val newQuestions = mutableListOf<Question>()
 
                         //estrai e converti in oggetti Question
                         triviaResponse.results.forEach { triviaResult ->
@@ -52,36 +59,45 @@ class TriviaApiService(private val context: Context){
                                 triviaResult.incorrect_answers,
                                 0 //verrà aggiornato in un secondo momento
                             )
-                            questions.add(question)
+                            newQuestions.add(question)
+                            Log.d("Debug", "Questions size: ${newQuestions.size}")
                         }
+                        Log.d("Debug", "Questions UNDERSCORE size: ${_questions.value?.size}")
+                        Log.d("Debug", "NEWQuestions size: ${newQuestions.size}")
+
+                        //TODO: SISTEMARE, NON SI DOVREBBE USARE IL DISPATCHER MAIN
+                        _questions.value = newQuestions
+                        Log.d("Debug", "Questions POST size: ${_questions.value?.size}")
                     } catch (e: JsonSyntaxException) {
                         Log.e(TAG, "Error parsing JSON: $e")
                         // Gestisci l'errore in modo appropriato
                     }
                 },
                 { error ->
-                    Log.e(Log.ERROR.toString(),"Error fetching questions: $error")
+                    Log.e(Log.ERROR.toString(), "Error fetching questions: $error")
                 }
             )
             requestQueue.add(questionsResponse)
 
-
             //se è andato tutto a buon fine ottengo l'id della categoria
-            if (questions.isNotEmpty()) {
-                val categoryNames = questions.map { it.category }.toSet()
-                val categoryIds = fetchCategoryIds(categoryNames)
+            //Operatore ? dopo value e' il SAFE CALL OPERATOR, se questions.value e' null l'espressione viene valutata come null senza causare NullPointerException
+            if (questions.value != null) {
+                Log.d("Debug", "Questions not empty")
+                /*val categoryNames = questions.map { it.category }.toSet()
+                val categoryIds = fetchCategoryIds(categoryNames)*/
 
                 //aggiorno categoryIDs
-                questions.forEachIndexed { index, question ->
+                /*questions.forEachIndexed { index, question ->
                     val categoryName = question.category
-                    val categoryId = categoryIds.find { //cerco nella lista delle categorie delle domande ottenute dalla precedente chiamata l'id corrispondente e lo setto
-                        it.name == categoryName
-                    }?.id ?: 0
-                    questions[index] = question.copy(categoryId = categoryId) //sostituisco nella Question all'indice index il vero categoryID
+                    val categoryId =
+                        categoryIds.find { //cerco nella lista delle categorie delle domande ottenute dalla precedente chiamata l'id corrispondente e lo setto
+                            it.name == categoryName
+                        }?.id ?: 0
+                    questions[index] =
+                        question.copy(categoryId = categoryId) //sostituisco nella Question all'indice index il vero categoryID
 
-                }
+                }*/
             }
-            questions.toList()
         }
     }
 
@@ -104,7 +120,7 @@ class TriviaApiService(private val context: Context){
 
                 },
                 { error ->
-                    Log.e(Log.ERROR.toString(),"Error fetching categories: $error")
+                    Log.e(Log.ERROR.toString(), "Error fetching categories: $error")
                 }
             )
 
