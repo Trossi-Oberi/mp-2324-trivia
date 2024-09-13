@@ -65,9 +65,10 @@ class TriviaViewModel(application: Application) : AndroidViewModel(application) 
                         Log.d("Debug", "Questions UNDERSCORE size: ${_questions.value?.size}")
                         Log.d("Debug", "NEWQuestions size: ${newQuestions.size}")
 
-                        //TODO: SISTEMARE, NON SI DOVREBBE USARE IL DISPATCHER MAIN E NON FUNZIONA COMUNQUE SUL RESTO DELL'APP
+                        //TODO: SISTEMARE
                         _questions.value = newQuestions
                         Log.d("Debug", "Questions POST size: ${_questions.value?.size}")
+                        Log.d("Debug", "Questions SENZA UNDERSCORE Size: ${questions.value?.size}")
                     } catch (e: JsonSyntaxException) {
                         Log.e(TAG, "Error parsing JSON: $e")
                         // Gestisci l'errore in modo appropriato

@@ -9,13 +9,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.data.network.TriviaViewModel
-//import it.scvnsc.whoknows.data.network.TriviaViewModel
 import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.LoginForm
 import it.scvnsc.whoknows.ui.screens.RegistrationForm
@@ -26,8 +27,9 @@ import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.LoginViewModel
 import it.scvnsc.whoknows.ui.viewmodels.RegistrationViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -44,10 +46,13 @@ class MainActivity : ComponentActivity() {
         }
 
         //TODO: da sistemare
-        lifecycleScope.launch {
+        lifecycleScope.launch (Dispatchers.IO){
+            val questions: LiveData<List<Question>>
             val triviaViewModel = TriviaViewModel(application)
             triviaViewModel.getQuestions(15)
-            val questions = triviaViewModel.questions
+            withContext(Dispatchers.Main){
+                questions = triviaViewModel.questions
+            }
             sleep(5000)
             Log.d("Debug", "Questions MAIN size: ${questions.value?.size}")
             questions.value?.forEach { question ->
