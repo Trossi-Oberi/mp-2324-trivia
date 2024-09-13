@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -15,10 +14,12 @@ import androidx.navigation.compose.rememberNavController
 import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.LoginForm
 import it.scvnsc.whoknows.ui.screens.RegistrationForm
+import it.scvnsc.whoknows.ui.screens.views.DifficultyView
 import it.scvnsc.whoknows.ui.screens.views.GameView
 import it.scvnsc.whoknows.ui.screens.views.SettingsView
 import it.scvnsc.whoknows.ui.screens.views.StatsView
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
+import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.LoginViewModel
 import it.scvnsc.whoknows.ui.viewmodels.RegistrationViewModel
 
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun NavControlHost() {
         val navController = rememberNavController()
+        val gameViewModel = GameViewModel()
 
         NavHost(navController = navController, startDestination = "login" ) {
             composable("login") {
@@ -77,7 +79,11 @@ class MainActivity : ComponentActivity() {
             }
 
             composable("game") {
-                GameView(navController)
+                GameView(navController, gameViewModel)
+            }
+
+            composable("difficulty"){
+                DifficultyView(navController, gameViewModel)
             }
         }
 

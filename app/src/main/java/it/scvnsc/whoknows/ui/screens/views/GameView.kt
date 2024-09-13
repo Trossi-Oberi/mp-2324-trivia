@@ -21,10 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameView(navController: NavController){
+fun GameView(navController: NavController, gameViewModel: GameViewModel){
+    val difficulty = gameViewModel.getDifficulty()
     Surface {
         Scaffold (
             modifier = Modifier
@@ -74,7 +76,7 @@ fun GameView(navController: NavController){
                         .fillMaxSize()
                         .padding(padding)
                 ){
-                    Text("Area Game")
+                    Text("Area Game - Difficolta': $difficulty")
                 }
             }
         )

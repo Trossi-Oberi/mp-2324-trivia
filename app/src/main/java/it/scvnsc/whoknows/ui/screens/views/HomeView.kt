@@ -82,7 +82,7 @@ fun HomeView(navController: NavHostController) {
                     )
                     Button(
                         onClick = {
-                            navController.navigate("game")
+                            navController.navigate("difficulty")
                         },
                         shape = ButtonDefaults.outlinedShape,
 
