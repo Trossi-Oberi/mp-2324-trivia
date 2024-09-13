@@ -26,7 +26,6 @@ import it.scvnsc.whoknows.ui.viewmodels.RegistrationViewModel
 
 
 class MainActivity : ComponentActivity() {
-    private lateinit var gameViewModel: GameViewModel
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
