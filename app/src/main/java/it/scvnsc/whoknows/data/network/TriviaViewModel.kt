@@ -27,7 +27,7 @@ class TriviaViewModel(application: Application) : AndroidViewModel(application) 
     val questions: LiveData<List<Question>> get() = _questions
 
     suspend fun getQuestions(amount: Int) {
-        withContext(Dispatchers.Main) {
+        withContext(Dispatchers.IO) {
             val questionsResponse = JsonObjectRequest(
                 Request.Method.GET,
                 "https://opentdb.com/api.php?amount=$amount",
@@ -65,7 +65,7 @@ class TriviaViewModel(application: Application) : AndroidViewModel(application) 
                         Log.d("Debug", "Questions UNDERSCORE size: ${_questions.value?.size}")
                         Log.d("Debug", "NEWQuestions size: ${newQuestions.size}")
 
-                        //TODO: SISTEMARE, NON SI DOVREBBE USARE IL DISPATCHER MAIN
+                        //TODO: SISTEMARE, NON SI DOVREBBE USARE IL DISPATCHER MAIN E NON FUNZIONA COMUNQUE SUL RESTO DELL'APP
                         _questions.value = newQuestions
                         Log.d("Debug", "Questions POST size: ${_questions.value?.size}")
                     } catch (e: JsonSyntaxException) {
