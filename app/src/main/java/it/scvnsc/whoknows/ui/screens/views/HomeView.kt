@@ -32,7 +32,6 @@ fun HomeView(navController: NavHostController) {
         Scaffold (
             modifier = Modifier
                 .fillMaxSize(),
-
             contentColor = Color.Blue,
             topBar = {
                 TopAppBar(title = {Text("WhoKnows")})
@@ -82,7 +81,7 @@ fun HomeView(navController: NavHostController) {
                     )
                     Button(
                         onClick = {
-                            navController.navigate("difficulty")
+                            navController.navigate("game")
                         },
                         shape = ButtonDefaults.outlinedShape,
 
