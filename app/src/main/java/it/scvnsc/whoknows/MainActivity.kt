@@ -18,21 +18,16 @@ import androidx.navigation.compose.rememberNavController
 import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.data.network.TriviaViewModel
 import it.scvnsc.whoknows.ui.screens.views.HomeView
-import it.scvnsc.whoknows.ui.screens.LoginForm
-import it.scvnsc.whoknows.ui.screens.RegistrationForm
 import it.scvnsc.whoknows.ui.screens.views.GameView
 import it.scvnsc.whoknows.ui.screens.views.SettingsView
 import it.scvnsc.whoknows.ui.screens.views.StatsView
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
-import it.scvnsc.whoknows.ui.viewmodels.LoginViewModel
-import it.scvnsc.whoknows.ui.viewmodels.RegistrationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
-
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,19 +63,7 @@ class MainActivity : ComponentActivity() {
     private fun NavControlHost() {
         val navController = rememberNavController()
 
-        NavHost(navController = navController, startDestination = "login") {
-            composable("login") {
-                //Solo per test inserisco il triviaViewModel qui
-                val triviaViewModel: TriviaViewModel = viewModel()
-                val loginViewModel = viewModel<LoginViewModel>()
-                LoginForm(loginViewModel, navController)
-            }
-
-            composable("registration") {
-                val registrationViewModel = viewModel<RegistrationViewModel>()
-                RegistrationForm(registrationViewModel, navController)
-            }
-
+        NavHost(navController = navController, startDestination = "home") {
             composable("home") {
                 HomeView(navController)
             }
@@ -94,29 +77,12 @@ class MainActivity : ComponentActivity() {
             }
 
             composable("game") {
-                val gameViewModel: GameViewModel = viewModel()
+                val gameViewModel: GameViewModel = viewModel<GameViewModel>()
                 GameView(navController, gameViewModel)
             }
 
         }
 
     }
-
-    //TODO: NICOLAS
-    /*
-     - creazione model Game, UserGame
-     - creazione db usando SQLiteStudio
-     - inizio integrazione DAO, logica di recupero informazioni dal db e scrittura sul db
-     */
-
-    //TODO: MATTEO
-    /*
-     - risolvere problema GET da API Trivia
-     - creazione interfacce Registrazione, Stats e Setting (se faccio in tempo)
-     - inizio logica di registrazione
-     - scheda profilo (avatar)
-     - LoginSession per ridurre i tempi di accesso dovuti alle query al db
-     */
-
 }
 

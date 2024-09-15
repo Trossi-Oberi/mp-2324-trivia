@@ -18,4 +18,30 @@ data class Game(
     @ColumnInfo var score: Int,
     @ColumnInfo val duration: Long
 
-)
+) {
+//per utilizzare l'autogenerate dell'id creare un costruttore
+
+//questo costruttore crea User senza id che verrà aggiunto automaticamente da Room
+//    constructor(
+//    username: String,
+//    password: String,
+//    firstName: String,
+//    lastName: String,
+//    birthDate: String,
+//    avatar: ByteArray? = null,
+//    preferredCategories: List<String> = emptyList(),
+//    language: String = "it",
+//    isOnline: Boolean = false
+//    ) : this(
+//    id = 0, //l'id verrà incrementato da Room
+//    username = username,
+//    password = password,
+//    firstName = firstName,
+//    lastName = lastName,
+//    birthDate = birthDate,
+//    avatar = avatar,
+//    preferredCategories = preferredCategories,
+//    language = language,
+//    isOnline = isOnline
+//    )
+}
