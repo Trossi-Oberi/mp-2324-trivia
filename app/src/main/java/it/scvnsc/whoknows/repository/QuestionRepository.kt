@@ -32,7 +32,6 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         val categories = apiService.getCategories()
         Log.d("Debug", "Categories: ${categories.trivia_categories[0]}")
         Log.d("Debug", "Categories: ${categories.trivia_categories[1]}")
-        //TODO: Controllare se questa createCategoriesMap aspetta di aver ricevuto le categories dall'API o esegue come NULL
         CategoryManager.buildCategoriesMap(categories.trivia_categories)
     }
 
@@ -53,8 +52,6 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
 
             withContext(Dispatchers.IO) {
                 questionDAO.insertQuestions(fetchedQuestions)
-                /*questionDAO.insert(fetchedQuestions.get(0))
-                questionDAO.insert(fetchedQuestions.get(1))*/
             }
         }
         //Faccio una query al DB per prendere le domande

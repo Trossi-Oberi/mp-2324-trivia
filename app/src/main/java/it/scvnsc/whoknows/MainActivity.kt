@@ -39,14 +39,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-        /*lifecycleScope.launch {
-            val questionDao = DatabaseWK.getInstance(applicationContext).questionDAO()
-            val question = Question(0, "NOT SET", "NOT SET", "NOT SET", "NOT SET", "NOT SET", emptyList(), 0)
-            withContext(Dispatchers.IO) {
-                questionDao.insert(question)
-            }
-        }*/
     }
 
 
