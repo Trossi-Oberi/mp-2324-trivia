@@ -8,24 +8,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -135,17 +131,18 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
                     }
 
                     if (gameViewModel.isPlaying.observeAsState().value == true) {
-                        Column {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
                             with(gameViewModel) {
                                 questionForUser.observeAsState().value?.let {
                                     Log.d("Debug", "Question for user: ${it.question}")
                                     Text("Category: " + it.category)
                                     Text("Difficulty: " + it.difficulty)
                                     Text(it.question)
-                                    Text(it.correct_answer)
-                                    for (i in 1..it.incorrect_answers.size) {
-                                        Text(it.incorrect_answers[i-1])
-                                    }
+                                    ShowAnswers(it.correct_answer, it.incorrect_answers, gameViewModel)
+
                                 }
                             }
                         }
@@ -154,6 +151,21 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
 
             }
         )
+    }
+}
+
+@Composable
+fun ShowAnswers(correctAnswer: String, incorrectAnswers: List<String>, gvm: GameViewModel) {
+    val possibleAnswers = mutableListOf<String>()
+    possibleAnswers.add(correctAnswer)
+    possibleAnswers.addAll(incorrectAnswers)
+    possibleAnswers.shuffle()
+    for (ans in possibleAnswers){
+        Button(onClick = {
+            gvm.onAnswerClicked(ans)
+        }) {
+            Text(ans)
+        }
     }
 }
 

@@ -74,6 +74,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun onAnswerClicked(givenAnswer: String){
+        //TODO: Gestione della logica quando l'utente seleziona una risposta
+        Log.d("Debug", "Answer clicked")
+    }
+
     suspend fun startGame() {
         //TODO: I parametri category e difficulty vanno passati come parametro dinamicamente
         freshQuestions = questionRepository.retrieveQuestions(AMOUNT, "Entertainment: Music", "easy")
