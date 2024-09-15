@@ -14,13 +14,18 @@ import kotlinx.coroutines.launch
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _selectedDifficulty = MutableLiveData("NOT SET")
+    //TODO: Cambiare la logica di come vengono passati i parametri difficulty e category alla chiamata API
+    // (Ora difficulty e category vengono impostati nella scheda settings)
+    private val _selectedDifficulty = MutableLiveData("MIXED") //valore di default
     private val _showDifficultySelection = MutableLiveData(false)
     val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
     val showDifficultySelection: LiveData<Boolean> get() = _showDifficultySelection
 
+    val AMOUNT = 20 //Numero arbitrario (costante) di domande da prendere dall'API
+
     private var freshQuestions: List<Question>?
 
+    //Variabili booleane per controllare la logica di gioco
     private val _isPlaying = MutableLiveData(false)
     val isPlaying: LiveData<Boolean> get() = _isPlaying
 
@@ -29,15 +34,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private val questionRepository: QuestionRepository
 
-    private val _question1 = MutableLiveData<Question>()
+    /*private val _question1 = MutableLiveData<Question>()
     val question1: LiveData<Question> get() = _question1
     private val _question2 = MutableLiveData<Question>()
-    val question2: LiveData<Question> get() = _question2
+    val question2: LiveData<Question> get() = _question2*/
+
+
 
     init {
         freshQuestions = emptyList()
         val questionDAO = DatabaseWK.getInstance(application).questionDAO()
         questionRepository = QuestionRepository(questionDAO)
+        viewModelScope.launch {
+            questionRepository.setupInteractionWithAPI()
+        }
     }
 
     fun setDifficulty(difficulty: String) {
@@ -60,11 +70,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun startGame() {
-        questionRepository.setupCategoryManager()
-        freshQuestions = questionRepository.retrieveQuestions(20, "Entertainment: Music", "easy")
-        Log.d("Debug", "Questions: ${freshQuestions?.get(0)}")
+
+        //TODO: I parametri category e difficulty vanno passati come parametro dinamicamente
+        freshQuestions = questionRepository.retrieveQuestions(AMOUNT, "Entertainment: Music", "easy")
+       /* Log.d("Debug", "Questions: ${freshQuestions?.get(0)}")
         _question1.value= freshQuestions?.get(0)
-        _question2.value= freshQuestions?.get(0)
+        _question2.value= freshQuestions?.get(0)*/
     }
 
 

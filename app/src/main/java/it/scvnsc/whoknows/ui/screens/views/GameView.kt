@@ -135,7 +135,7 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
 
                     if (gameViewModel.isPlaying.observeAsState().value == true) {
                         Column {
-                            with(gameViewModel) {
+                            /*with(gameViewModel) {
                                 question1.observeAsState().value?.let {
                                     Text(it.category)
                                     Text(it.question)
@@ -145,7 +145,7 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
                                     Text(it.question)
                                 }
 
-                            }
+                            }*/
                         }
                     }
                 }
