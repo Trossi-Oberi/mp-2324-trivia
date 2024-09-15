@@ -40,9 +40,13 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
 
     var showDifficultySelection by rememberSaveable { mutableStateOf(true) }
     var selectedDifficulty by rememberSaveable { mutableStateOf("") }
-    //var isMenuOpen by rememberSaveable { mutableStateOf(false) }
 
-    if(showDifficultySelection){
+
+    //TODO: Fare in modo che la difficolta' venga richiesta solamente la prima volta in assoluto che viene
+    // aperta la schermata, quindi se l'utente gioca piu' di una partita non deve scegliere di nuovo la difficolta'
+
+
+    if (showDifficultySelection) {
         DifficultySelectionDialog(onDifficultySelected = {
             selectedDifficulty = it
             gameViewModel.setDifficulty(it)
@@ -57,6 +61,8 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
                 .fillMaxSize(),
 
             contentColor = Color.Blue,
+
+            //TODO: Implementare Menu a Hamburger per il cambio di difficolta'
             /*topBar = {
                 TopAppBar(
                     title = {Text("WhoKnows")},
@@ -121,21 +127,31 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
 
                     Button(
                         onClick = {
-                            //startGame()
+                            gameViewModel.onStartClicked()
                         }
                     ) {
                         Text("Start Game")
+                    }
+
+                    if (gameViewModel.isPlaying.observeAsState().value == true) {
+                        Column {
+                            with(gameViewModel) {
+                                question1.observeAsState().value?.let {
+                                    Text(it.category)
+                                    Text(it.question)
+                                }
+                                question2.observeAsState().value?.let {
+                                    Text(it.category)
+                                    Text(it.question)
+                                }
+
+                            }
+                        }
                     }
                 }
 
             }
         )
-    }
-    //startGame()
-
-    // Funzione per nascondere il popup e iniziare il gioco
-    fun startGame() {
-        // Inizia il gioco con la difficoltà selezionata
     }
 }
 

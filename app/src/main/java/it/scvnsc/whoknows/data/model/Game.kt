@@ -5,8 +5,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.Date
 
-//un game si dice vinto se l'utente risponde correttamente a 10 domande di fila
-
 @Entity(tableName = "games")
 data class Game(
     //game id defined progressively

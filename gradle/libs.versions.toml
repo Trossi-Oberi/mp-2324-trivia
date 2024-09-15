@@ -12,6 +12,8 @@ composeBom = "2024.04.01"
 roomRuntime = "2.6.1"
 volley = "1.2.1"
 runtimeLivedata = "1.7.0"
+retrofit2 = "2.9.0"
+retrofit2gson = "2.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,6 +36,8 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 volley = { module = "com.android.volley:volley", version.ref = "volley" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+retrofit2 = {module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit2"}
+retrofit2gson = {module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit2gson"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -15,8 +15,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import it.scvnsc.whoknows.data.db.DatabaseWK
 import it.scvnsc.whoknows.data.model.Question
-import it.scvnsc.whoknows.data.network.TriviaViewModel
 import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.views.GameView
 import it.scvnsc.whoknows.ui.screens.views.SettingsView
@@ -40,23 +40,14 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        //TODO: da sistemare
-        lifecycleScope.launch (Dispatchers.IO){
-            val questions: LiveData<List<Question>>
-            val triviaViewModel = TriviaViewModel(application)
-            triviaViewModel.getQuestions(15)
-            withContext(Dispatchers.Main){
-                questions = triviaViewModel.questions
+        /*lifecycleScope.launch {
+            val questionDao = DatabaseWK.getInstance(applicationContext).questionDAO()
+            val question = Question(0, "NOT SET", "NOT SET", "NOT SET", "NOT SET", "NOT SET", emptyList(), 0)
+            withContext(Dispatchers.IO) {
+                questionDao.insert(question)
             }
-            sleep(5000)
-            Log.d("Debug", "Questions MAIN size: ${questions.value?.size}")
-            questions.value?.forEach { question ->
-                Log.d("Debug", "Question: ${question.question}")
-            }
-        }
-
+        }*/
     }
-
 
 
     @Composable

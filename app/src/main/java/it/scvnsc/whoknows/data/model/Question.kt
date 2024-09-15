@@ -4,23 +4,25 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import it.scvnsc.whoknows.data.model.Category
 
-@Entity(
-    tableName = "questions",
-    foreignKeys = [ForeignKey(
-        entity = Category::class,
-        parentColumns = arrayOf("id"),
-        childColumns = arrayOf("categoryId")
-    )]
-)
+@Entity(tableName = "questions")
 data class Question(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "type") val type: String,
     @ColumnInfo(name = "difficulty") val difficulty: String,
     @ColumnInfo(name = "category") val category: String,
     @ColumnInfo(name = "question") val question: String,
-    @ColumnInfo(name = "correctAnswer") val correctAnswer: String,
-    @ColumnInfo(name = "incorrectAnswer") val incorrectAnswers: List<String>,
+    @ColumnInfo(name = "correctAnswer") val correct_answer: String,
+    @ColumnInfo(name = "incorrectAnswer") val incorrect_answers: List<String>,
     @ColumnInfo(name = "categoryId") val categoryId: Int
-)
+){
+    constructor(
+        type: String,
+        difficulty: String,
+        category: String,
+        question: String,
+        correct_answer: String,
+        incorrect_answers: List<String>,
+        categoryId: Int
+    ) : this(0,type, difficulty, category, question, correct_answer, incorrect_answers, categoryId)
+}
