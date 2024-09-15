@@ -22,7 +22,8 @@ interface QuestionDAO {
 
 
     //TODO: Sistemare, voglio solo le ultime 20 domande inserite nel DB, devo fare un parametro data per Question
-    @androidx.room.Query("SELECT * FROM questions")
+    @androidx.room.Query("SELECT * FROM questions ORDER BY date DESC LIMIT 20")
+    //Room restituisce solo oggetti di tipo List, converto nella repository in MutableList
     suspend fun getLastQuestions(): List<Question>
 
 

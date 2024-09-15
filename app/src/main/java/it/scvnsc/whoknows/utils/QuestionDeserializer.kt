@@ -1,5 +1,7 @@
 package it.scvnsc.whoknows.utils
 
+import android.text.Html
+import androidx.core.text.HtmlCompat
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -13,9 +15,13 @@ class QuestionDeserializer : JsonDeserializer<Question> {
         val type = jsonObject.get("type").asString
         val difficulty = jsonObject.get("difficulty").asString
         val category = jsonObject.get("category").asString
-        val question = jsonObject.get("question").asString
-        val correctAnswer = jsonObject.get("correct_answer").asString
-        val incorrectAnswers = jsonObject.get("incorrect_answers").asJsonArray.map { it.asString }
+        val question = HtmlCompat.fromHtml(jsonObject.get("question").asString,
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        ).toString()
+        val correctAnswer = HtmlCompat.fromHtml(jsonObject.get("correct_answer").asString,
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        ).toString()
+        val incorrectAnswers = incAnswersHtmlParser(jsonObject.get("incorrect_answers").asJsonArray.map { it.asString })
         val categoryID = CategoryManager.categories[category]
 
         // Imposta id e categoryId con i valori desiderati
@@ -24,4 +30,14 @@ class QuestionDeserializer : JsonDeserializer<Question> {
             Question(type, difficulty, category, question, correctAnswer, incorrectAnswers, catID)
         }
     }
+
+    private fun incAnswersHtmlParser(incAnswersJson: List<String>): List<String> {
+        val parsedIncAnswers = mutableListOf<String>()
+        for (ans in incAnswersJson){
+            parsedIncAnswers.add(HtmlCompat.fromHtml(ans, HtmlCompat.FROM_HTML_MODE_LEGACY).toString())
+        }
+        return parsedIncAnswers
+    }
+
+
 }

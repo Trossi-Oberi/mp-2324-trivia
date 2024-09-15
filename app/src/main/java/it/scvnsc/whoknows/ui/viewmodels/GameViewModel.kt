@@ -10,12 +10,14 @@ import it.scvnsc.whoknows.data.db.DatabaseWK
 import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.repository.QuestionRepository
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //TODO: Cambiare la logica di come vengono passati i parametri difficulty e category alla chiamata API
     // (Ora difficulty e category vengono impostati nella scheda settings)
+
     private val _selectedDifficulty = MutableLiveData("MIXED") //valore di default
     private val _showDifficultySelection = MutableLiveData(false)
     val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
@@ -23,7 +25,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     val AMOUNT = 20 //Numero arbitrario (costante) di domande da prendere dall'API
 
-    private var freshQuestions: List<Question>?
+    private var freshQuestions = mutableListOf<Question>() //Domande prese dall'API
+    private var askedQuestions = mutableListOf<Question>() //Domande poste all'utente
+    private val _questionForUser = MutableLiveData<Question>()
+    val questionForUser: LiveData<Question> get() = _questionForUser
+
 
     //Variabili booleane per controllare la logica di gioco
     private val _isPlaying = MutableLiveData(false)
@@ -42,7 +48,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
 
     init {
-        freshQuestions = emptyList()
         val questionDAO = DatabaseWK.getInstance(application).questionDAO()
         questionRepository = QuestionRepository(questionDAO)
         viewModelScope.launch {
@@ -70,12 +75,24 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun startGame() {
-
         //TODO: I parametri category e difficulty vanno passati come parametro dinamicamente
         freshQuestions = questionRepository.retrieveQuestions(AMOUNT, "Entertainment: Music", "easy")
-       /* Log.d("Debug", "Questions: ${freshQuestions?.get(0)}")
-        _question1.value= freshQuestions?.get(0)
-        _question2.value= freshQuestions?.get(0)*/
+        Log.d("Debug", "Fresh Questions: ${freshQuestions.get(0).question}")
+        Log.d("Debug", "Fresh Questions: ${freshQuestions.get(1).question}")
+        _questionForUser.value = nextQuestion()
+        Log.d("Debug", "Question for user: ${_questionForUser.value}")
+        if (freshQuestions[0].question == "NMQ") {
+            //TODO: Mostrare messaggio all'utente dicendo che ha completato tutte le domande per difficolta' e categoria selezionate
+            // (usare variabile booleana osservabile dalla GameView
+        }
+    }
+
+    private fun nextQuestion(): Question {
+        val r = Random.nextInt(freshQuestions.size)
+        val nextQ = freshQuestions[r]
+        freshQuestions.removeAt(r)
+        askedQuestions.add(nextQ)
+        return nextQ
     }
 
 

@@ -1,5 +1,6 @@
 package it.scvnsc.whoknows.ui.screens.views
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -135,17 +136,18 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
 
                     if (gameViewModel.isPlaying.observeAsState().value == true) {
                         Column {
-                            /*with(gameViewModel) {
-                                question1.observeAsState().value?.let {
-                                    Text(it.category)
+                            with(gameViewModel) {
+                                questionForUser.observeAsState().value?.let {
+                                    Log.d("Debug", "Question for user: ${it.question}")
+                                    Text("Category: " + it.category)
+                                    Text("Difficulty: " + it.difficulty)
                                     Text(it.question)
+                                    Text(it.correct_answer)
+                                    for (i in 1..it.incorrect_answers.size) {
+                                        Text(it.incorrect_answers[i-1])
+                                    }
                                 }
-                                question2.observeAsState().value?.let {
-                                    Text(it.category)
-                                    Text(it.question)
-                                }
-
-                            }*/
+                            }
                         }
                     }
                 }
