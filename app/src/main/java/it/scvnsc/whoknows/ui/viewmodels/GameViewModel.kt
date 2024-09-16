@@ -139,7 +139,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 //TODO: Fare attenzione al cambio categoria/difficolta' da parte dell'utente, se una delle due cambia allora vanno pulite tutte le domande presenti in memoria
                 val newQuestions = questionRepository.retrieveQuestions(
                     SMALL_AMOUNT,
-                    _selectedCategory,
+                    _selectedCategory.value.toString(),
                     _selectedDifficulty.value.toString().lowercase()
                 )
                 freshQuestions.addAll(newQuestions)
@@ -152,7 +152,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             //Salvataggio game nel DB
             Log.d("Debug","Game ended with score: ${_score.value}")
-            val playedGame = Game(_score.value, chosenDifficulty, chosenCategory, _elapsedTime.value, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+            val playedGame = Game(_score.value, _selectedDifficulty.value.toString(), _selectedCategory.value.toString(), _elapsedTime.value, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
