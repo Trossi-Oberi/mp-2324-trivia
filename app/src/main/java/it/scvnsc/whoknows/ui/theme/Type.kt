@@ -1,17 +1,19 @@
 package it.scvnsc.whoknows.ui.theme
 
-import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 
 //Main titles
 val titleTextStyle = TextStyle(
     fontSize = fontSizeBig,
     fontWeight = FontWeight.Normal,
+    fontFamily = customTitleFont
+)
+
+val topBarTextStyle = TextStyle(
+    fontSize = fontSizeNormal,
+    fontWeight = FontWeight.Medium,
     fontFamily = customTitleFont
 )
 

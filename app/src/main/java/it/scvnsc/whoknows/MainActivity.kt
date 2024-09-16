@@ -52,11 +52,11 @@ class MainActivity : ComponentActivity() {
             }
 
             composable("stats") {
-                StatsView(navController)
+                StatsView(navController, settingsViewModel)
             }
 
             composable("settings") {
-                SettingsView(navController)
+                SettingsView(navController, settingsViewModel)
             }
 
             composable("game") {

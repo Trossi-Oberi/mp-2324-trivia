@@ -1,13 +1,11 @@
 package it.scvnsc.whoknows.utils
 
-import android.text.Html
 import androidx.core.text.HtmlCompat
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import it.scvnsc.whoknows.data.model.Question
 import java.lang.reflect.Type
-import java.util.Date
 
 class QuestionDeserializer : JsonDeserializer<Question> {
     override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Question? {

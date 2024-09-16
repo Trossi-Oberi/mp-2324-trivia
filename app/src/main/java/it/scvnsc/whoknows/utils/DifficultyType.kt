@@ -5,5 +5,4 @@ enum class DifficultyType {
     MEDIUM,
     HARD,
     MIXED
-
 }

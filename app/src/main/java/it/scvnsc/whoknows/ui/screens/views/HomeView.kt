@@ -1,5 +1,6 @@
 package it.scvnsc.whoknows.ui.screens.views
 
+import android.provider.Settings.Global.getString
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,12 +42,14 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asComposePath
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.CornerRounding
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.toPath
 import androidx.navigation.NavHostController
+import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
@@ -58,13 +61,18 @@ import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.theme.titleTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.isLandscape
+import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeView(navController: NavHostController, settingsViewModel: SettingsViewModel) {
+fun HomeView(
+    navController: NavHostController,
+    settingsViewModel: SettingsViewModel
+) {
 
     //determino orientamento schermo
     val isLandscape = isLandscape()
+    val context = LocalContext.current
 
     WhoKnowsTheme(
         darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true
@@ -103,7 +111,7 @@ fun HomeView(navController: NavHostController, settingsViewModel: SettingsViewMo
                         //TODO:: da sistemare
 
                         Text(
-                            text = "¿WhoKnows?",
+                            text = context.getString(R.string.app_name),
                             color = Color.Yellow,
                             style = titleTextStyle,
                             textAlign = TextAlign.Center,
@@ -182,8 +190,8 @@ fun HomeView(navController: NavHostController, settingsViewModel: SettingsViewMo
                                 modifier = Modifier
                                     .height(home_buttons_height)
                                     .width(home_buttons_width)
-                                ) {
-                                Row (
+                            ) {
+                                Row(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(small_padding),
@@ -216,7 +224,7 @@ fun HomeView(navController: NavHostController, settingsViewModel: SettingsViewMo
                                     .height(home_buttons_height)
                                     .width(home_buttons_width)
                             ) {
-                                Row (
+                                Row(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(small_padding),
@@ -248,7 +256,7 @@ fun HomeView(navController: NavHostController, settingsViewModel: SettingsViewMo
                                     .height(home_buttons_height)
                                     .width(home_buttons_width)
                             ) {
-                                Row (
+                                Row(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(small_padding),
