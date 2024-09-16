@@ -20,7 +20,7 @@ data class Question(
     @ColumnInfo(name = "incorrectAnswer") val incorrect_answers: List<String>,
     @ColumnInfo(name = "categoryId") val categoryId: Int,
     @ColumnInfo(name = "date") val date: String
-){
+) :Serializable{
     @SuppressLint("SimpleDateFormat")
     constructor(
         type: String,

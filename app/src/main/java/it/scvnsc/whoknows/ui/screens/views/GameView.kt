@@ -39,12 +39,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
@@ -61,6 +61,7 @@ import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,43 +135,36 @@ fun GameView(
                         }
 
                         if (gameViewModel.isPlaying.observeAsState().value == true) {
-
-
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
+                                Text("Prova")
+                                //TODO:: DA SISTEMARE URGENTE
                                 with(gameViewModel) {
-                                    val currentQuestion by rememberSaveable {
-                                        mutableStateOf(questionForUser.value)
-                                    }
-
-                                    val shuffledAnswers by rememberSaveable {
-                                        mutableStateOf(
-                                            shuffledAnswers.value
-                                        )
-                                    }
-                                    val timer by rememberSaveable { mutableStateOf(elapsedTime.value) }
-                                    val currentScore by rememberSaveable { mutableStateOf(score.value) }
+                                    //TODO: da sistemare
 
                                     //Timer nella UI
-                                    Text("Game time: $timer")
+                                    GameTimer(this)
 
                                     //Punteggio nella UI
-                                    Text("Score: $currentScore")
+                                    GameScore(this)
 
                                     //Domanda nella UI
-                                    ShowQuestion(currentQuestion)
+                                    ShowQuestion(this)
 
                                     //Possibili risposte nella UI
-                                    ShowAnswers(shuffledAnswers!!, gameViewModel)
+                                    ShowAnswers(this)
                                 }
                             }
                         }
                     }
+
                 }
             )
+
         }
+
     }
 }
 
@@ -425,7 +419,7 @@ fun CategorySelectionDialog(
 //    }
 }
 
-
+/*
 @Composable
 fun ShowQuestion(currentQuestion: Question?) {
     Log.d("Debug", "Question for user: $currentQuestion")
@@ -437,6 +431,40 @@ fun ShowQuestion(currentQuestion: Question?) {
 @Composable
 fun ShowAnswers(answers: List<String>, gvm: GameViewModel) {
     for (ans in answers) {
+        Button(onClick = {
+            gvm.onAnswerClicked(ans)
+        }) {
+            Text(ans)
+        }
+    }
+}
+*/
+
+@Composable
+fun GameScore(gameViewModel: GameViewModel) {
+    val currentScore = gameViewModel.score.observeAsState().value
+    Text("Score: $currentScore")
+}
+
+@Composable
+fun GameTimer(gameViewModel: GameViewModel) {
+    val timer = gameViewModel.elapsedTime.observeAsState().value
+    Text("Game time: $timer")
+}
+
+@Composable
+fun ShowQuestion(gameViewModel: GameViewModel) {
+    val currentQuestion = gameViewModel.questionForUser.observeAsState().value
+    Log.d("Debug", "Question for user: $currentQuestion")
+    Text("Category: " + (currentQuestion?.category ?: ""))
+    Text("Difficulty: " + (currentQuestion?.difficulty ?: ""))
+    Text(currentQuestion?.question ?: "")
+}
+
+@Composable
+fun ShowAnswers(gvm: GameViewModel) {
+    val answers = gvm.shuffledAnswers.observeAsState().value
+    for (ans in answers!!) {
         Button(onClick = {
             gvm.onAnswerClicked(ans)
         }) {
