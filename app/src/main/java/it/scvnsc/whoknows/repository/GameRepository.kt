@@ -6,6 +6,7 @@ import it.scvnsc.whoknows.data.model.Game
 class GameRepository (private val gameDAO : GameDAO) {
 
     suspend fun saveGame(game: Game){
+        //TODO: Quando difficulty e category sono stringhe vuote vanno sostituite con "Mixed"
         gameDAO.insertGame(game)
     }
 

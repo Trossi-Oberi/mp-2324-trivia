@@ -9,7 +9,10 @@ import it.scvnsc.whoknows.data.network.QuestionResponse
 import it.scvnsc.whoknows.data.network.TokenResponse
 import it.scvnsc.whoknows.utils.CategoryManager
 import it.scvnsc.whoknows.utils.QuestionDeserializer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -52,66 +55,52 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
     }
 
     // Step 3: Recupera un (amount) di domande della categoria e della difficolta' scelte ogni volta che l'utente clicka Play o risponde correttamente a tutte le domande precedenti
-    suspend fun retrieveQuestions(
-        amount: Int,
-        categoryName: String,
-        difficulty: String
-    ): MutableList<Question> {
+    suspend fun retrieveQuestions(amount: Int, categoryName: String, difficulty: String): MutableList<Question> {
 
         //Prendo le nuove domande dall'API
-        val questionResponse: QuestionResponse?
-        var categoryID: Int? = null
-
+        var categoryID: String? = ""
         if (categoryName != "") {
-            categoryID = CategoryManager.categories[categoryName]
+            categoryID = CategoryManager.categories[categoryName].toString()
         }
 
-        questionResponse = categoryID.let { id ->
-            val effectiveId = if (categoryID != null) id else null
-            val effectiveDifficulty = difficulty.ifEmpty { null }
+        Log.d("Debug", "Category ID: $categoryID")
+        Log.d("Debug", "Difficulty: $difficulty")
 
-            Log.d("Debug", "Category ID: $effectiveId")
-            Log.d("Debug", "Difficulty: $effectiveDifficulty")
 
-            apiService.getQuestions(
-                amount,
-                effectiveId,
-                effectiveDifficulty,
-                SESSION_TOKEN
-            )
-        }
-
+        //TODO: Capire perche' l'API prende una domanda rispetto a quanto richiesto
+        val questionResponse = apiService.getQuestions(
+            amount,
+            categoryID,
+            difficulty,
+            SESSION_TOKEN
+        )
         Log.d("Debug", "Question Response: $questionResponse")
 
         //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token
-        if (questionResponse != null) {
-            if (questionResponse.response_code == 4) {
-                resetSessionToken()
-            }
+        if (questionResponse.response_code == 4) {
+            resetSessionToken()
         }
 
-        val fetchedQuestions = (questionResponse.results)
-        Log.d("Debug", "Fetched Questions: $fetchedQuestions")
+        val fetchedQuestions = questionResponse.results
+        Log.d("Debug", "Fetched Questions: $fetchedQuestions") //OK
         //Inserisco le domande nel DB, non passo mai le domande direttamente dall'API al ViewModel
-        withContext(Dispatchers.IO) {
-            if (fetchedQuestions != null) {
-                questionDAO.insertQuestions(fetchedQuestions)
-            }
-        }
-        //Faccio una query al DB per prendere le domande e al ViewModel returno una MutableList<Question>
         val dbQuestions = mutableListOf<Question>()
-        dbQuestions.addAll(questionDAO.getLastQuestions(amount))
-        if (amount == 2) {
-            Log.d("Debug", "Start amount DB Questions:")
-            Log.d("Debug", dbQuestions[0].question)
-            Log.d("Debug", dbQuestions[1].question)
-        } else if (amount == 1) {
-            Log.d("Debug", "Small amount question retrieve")
-            Log.d("Debug", dbQuestions[0].question)
+        withContext(Dispatchers.IO) {
+            questionDAO.insertQuestions(fetchedQuestions)
+            dbQuestions.addAll(fetchedQuestions)
         }
-        /*Log.d("Debug", "DB Questions: ${dbQuestions[0].question}")
-        Log.d("Debug", "DB Questions: ${dbQuestions[1].question}")*/
+//        val q : List<Question>
+//        withContext(Dispatchers.IO) {
+//            q = questionDAO.getLastQuestions(amount)
+//        Log.d("Debug", q[0].question)
+//        dbQuestions.addAll(q)
+//        Log.d("Debug", "DB Questions: ${dbQuestions[0].question}")
+//        Log.d("Debug", "DB Questions: ${dbQuestions[1].question}")
         return dbQuestions
+
+        //Faccio una query al DB per prendere le domande e al ViewModel returno una MutableList<Question>
+
+
     }
 
 }

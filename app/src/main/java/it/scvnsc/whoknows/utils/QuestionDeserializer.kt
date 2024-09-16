@@ -12,21 +12,17 @@ class QuestionDeserializer : JsonDeserializer<Question> {
         val jsonObject = json.asJsonObject
         val type = jsonObject.get("type").asString
         val difficulty = jsonObject.get("difficulty").asString
-        val category = jsonObject.get("category").asString
-        val question = HtmlCompat.fromHtml(jsonObject.get("question").asString,
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-        ).toString()
-        val correctAnswer = HtmlCompat.fromHtml(jsonObject.get("correct_answer").asString,
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-        ).toString()
+        val category = HtmlCompat.fromHtml(jsonObject.get("category").asString, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
+        val question = HtmlCompat.fromHtml(jsonObject.get("question").asString, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
+        val correctAnswer = HtmlCompat.fromHtml(jsonObject.get("correct_answer").asString, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
         val incorrectAnswers = incAnswersHtmlParser(jsonObject.get("incorrect_answers").asJsonArray.map { it.asString })
-        val categoryID = CategoryManager.categories[category]
+        val categoryID = CategoryManager.categories[category].toString()
 
         // Imposta id e categoryId con i valori desiderati
         //catID e' il category ID
-        return categoryID?.let { catID ->
-            Question(type, difficulty, category, question, correctAnswer, incorrectAnswers, catID)
-        }
+        return Question(type, difficulty, category, question, correctAnswer, incorrectAnswers,
+            categoryID
+        )
     }
 
     private fun incAnswersHtmlParser(incAnswersJson: List<String>): List<String> {

@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import it.scvnsc.whoknows.data.db.DatabaseWK
 import it.scvnsc.whoknows.data.model.Game
 import it.scvnsc.whoknows.data.model.Question
@@ -49,7 +50,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 */
 
     private val START_AMOUNT =
-        20 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
+        30 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
     private val SMALL_AMOUNT =
         10 //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
 
@@ -73,7 +74,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Controlla se il nuovo punteggio e' un record
     private val _isRecord = MutableLiveData(false)
-    val isRecord : LiveData<Boolean> get() = _isRecord
+    val isRecord: LiveData<Boolean> get() = _isRecord
 
     //Timer di gioco
     private val _elapsedTime = MutableLiveData<String>()
@@ -151,8 +152,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             freshQuestions = emptyList<Question>().toMutableList()
 
             //Salvataggio game nel DB
-            Log.d("Debug","Game ended with score: ${_score.value}")
-            val playedGame = Game(_score.value, _selectedDifficulty.value!!, _selectedCategory.value!!, _elapsedTime.value, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+            Log.d("Debug", "Game ended with score: ${_score.value}")
+            val playedGame = Game(
+                _score.value,
+                _selectedDifficulty.value!!,
+                _selectedCategory.value!!,
+                _elapsedTime.value,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            )
 
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
@@ -165,7 +172,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         Log.d("Debug", "Answer clicked")
     }
 
-    private suspend fun checkGameRecord(playedGame: Game){
+    private suspend fun checkGameRecord(playedGame: Game) {
         val maxScore = gameRepository.getMaxScore() ?: 0
         Log.d("Debug", "Max score: $maxScore")
         Log.d("Debug", "Played game score: ${playedGame.score}")
@@ -178,10 +185,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun startGame() {
         //TODO: category e difficulty vanno passati come parametro dinamicamente
         //Ottimizzazione: se ci sono ancora domanda che non sono state poste all'utente non faccio una chiamata API
-        if (freshQuestions.size == 0){
+        if (freshQuestions.size == 0) {
             questionRepository.resetSessionToken()
-            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, "", "")
-            //freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, _selectedCategory.value!!, _selectedDifficulty.value!!)
+//            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, "", "")
+            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, _selectedCategory.value!!, _selectedDifficulty.value!!)
         }
         Log.d("Debug", "Fresh Questions: ${freshQuestions[0].question}")
         Log.d("Debug", "Fresh Questions: ${freshQuestions[1].question}")
@@ -194,6 +201,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         startTimer()
 
         Log.d("Debug", "Question for user: ${_questionForUser.value}")
+
     }
 
     //Funzione che ottiene la nuova domanda da presentare all'utente
