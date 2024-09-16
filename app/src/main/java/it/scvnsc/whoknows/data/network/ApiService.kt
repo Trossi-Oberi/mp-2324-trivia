@@ -1,5 +1,6 @@
 package it.scvnsc.whoknows.data.network
 
+import android.media.session.MediaSession.Token
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -12,6 +13,12 @@ interface ApiService {
 
     @GET("api_token.php?command=request")
     suspend fun getToken(): TokenResponse
+
+    @GET("api_token.php?command=reset")
+    suspend fun resetToken(
+        @Query("token") token: String
+    ): TokenResponse
+
 
     @GET("api.php")
     suspend fun getQuestions(

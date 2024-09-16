@@ -38,14 +38,16 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
     // Step 1: Recuperare le categorie per popolare il CategoryManager (HashMap che collega categoryName e categoryID)
     private suspend fun buildCategoryManager() {
         val categories = apiService.getCategories()
-//        Log.d("Debug", "Categories: ${categories.trivia_categories[0]}")
-//        Log.d("Debug", "Categories: ${categories.trivia_categories[1]}")
         CategoryManager.buildCategoriesMap(categories.trivia_categories)
     }
 
     // Step 2: Ottieni il Session Token per ottenere risposte sempre diverse dall'API
-    suspend fun getSessionToken(): TokenResponse {
+    private suspend fun getSessionToken(): TokenResponse {
         return apiService.getToken()
+    }
+
+    suspend fun resetSessionToken(){
+        apiService.resetToken(SESSION_TOKEN)
     }
 
     // Step 3: Recupera un (amount) di domande della categoria e della difficolta' scelte ogni volta che l'utente clicka Play o risponde correttamente a tutte le domande precedenti
@@ -60,17 +62,14 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
                 SESSION_TOKEN
             )
         }
-        //Uso il DAO per scrivere le domande nel DB
+        //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token
         if (questionResponse != null) {
             if (questionResponse.response_code == 4) {
-                //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, dire all'utente che ha completato le domande disponibili per categoria e difficolta'
-                //Questo valore di ritorno e' un valore di ritorno custom che il ViewModel gestisce per mostrare un messaggio all'utente
-                return mutableListOf(Question("","","","NMQ","", emptyList(),0))
+                resetSessionToken()
             }
         }
+
         val fetchedQuestions = (questionResponse?.results)
-//            Log.d("Debug", "Question: ${fetchedQuestions.get(0).question}")
-//            Log.d("Debug", "Question: ${fetchedQuestions.get(1).question}")
         //Inserisco le domande nel DB, non passo mai le domande direttamente dall'API al ViewModel
         withContext(Dispatchers.IO) {
             if (fetchedQuestions != null) {
@@ -79,16 +78,19 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         }
         //Faccio una query al DB per prendere le domande e al ViewModel returno una MutableList<Question>
         val dbQuestions = mutableListOf<Question>()
-        dbQuestions.addAll(questionDAO.getLastQuestions())
-        Log.d("Debug", "DB Questions: ${dbQuestions[0].question}")
-        Log.d("Debug", "DB Questions: ${dbQuestions[1].question}")
+        dbQuestions.addAll(questionDAO.getLastQuestions(amount))
+        if (amount==2){
+            Log.d("Debug","Start amount DB Questions:")
+            Log.d("Debug", dbQuestions[0].question)
+            Log.d("Debug", dbQuestions[1].question)
+        }else if(amount==1){
+            Log.d("Debug","Small amount question retrieve")
+            Log.d("Debug", dbQuestions[0].question)
+        }
+        /*Log.d("Debug", "DB Questions: ${dbQuestions[0].question}")
+        Log.d("Debug", "DB Questions: ${dbQuestions[1].question}")*/
         return dbQuestions
     }
 
 }
 
-
-//check della presenza di domande nel DB, se sono presenti domande non viene eseguita nuovamente la richiesta API
-fun questionsDBisEmpty(): Boolean {
-    return true
-}

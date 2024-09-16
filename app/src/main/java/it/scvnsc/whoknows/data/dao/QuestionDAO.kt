@@ -3,6 +3,7 @@ package it.scvnsc.whoknows.data.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.Query
 import androidx.room.Update
 import it.scvnsc.whoknows.data.model.Question
 
@@ -22,9 +23,9 @@ interface QuestionDAO {
 
 
     //TODO: Sistemare, voglio solo le ultime 20 domande inserite nel DB, devo fare un parametro data per Question
-    @androidx.room.Query("SELECT * FROM questions ORDER BY date DESC LIMIT 20")
+    @Query("SELECT * FROM questions ORDER BY date DESC LIMIT :amount")
     //Room restituisce solo oggetti di tipo List, converto nella repository in MutableList
-    suspend fun getLastQuestions(): List<Question>
+    suspend fun getLastQuestions(amount: Int): List<Question>
 
 
 }

@@ -1,5 +1,6 @@
 package it.scvnsc.whoknows.ui.screens.views
 
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,14 +23,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import androidx.room.ColumnInfo
+import androidx.room.PrimaryKey
+import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
+import it.scvnsc.whoknows.utils.QuestionSaver
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,32 +124,49 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
                         .fillMaxSize()
                         .padding(padding)
                 ) {
-                    Text("Area Game - Difficolta': $selectedDifficulty")
-
-
-
-                    Button(
-                        onClick = {
-                            gameViewModel.onStartClicked()
+                    if (gameViewModel.isPlaying.observeAsState().value == false) {
+                        Button(
+                            onClick = {
+                                gameViewModel.onStartClicked()
+                            }
+                        ) {
+                            Text("Start Game")
                         }
-                    ) {
-                        Text("Start Game")
                     }
 
                     if (gameViewModel.isPlaying.observeAsState().value == true) {
+
+
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
                             with(gameViewModel) {
-                                questionForUser.observeAsState().value?.let {
-                                    Log.d("Debug", "Question for user: ${it.question}")
-                                    Text("Category: " + it.category)
-                                    Text("Difficulty: " + it.difficulty)
-                                    Text(it.question)
-                                    ShowAnswers(it.correct_answer, it.incorrect_answers, gameViewModel)
-
+                                val currentQuestion by questionForUser.observeAsState()
+                                val savedCurrentQuestion = rememberSaveable(
+                                    saver = QuestionSaver.questionSaver(),
+                                    stateSaver = currentQuestion
+                                )
+                                val shuffledAnswers by rememberSaveable {
+                                    mutableStateOf(
+                                        shuffledAnswers.value
+                                    )
                                 }
+                                val timer by rememberSaveable { mutableStateOf(elapsedTime.value) }
+                                val currentScore by rememberSaveable { mutableStateOf(score.value) }
+
+                                //Timer nella UI
+                                Text("Game time: $timer")
+
+                                //Punteggio nella UI
+                                Text("Score: $currentScore")
+
+                                //Domanda nella UI
+                                ShowQuestion(currentQuestion)
+
+                                //Possibili risposte nella UI
+                                ShowAnswers(shuffledAnswers!!, gameViewModel)
+
                             }
                         }
                     }
@@ -155,12 +178,16 @@ fun GameView(navController: NavController, gameViewModel: GameViewModel) {
 }
 
 @Composable
-fun ShowAnswers(correctAnswer: String, incorrectAnswers: List<String>, gvm: GameViewModel) {
-    val possibleAnswers = mutableListOf<String>()
-    possibleAnswers.add(correctAnswer)
-    possibleAnswers.addAll(incorrectAnswers)
-    possibleAnswers.shuffle()
-    for (ans in possibleAnswers){
+fun ShowQuestion(currentQuestion: Question?) {
+    Log.d("Debug", "Question for user: $currentQuestion")
+    Text("Category: " + (currentQuestion?.category ?: ""))
+    Text("Difficulty: " + (currentQuestion?.difficulty ?: ""))
+    Text(currentQuestion?.question ?: "")
+}
+
+@Composable
+fun ShowAnswers(answers: List<String>, gvm: GameViewModel) {
+    for (ans in answers) {
         Button(onClick = {
             gvm.onAnswerClicked(ans)
         }) {
