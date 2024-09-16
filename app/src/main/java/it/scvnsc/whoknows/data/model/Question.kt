@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.io.Serializable
 import java.util.Date
 import java.text.SimpleDateFormat
 
@@ -18,7 +19,7 @@ data class Question(
     @ColumnInfo(name = "incorrectAnswer") val incorrect_answers: List<String>,
     @ColumnInfo(name = "categoryId") val categoryId: Int,
     @ColumnInfo(name = "date") val date: String
-){
+) :Serializable{
     constructor(
         type: String,
         difficulty: String,

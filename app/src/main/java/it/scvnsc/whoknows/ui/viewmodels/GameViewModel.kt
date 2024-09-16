@@ -25,8 +25,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
     val showDifficultySelection: LiveData<Boolean> get() = _showDifficultySelection
 
-    private val START_AMOUNT = 2 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
-    private val SMALL_AMOUNT = 1 //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
+    private val START_AMOUNT = 20 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
+    private val SMALL_AMOUNT = 10 //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
 
     private var freshQuestions = mutableListOf<Question>() //Domande prese dall'API
     private var askedQuestions = mutableListOf<Question>() //Domande poste all'utente
@@ -65,7 +65,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setDifficulty(difficulty: String) {
-        _selectedDifficulty.value = difficulty
+        _selectedDifficulty.postValue(difficulty)
     }
 
     fun setShowDifficultySelection(show: Boolean) {
@@ -76,9 +76,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 startGame()
-                _isPlaying.value = true
+                _isPlaying.postValue(true)
             } catch (e: Exception) {
-                _gameError.value = "Errore durante l'avvio del gioco: ${e.message}"
+                _gameError.postValue("Errore durante l'avvio del gioco: ${e.message}")
             }
         }
     }
@@ -103,11 +103,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 val newQuestions = questionRepository.retrieveQuestions(SMALL_AMOUNT, "Entertainment: Music", "easy")
                 freshQuestions.addAll(newQuestions)
             }
-            _questionForUser.value = nextQuestion()
+            _questionForUser.postValue(nextQuestion())
         }else{
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
-            _isPlaying.value = false
+            _isPlaying.postValue(false)
             freshQuestions = emptyList<Question>().toMutableList()
         }
         Log.d("Debug", "Answer clicked")
@@ -122,10 +122,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
         Log.d("Debug", "Fresh Questions: ${freshQuestions[0].question}")
         Log.d("Debug", "Fresh Questions: ${freshQuestions[1].question}")
-        _questionForUser.value = nextQuestion()
+        _questionForUser.postValue(nextQuestion())
 
         //Imposto punteggio a 0
-        _score.value=0
+        _score.postValue(0)
 
         //Start timer della partita
         startTimer()
@@ -169,7 +169,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun updateScore(){
-        _score.value = _score.value!! + 1
+        _score.postValue(_score.value!! + 1)
     }
 
 
