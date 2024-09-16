@@ -26,9 +26,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //TODO: Cambiare la logica di come vengono passati i parametri difficulty e category alla chiamata API
     // (Ora difficulty e category vengono impostati nella scheda settings)
 
-    private val _selectedDifficulty = MutableLiveData(DifficultyType.MIXED) //valore di default
+    private val _selectedDifficulty = MutableLiveData("") //valore di default
     private val _showDifficultySelection = MutableLiveData(false)
-    val selectedDifficulty: LiveData<DifficultyType> get() = _selectedDifficulty
+    val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
     //val showDifficultySelection: LiveData<Boolean> get() = _showDifficultySelection
 
     private val _selectedCategory = MutableLiveData("") //valore di default
@@ -101,7 +101,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setDifficulty(difficulty: DifficultyType) {
+    fun setDifficulty(difficulty: String) {
         _selectedDifficulty.postValue(difficulty)
     }
 
@@ -152,7 +152,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             //Salvataggio game nel DB
             Log.d("Debug","Game ended with score: ${_score.value}")
-            val playedGame = Game(_score.value, _selectedDifficulty.value.toString(), _selectedCategory.value.toString(), _elapsedTime.value, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+            val playedGame = Game(_score.value, _selectedDifficulty.value!!, _selectedCategory.value!!, _elapsedTime.value, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
@@ -180,7 +180,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //Ottimizzazione: se ci sono ancora domanda che non sono state poste all'utente non faccio una chiamata API
         if (freshQuestions.size == 0){
             questionRepository.resetSessionToken()
-            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, _selectedCategory.value!!, _selectedDifficulty.value!!.toString().lowercase())
+            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, "", "")
+            //freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, _selectedCategory.value!!, _selectedDifficulty.value!!)
         }
         Log.d("Debug", "Fresh Questions: ${freshQuestions[0].question}")
         Log.d("Debug", "Fresh Questions: ${freshQuestions[1].question}")

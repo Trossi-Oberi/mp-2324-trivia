@@ -178,15 +178,7 @@ fun GameViewMainPage(gameViewModel: GameViewModel) {
                 },
                 onDifficultySelected = {
                     selectedDifficulty = it
-                    with(gameViewModel) {
-                        when (it) {
-                            "EASY" -> setDifficulty(DifficultyType.EASY)
-                            "MEDIUM" -> setDifficulty(DifficultyType.MEDIUM)
-                            "HARD" -> setDifficulty(DifficultyType.HARD)
-                            else -> setDifficulty(DifficultyType.MIXED)
-                        }
-                    }
-                    //TODO:: rimuovere gameViewModel.setShowDifficultySelection(false)
+                    gameViewModel.setDifficulty(it.lowercase())
                 }
             )
         }
@@ -196,7 +188,6 @@ fun GameViewMainPage(gameViewModel: GameViewModel) {
                 onCategorySelected = {
                     selectedCategory = it
                     gameViewModel.setCategory(it)
-                    //TODO:: rimuovere gameViewModel.setShowCategorySelection(false)
                 },
                 onDismissRequest = {
                     showCategorySelectionDialog = false

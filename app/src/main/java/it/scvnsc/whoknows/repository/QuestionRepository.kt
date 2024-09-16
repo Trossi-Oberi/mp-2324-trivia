@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import it.scvnsc.whoknows.data.dao.QuestionDAO
 import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.data.network.ApiService
+import it.scvnsc.whoknows.data.network.QuestionResponse
 import it.scvnsc.whoknows.data.network.TokenResponse
 import it.scvnsc.whoknows.utils.CategoryManager
 import it.scvnsc.whoknows.utils.QuestionDeserializer
@@ -46,22 +47,42 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         return apiService.getToken()
     }
 
-    suspend fun resetSessionToken(){
+    suspend fun resetSessionToken() {
         apiService.resetToken(SESSION_TOKEN)
     }
 
     // Step 3: Recupera un (amount) di domande della categoria e della difficolta' scelte ogni volta che l'utente clicka Play o risponde correttamente a tutte le domande precedenti
-    suspend fun retrieveQuestions(amount: Int, categoryName: String, difficulty: String): MutableList<Question> {
+    suspend fun retrieveQuestions(
+        amount: Int,
+        categoryName: String,
+        difficulty: String
+    ): MutableList<Question> {
+
         //Prendo le nuove domande dall'API
-        val categoryID = CategoryManager.categories[categoryName]
-        val questionResponse = categoryID?.let { id ->
+        val questionResponse: QuestionResponse?
+        var categoryID: Int? = null
+
+        if (categoryName != "") {
+            categoryID = CategoryManager.categories[categoryName]
+        }
+
+        questionResponse = categoryID.let { id ->
+            val effectiveId = if (categoryID != null) id else null
+            val effectiveDifficulty = difficulty.ifEmpty { null }
+
+            Log.d("Debug", "Category ID: $effectiveId")
+            Log.d("Debug", "Difficulty: $effectiveDifficulty")
+
             apiService.getQuestions(
                 amount,
-                id,
-                difficulty.lowercase(),
+                effectiveId,
+                effectiveDifficulty,
                 SESSION_TOKEN
             )
         }
+
+        Log.d("Debug", "Question Response: $questionResponse")
+
         //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token
         if (questionResponse != null) {
             if (questionResponse.response_code == 4) {
@@ -69,7 +90,8 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             }
         }
 
-        val fetchedQuestions = (questionResponse?.results)
+        val fetchedQuestions = (questionResponse.results)
+        Log.d("Debug", "Fetched Questions: $fetchedQuestions")
         //Inserisco le domande nel DB, non passo mai le domande direttamente dall'API al ViewModel
         withContext(Dispatchers.IO) {
             if (fetchedQuestions != null) {
@@ -79,12 +101,12 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         //Faccio una query al DB per prendere le domande e al ViewModel returno una MutableList<Question>
         val dbQuestions = mutableListOf<Question>()
         dbQuestions.addAll(questionDAO.getLastQuestions(amount))
-        if (amount==2){
-            Log.d("Debug","Start amount DB Questions:")
+        if (amount == 2) {
+            Log.d("Debug", "Start amount DB Questions:")
             Log.d("Debug", dbQuestions[0].question)
             Log.d("Debug", dbQuestions[1].question)
-        }else if(amount==1){
-            Log.d("Debug","Small amount question retrieve")
+        } else if (amount == 1) {
+            Log.d("Debug", "Small amount question retrieve")
             Log.d("Debug", dbQuestions[0].question)
         }
         /*Log.d("Debug", "DB Questions: ${dbQuestions[0].question}")
