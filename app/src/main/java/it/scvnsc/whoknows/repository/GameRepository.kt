@@ -7,6 +7,8 @@ class GameRepository (private val gameDAO : GameDAO) {
 
     suspend fun saveGame(game: Game){
         //TODO: Quando difficulty e category sono stringhe vuote vanno sostituite con "Mixed"
+        if (game.difficulty == "") game.difficulty = "mixed"
+        if (game.category == "") game.category = "mixed"
         gameDAO.insertGame(game)
     }
 

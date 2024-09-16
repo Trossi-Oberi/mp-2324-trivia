@@ -9,8 +9,8 @@ data class Game(
     //game id defined progressively
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo var score: Int?,
-    @ColumnInfo val difficulty: String,
-    @ColumnInfo val category: String,
+    @ColumnInfo var difficulty: String,
+    @ColumnInfo var category: String,
     @ColumnInfo val duration: String?,
     @ColumnInfo val date: String
 ) {
