@@ -22,7 +22,7 @@ interface QuestionDAO {
     suspend fun delete(question: Question)
 
 
-    //TODO: Sistemare, voglio solo le ultime 20 domande inserite nel DB, devo fare un parametro data per Question
+    // Voglio solo le ultime domande inserite nel DB
     @Query("SELECT * FROM questions ORDER BY date DESC LIMIT :amount")
     //Room restituisce solo oggetti di tipo List, converto nella repository in MutableList
     suspend fun getLastQuestions(amount: Int): List<Question>
