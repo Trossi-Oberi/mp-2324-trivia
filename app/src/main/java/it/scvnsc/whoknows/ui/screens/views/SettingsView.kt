@@ -40,7 +40,7 @@ import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 
-//TODO : difficoltà, temi, categoria
+//TODO : credits, sounds, theme
 fun SettingsView(
     navController: NavHostController,
     settingsViewModel: SettingsViewModel

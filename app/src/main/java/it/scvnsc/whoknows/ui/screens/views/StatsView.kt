@@ -44,6 +44,8 @@ fun StatsView(
     settingsViewModel: SettingsViewModel
 ) {
 
+    //TODO:: reset statistiche
+
     val context = LocalContext.current
 
     WhoKnowsTheme (darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {

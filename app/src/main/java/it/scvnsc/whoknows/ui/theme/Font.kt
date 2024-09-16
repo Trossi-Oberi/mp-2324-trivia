@@ -1,14 +1,29 @@
 package it.scvnsc.whoknows.ui.theme
 
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import it.scvnsc.whoknows.R
 
 // Definisce la famiglia di font personalizzato per i titoli
-val customTitleFont = FontFamily(
-    Font(R.font.nabla_regular_title, FontWeight.Normal)
-)
+@OptIn(ExperimentalTextApi::class)
+val customTitleFont =
+    FontFamily(
+        Font(
+            R.font.nabla,
+            variationSettings = FontVariation.Settings(
+                FontVariation.weight(950),
+                FontVariation.width(30f),
+                FontVariation.slant(-6f),
+                FontVariation.Setting("EDPT", 100F),
+                FontVariation.Setting("EHLT", 12F)
+            )
+        )
+    )
+
 
 // Definisce la famiglia di font personalizzato per i testi generali
 val customTextFont = FontFamily(

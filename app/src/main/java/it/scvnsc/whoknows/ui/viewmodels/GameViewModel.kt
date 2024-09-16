@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import it.scvnsc.whoknows.data.db.DatabaseWK
 import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.repository.QuestionRepository
+import it.scvnsc.whoknows.utils.CategoryManager
+import it.scvnsc.whoknows.utils.DifficultyType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -20,10 +22,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //TODO: Cambiare la logica di come vengono passati i parametri difficulty e category alla chiamata API
     // (Ora difficulty e category vengono impostati nella scheda settings)
 
-    private val _selectedDifficulty = MutableLiveData("MIXED") //valore di default
+    private val _selectedDifficulty = MutableLiveData(DifficultyType.MIXED) //valore di default
     private val _showDifficultySelection = MutableLiveData(false)
-    val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
-    val showDifficultySelection: LiveData<Boolean> get() = _showDifficultySelection
+    val selectedDifficulty: LiveData<DifficultyType> get() = _selectedDifficulty
+    //val showDifficultySelection: LiveData<Boolean> get() = _showDifficultySelection
+
+    private val _selectedCategory = MutableLiveData("") //valore di default
+    val selectedCategory: LiveData<String> get() = _selectedCategory
+
+    fun getCategories(): List<String> {
+        return CategoryManager.categories.keys.toList()
+    }
+
+    fun setCategory(categoryName: String) {
+        _selectedCategory.value = categoryName
+    }
 
     private val START_AMOUNT = 2 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
     private val SMALL_AMOUNT = 1 //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
@@ -64,7 +77,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setDifficulty(difficulty: String) {
+    fun setDifficulty(difficulty: DifficultyType) {
         _selectedDifficulty.value = difficulty
     }
 
@@ -116,9 +129,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun startGame() {
         //TODO: I parametri category e difficulty vanno passati come parametro dinamicamente
         //Ottimizzazione: se ci sono ancora domanda che non sono state poste all'utente non faccio una chiamata API
-        if (freshQuestions.size==0){
+        if (freshQuestions.size == 0){
+            val selectedDifficulty = getSelectedDifficulty()
+
             questionRepository.resetSessionToken()
-            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, "Entertainment: Music", "easy")
+            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, _selectedCategory.value!!, selectedDifficulty)
         }
         Log.d("Debug", "Fresh Questions: ${freshQuestions[0].question}")
         Log.d("Debug", "Fresh Questions: ${freshQuestions[1].question}")
@@ -131,6 +146,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         startTimer()
 
         Log.d("Debug", "Question for user: ${_questionForUser.value}")
+    }
+
+    private fun getSelectedDifficulty(): String {
+        return _selectedDifficulty.value.toString().lowercase()
     }
 
     private fun nextQuestion(): Question {
@@ -171,6 +190,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private fun updateScore(){
         _score.value = _score.value!! + 1
     }
+
 
 
 }

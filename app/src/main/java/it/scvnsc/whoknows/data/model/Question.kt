@@ -1,9 +1,11 @@
 package it.scvnsc.whoknows.data.model
 
+import android.annotation.SuppressLint
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.io.Serializable
 import java.util.Date
 import java.text.SimpleDateFormat
 
@@ -19,6 +21,7 @@ data class Question(
     @ColumnInfo(name = "categoryId") val categoryId: Int,
     @ColumnInfo(name = "date") val date: String
 ){
+    @SuppressLint("SimpleDateFormat")
     constructor(
         type: String,
         difficulty: String,

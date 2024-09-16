@@ -1,5 +1,6 @@
 package it.scvnsc.whoknows.ui.screens.views
 
+import android.content.Context
 import android.provider.Settings.Global.getString
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -43,11 +44,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.CornerRounding
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.toPath
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
@@ -110,14 +117,7 @@ fun HomeView(
                     if (isLandscape) {
                         //TODO:: da sistemare
 
-                        Text(
-                            text = context.getString(R.string.app_name),
-                            color = Color.Yellow,
-                            style = titleTextStyle,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxHeight()
-                        )
+                        AppTitle(context)
 
                         Row(
                             modifier = Modifier
@@ -285,3 +285,15 @@ fun HomeView(
         }
     }
 }
+
+@OptIn(ExperimentalTextApi::class)
+@Composable
+fun AppTitle(context: Context) {
+    Text(
+        text = context.getString(R.string.app_name),
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxHeight()
+    )
+}
+
