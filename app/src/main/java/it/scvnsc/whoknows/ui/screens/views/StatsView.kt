@@ -33,37 +33,6 @@ fun StatsView(navController: NavHostController) {
         topBar = {
             TopAppBar(title = { Text("WhoKnows") })
         },
-        bottomBar = {
-            NavigationBar (
-                containerColor = Color.LightGray
-            ){
-                NavigationBarItem(
-                    selected = false,
-                    icon = { Icon(Icons.Default.Home, "Home") },
-                    label = { Text(text = "Home") },
-                    enabled = true,
-                    onClick = {
-                        navController.navigate("home")
-                    }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.BarChart, "Stats") },
-                    label = { Text(text = "Stats") },
-                    selected = true,
-                    enabled = false,
-                    onClick = { /* non fare niente */}
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Settings, "Settings") },
-                    label = { Text(text = "Settings") },
-                    selected = false,
-                    enabled = true,
-                    onClick = {
-                        navController.navigate("settings")
-                    }
-                )
-            }
-        },
         content = { padding ->
             Column (
                 verticalArrangement = Arrangement.Center,

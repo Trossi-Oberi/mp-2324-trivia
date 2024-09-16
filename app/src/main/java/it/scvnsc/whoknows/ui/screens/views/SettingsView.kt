@@ -23,6 +23,8 @@ import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
+//TODO : difficoltà, temi, categoria
 fun SettingsView(navController: NavHostController) {
 
     Scaffold (
@@ -32,37 +34,6 @@ fun SettingsView(navController: NavHostController) {
         contentColor = Color.Blue,
         topBar = {
             TopAppBar(title = { Text("WhoKnows") })
-        },
-        bottomBar = {
-            NavigationBar (
-                containerColor = Color.LightGray
-            ){
-                NavigationBarItem(
-                    selected = false,
-                    icon = { Icon(Icons.Default.Home, "Home") },
-                    label = { Text(text = "Home") },
-                    enabled = true,
-                    onClick = {
-                        navController.navigate("home")
-                    }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.BarChart, "Stats") },
-                    label = { Text(text = "Stats") },
-                    selected = false,
-                    enabled = true,
-                    onClick = {
-                        navController.navigate("stats")
-                    }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Settings, "Settings") },
-                    label = { Text(text = "Settings") },
-                    selected = true,
-                    enabled = false,
-                    onClick = { /* non deve succedere nulla */}
-                )
-            }
         },
         content = { padding ->
             Column (
