@@ -6,7 +6,6 @@ import androidx.room.Room
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import it.scvnsc.whoknows.data.dao.CategoryDAO
 import it.scvnsc.whoknows.data.dao.GameDAO
 import it.scvnsc.whoknows.data.dao.GameQuestionDAO
 import it.scvnsc.whoknows.data.dao.QuestionDAO
@@ -18,12 +17,11 @@ import it.scvnsc.whoknows.utils.Converters
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.internal.synchronized
 
-@Database(entities = [Category::class, Question::class, Game::class, GameQuestion::class], version = 1)
+@Database(entities = [Category::class, Question::class, Game::class, GameQuestion::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class DatabaseWK : RoomDatabase() {
 
     //Queste funzioni astratte servono ad ottenere i vari DAO utilizzando la libreria Room
-    abstract fun categoryDAO(): CategoryDAO
     abstract fun questionDAO(): QuestionDAO
     abstract fun gameDAO(): GameDAO
     abstract fun gameQuestionDAO(): GameQuestionDAO
