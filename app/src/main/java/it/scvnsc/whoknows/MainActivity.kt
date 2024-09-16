@@ -23,9 +23,7 @@ import it.scvnsc.whoknows.ui.screens.views.SettingsView
 import it.scvnsc.whoknows.ui.screens.views.StatsView
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -33,7 +31,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            WhoKnowsTheme {
+            WhoKnowsTheme() {
                 Scaffold() {
                     NavControlHost()
                 }
@@ -45,10 +43,12 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun NavControlHost() {
         val navController = rememberNavController()
+        val settingsViewModel: SettingsViewModel = viewModel<SettingsViewModel>()
+        val gameViewModel: GameViewModel = viewModel<GameViewModel>()
 
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
-                HomeView(navController)
+                HomeView(navController, settingsViewModel)
             }
 
             composable("stats") {
@@ -60,8 +60,7 @@ class MainActivity : ComponentActivity() {
             }
 
             composable("game") {
-                val gameViewModel: GameViewModel = viewModel<GameViewModel>()
-                GameView(navController, gameViewModel)
+                GameView(navController, gameViewModel, settingsViewModel)
             }
 
         }
