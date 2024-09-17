@@ -133,7 +133,7 @@ fun GameView(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Text("Prova")
+                                //Text("Prova")
                                 //TODO:: DA SISTEMARE URGENTE
                                 with(gameViewModel) {
                                     //TODO: da sistemare
@@ -321,17 +321,6 @@ fun DifficultySelectionDialog(
                     .fillMaxWidth()
                     .height(300.dp)
             ) {
-//                // Pulsanti per le difficoltà
-//                for (diff in DifficultyType.entries) {
-//                    Button(
-//                        onClick = {
-//                            onDifficultySelected(diff.toString())
-//                        }
-//                    ) {
-//                        Text(text = diff.toString())
-//                    }
-//                }
-
                 for (diff in DifficultyType.entries) {
                     TextButton(onClick = {
                         onDifficultySelected(diff.toString())
@@ -403,27 +392,6 @@ fun CategorySelectionDialog(
 //        }
 //    }
 }
-
-/*
-@Composable
-fun ShowQuestion(currentQuestion: Question?) {
-    Log.d("Debug", "Question for user: $currentQuestion")
-    Text("Category: " + (currentQuestion?.category ?: ""))
-    Text("Difficulty: " + (currentQuestion?.difficulty ?: ""))
-    Text(currentQuestion?.question ?: "")
-}
-
-@Composable
-fun ShowAnswers(answers: List<String>, gvm: GameViewModel) {
-    for (ans in answers) {
-        Button(onClick = {
-            gvm.onAnswerClicked(ans)
-        }) {
-            Text(ans)
-        }
-    }
-}
-*/
 
 @Composable
 fun GameScore(gameViewModel: GameViewModel) {

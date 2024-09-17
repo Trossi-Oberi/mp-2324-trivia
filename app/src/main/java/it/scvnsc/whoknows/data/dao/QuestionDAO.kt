@@ -27,5 +27,8 @@ interface QuestionDAO {
     //Room restituisce solo oggetti di tipo List, converto nella repository in MutableList
     suspend fun getLastQuestions(amount: Int): List<Question>
 
+    @Query("SELECT * FROM questions WHERE id IN (:idList)")
+    suspend fun getQuestionsByIDs(idList: List<Int>): List<Question>
+
 
 }

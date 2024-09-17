@@ -17,7 +17,7 @@ import it.scvnsc.whoknows.utils.Converters
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.internal.synchronized
 
-@Database(entities = [Category::class, Question::class, Game::class, GameQuestion::class], version = 1)
+@Database(entities = [Category::class, Question::class, Game::class, GameQuestion::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class DatabaseWK : RoomDatabase() {
 

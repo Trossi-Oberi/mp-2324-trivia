@@ -6,14 +6,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import it.scvnsc.whoknows.data.db.DatabaseWK
 import it.scvnsc.whoknows.data.model.Game
 import it.scvnsc.whoknows.data.model.Question
+import it.scvnsc.whoknows.repository.GameQuestionRepository
 import it.scvnsc.whoknows.repository.GameRepository
 import it.scvnsc.whoknows.repository.QuestionRepository
 import it.scvnsc.whoknows.utils.CategoryManager
-import it.scvnsc.whoknows.utils.DifficultyType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -27,20 +26,27 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //TODO: Cambiare la logica di come vengono passati i parametri difficulty e category alla chiamata API
     // (Ora difficulty e category vengono impostati nella scheda settings)
 
-    private val _selectedDifficulty = MutableLiveData("") //valore di default
+    private val DEFAULT_CATEGORY = "mixed"
+    private val DEFAULT_DIFFICULTY = "mixed"
+
+
+    //Mostra all'utente la lista delle possibili difficolta'
     private val _showDifficultySelection = MutableLiveData(false)
-    val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
     //val showDifficultySelection: LiveData<Boolean> get() = _showDifficultySelection
 
-    private val _selectedCategory = MutableLiveData("") //valore di default
+    //Difficolta' selezionata dall'utente
+    private val _selectedDifficulty = MutableLiveData(DEFAULT_DIFFICULTY) //valore di default = MIXED
+    val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
+
+    //Categoria selezionata dall'utente
+    private val _selectedCategory = MutableLiveData(DEFAULT_CATEGORY) //valore di default = MIXED
     val selectedCategory: LiveData<String> get() = _selectedCategory
 
     fun getCategories(): List<String> {
-        return CategoryManager.categories.keys.toList()
-    }
-
-    fun setCategory(categoryName: String) {
-        _selectedCategory.value = categoryName
+        val availableCategories = CategoryManager.categories.keys.toMutableList()
+        availableCategories.add("mixed")
+        availableCategories.toList()
+        return availableCategories
     }
 
     /* //TODO: da controllare
@@ -50,7 +56,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 */
 
     private val START_AMOUNT =
-        30 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
+        20 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
     private val SMALL_AMOUNT =
         10 //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
 
@@ -91,19 +97,32 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Repositories
     private val questionRepository: QuestionRepository
     private val gameRepository: GameRepository
+    private val gameQuestionRepository: GameQuestionRepository
 
     init {
         val questionDAO = DatabaseWK.getInstance(application).questionDAO()
         val gameDAO = DatabaseWK.getInstance(application).gameDAO()
+        val gameQuestionDAO = DatabaseWK.getInstance(application).gameQuestionDAO()
         questionRepository = QuestionRepository(questionDAO)
         gameRepository = GameRepository(gameDAO)
+        gameQuestionRepository = GameQuestionRepository(gameQuestionDAO)
         viewModelScope.launch {
             questionRepository.setupInteractionWithAPI()
         }
     }
 
     fun setDifficulty(difficulty: String) {
+        if (difficulty!=_selectedDifficulty.value){
+            freshQuestions.clear()
+        }
         _selectedDifficulty.postValue(difficulty)
+    }
+
+    fun setCategory(categoryName: String) {
+        if (categoryName!=_selectedCategory.value){
+            freshQuestions.clear()
+        }
+        _selectedCategory.value = categoryName
     }
 
     fun setShowDifficultySelection(show: Boolean) {
@@ -132,16 +151,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun checkAnswerCorrectness(givenAnswer: String) {
+        //Risposta corretta -> Fetch della prossima domanda, aggiornamento dello score
         if (givenAnswer == questionForUser.value?.correct_answer) {
-            //Risposta corretta -> Fetch della prossima domanda, aggiornamento dello score
             updateScore()
-            if (checkNumberOfAvailableQuestions() <= 5) {
-                //Se ci sono 5 o meno domande disponibili in memoria faccio una nuova chiamata API per prenderne altre 10
-                //TODO: Fare attenzione al cambio categoria/difficolta' da parte dell'utente, se una delle due cambia allora vanno pulite tutte le domande presenti in memoria
+            if (checkNumberOfAvailableQuestions() <= 2) {
+                //Se ci sono 2 o meno domande disponibili in memoria faccio una nuova chiamata API per prenderne altre (SMALL_AMOUNT)
                 val newQuestions = questionRepository.retrieveQuestions(
                     SMALL_AMOUNT,
-                    _selectedCategory.value.toString(),
-                    _selectedDifficulty.value.toString().lowercase()
+                    convertMixed(_selectedCategory.value.toString()),
+                    convertMixed(_selectedDifficulty.value.toString().lowercase())
                 )
                 freshQuestions.addAll(newQuestions)
             }
@@ -149,7 +167,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
-            freshQuestions = emptyList<Question>().toMutableList()
+            freshQuestions.clear()
 
             //Salvataggio game nel DB
             Log.d("Debug", "Game ended with score: ${_score.value}")
@@ -160,14 +178,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 _elapsedTime.value,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             )
-
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
             //TODO: Osservare isRecord per mostrare la notifica del record
 
             //In ogni caso salvo la partita
             gameRepository.saveGame(playedGame)
+            gameQuestionRepository.saveGameAndQuestions(playedGame, askedQuestions)
             _isPlaying.postValue(false)
+            askedQuestions.clear()
         }
         Log.d("Debug", "Answer clicked")
     }
@@ -185,10 +204,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun startGame() {
         //TODO: category e difficulty vanno passati come parametro dinamicamente
         //Ottimizzazione: se ci sono ancora domanda che non sono state poste all'utente non faccio una chiamata API
+        askedQuestions.clear()
         if (freshQuestions.size == 0) {
             questionRepository.resetSessionToken()
-//            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, "", "")
-            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, _selectedCategory.value!!, _selectedDifficulty.value!!)
+            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, convertMixed(_selectedCategory.value!!), convertMixed(_selectedDifficulty.value!!))
         }
         Log.d("Debug", "Fresh Questions: ${freshQuestions[0].question}")
         Log.d("Debug", "Fresh Questions: ${freshQuestions[1].question}")
@@ -199,9 +218,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         //Start timer della partita
         startTimer()
-
         Log.d("Debug", "Question for user: ${_questionForUser.value}")
 
+    }
+
+    //Funzione che converte la stringa "mixed" in "" in modo da far funzionare la richiesta all'API
+    private fun convertMixed(text: String): String {
+        if (text != "mixed"){
+            return text
+        }
+        return ""
     }
 
     //Funzione che ottiene la nuova domanda da presentare all'utente

@@ -66,8 +66,6 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         Log.d("Debug", "Category ID: $categoryID")
         Log.d("Debug", "Difficulty: $difficulty")
 
-
-        //TODO: Capire perche' l'API prende una domanda rispetto a quanto richiesto
         val questionResponse = apiService.getQuestions(
             amount,
             categoryID,
