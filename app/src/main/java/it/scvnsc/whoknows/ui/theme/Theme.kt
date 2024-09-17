@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 fun WhoKnowsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -41,6 +41,7 @@ fun WhoKnowsTheme(
 
 //funzione per creare un gradient background
 //TODO:: ancora non funziona
+// fare in modo che venga mostrato un gradient o un'immagine come sfondo
 fun gradientBackgroundBrush(isVertical: Boolean = true, colors: List<Color>): Brush {
     val endOffset = if (isVertical) {
         Offset(0f, Float.POSITIVE_INFINITY)
@@ -55,18 +56,20 @@ fun gradientBackgroundBrush(isVertical: Boolean = true, colors: List<Color>): Br
     )
 }
 
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
-    onPrimary = Color(0xFFFFFBFE)
+private val LightColorScheme = lightColorScheme(
+    primary = DarkYellow,
+    secondary = Yellow40,
+    tertiary = Yellow20,
+    onPrimary = Color.White,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+
+
+private val DarkColorScheme = darkColorScheme(
+    primary = DarkYellow,
+    secondary = Yellow60,
+    tertiary = Yellow40,
+    onPrimary = Color.White,
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
