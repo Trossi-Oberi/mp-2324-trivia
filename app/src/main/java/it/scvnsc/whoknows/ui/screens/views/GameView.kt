@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,9 +27,12 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -56,6 +62,11 @@ import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
 
+//TODO: inizializzare un timer dopo la chiamata API per le domande della durata di 5 secondi che modifica una variabile booleana da false a true (è possibile effettuare una nuova chiamata all'API delle domande)
+// initial = true, poi diventa false passano 5 secondi e ritorna true (_canMakeNewAPICalls: LiveData<Boolean>)
+// se l'utente prova ad iniziare una nuova partita mentre la variabile è false allora mostra un'animazione di caricamento fino all'aggiornamento della variabile
+
+//TODO: se il giocatore perde la partita viene mostrato un dialog con due pulsanti: "Play again", "Change game settings"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,9 +78,6 @@ fun GameView(
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
 
         val context = LocalContext.current
-
-        //TODO: Fare in modo che la difficolta' venga richiesta solamente la prima volta in assoluto che viene
-        // aperta la schermata, quindi se l'utente gioca piu' di una partita non deve scegliere di nuovo la difficolta'
 
         Surface {
             Scaffold(
@@ -114,7 +122,8 @@ fun GameView(
                         }
                     )
                 },
-                //Provvisorio
+
+
                 //TODO: capire come implementare il logo come immagine nella home e nelle schermate
                 content = { padding ->
                     Column(
@@ -133,7 +142,7 @@ fun GameView(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                //Text("Prova")
+
                                 //TODO:: DA SISTEMARE URGENTE
                                 with(gameViewModel) {
                                     //TODO: da sistemare
@@ -179,20 +188,22 @@ fun GameViewMainPage(gameViewModel: GameViewModel) {
                 onDifficultySelected = {
                     selectedDifficulty = it
                     gameViewModel.setDifficulty(it.lowercase())
-                }
+                },
+                gameViewModel = gameViewModel
             )
         }
 
         if (showCategorySelectionDialog) {
             CategorySelectionDialog(
+                onDismissRequest = {
+                    showCategorySelectionDialog = false
+                },
+                categories = gameViewModel.getCategories(),
                 onCategorySelected = {
                     selectedCategory = it
                     gameViewModel.setCategory(it)
                 },
-                onDismissRequest = {
-                    showCategorySelectionDialog = false
-                },
-                categories = gameViewModel.getCategories()
+                gameViewModel = gameViewModel
             )
         }
 
@@ -307,8 +318,11 @@ fun GameViewMainPage(gameViewModel: GameViewModel) {
 @Composable
 fun DifficultySelectionDialog(
     onDismissRequest: () -> Unit,
-    onDifficultySelected: (String) -> Unit
+    onDifficultySelected: (String) -> Unit,
+    gameViewModel: GameViewModel
 ) {
+
+    var radioSelected by rememberSaveable { mutableStateOf(gameViewModel.selectedDifficulty.value) }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -316,25 +330,72 @@ fun DifficultySelectionDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.Start,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
             ) {
                 for (diff in DifficultyType.entries) {
-                    TextButton(onClick = {
-                        onDifficultySelected(diff.toString())
-                        onDismissRequest()
-                        Log.d("Debug", "Selected difficulty: $diff")
-                    }) {
-                        Text(text = diff.toString())
-                    }
-                }
+//                    TextButton(onClick = {
+//                        onDifficultySelected(diff.toString())
+//                        onDismissRequest()
+//                        Log.d("Debug", "Selected difficulty: $diff")
+//                    }) {
+//                        Text(text = diff.toString())
+//                    }
 
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = (diff
+                                    .toString()
+                                    .lowercase() == gameViewModel.selectedDifficulty.value),
+                                onClick = {
+                                    onDifficultySelected(diff.toString())
+                                    Log.d("Debug", "$radioSelected")
+                                    radioSelected = diff
+                                        .toString()
+                                        .lowercase()
+                                    Log.d("Debug", "Selected category: ${diff.toString().lowercase()}")
+                                }
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            onClick = {
+                                onDifficultySelected(diff.toString())
+                                radioSelected = diff
+                                    .toString()
+                                    .lowercase()
+                                Log.d("Debug", "Selected category: ${diff.toString().lowercase()}")
+                            },
+                            selected = (diff
+                                .toString()
+                                .lowercase() == gameViewModel.selectedDifficulty.value),
+                            enabled = true
+                        )
+
+                        Text(
+                            text = diff.toString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+
+
+                }
             }
         },
         confirmButton = {
-            // Se necessario, un pulsante "Conferma"
+            Button(
+                onClick = onDismissRequest,
+                enabled = true,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ok")
+            }
         }
     )
 }
@@ -343,54 +404,67 @@ fun DifficultySelectionDialog(
 fun CategorySelectionDialog(
     onDismissRequest: () -> Unit,
     categories: List<String>,
-    onCategorySelected: (String) -> Unit
+    onCategorySelected: (String) -> Unit,
+    gameViewModel: GameViewModel
 ) {
+
+    var radioSelected by rememberSaveable { mutableStateOf(gameViewModel.selectedCategory.value) }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(text = "Select category") },
         text = {
             Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
             ) {
                 LazyColumn {
-                    itemsIndexed(categories) { index, category ->
-                        TextButton(onClick = {
-                            onCategorySelected(category)
-                            onDismissRequest()
-                            Log.d("Debug", "Selected category: $category")
-                        }) {
-                            Text(text = category)
+                    itemsIndexed(categories) { _, category ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = (category == gameViewModel.selectedCategory.value),
+                                    onClick = {
+                                        onCategorySelected(category)
+                                        radioSelected = category
+                                        Log.d("Debug", "Selected category: $category")
+                                    }
+                                )
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                onClick = {
+                                    onCategorySelected(category)
+                                    radioSelected = category
+                                    Log.d("Debug", "Selected category: $category")
+                                },
+                                selected = category == radioSelected,
+                                enabled = true
+                            )
+
+                            Text(
+                                text = category,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
                         }
                     }
                 }
             }
         },
         confirmButton = {
-            // Se necessario, un pulsante "Conferma"
+            Button(
+                onClick = onDismissRequest,
+                enabled = true,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ok")
+            }
         }
     )
-
-//    Dialog(onDismissRequest = onDismissRequest) {
-//        Surface(shape = MaterialTheme.shapes.medium, tonalElevation = 24.dp) {
-//            Column {
-//                LazyColumn {
-//                    itemsIndexed(categories) { index, category ->
-//                        TextButton(onClick = {
-//                            onCategorySelected(category)
-//                            onDismissRequest()
-//                        }) {
-//                            Text(text = category)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
 }
 
 @Composable
@@ -426,34 +500,4 @@ fun ShowAnswers(gvm: GameViewModel) {
     }
 }
 
-//@Composable
-//fun DifficultySelectionDialog(onDifficultySelected: (String) -> Unit) {
-//    AlertDialog(
-//        onDismissRequest = {},
-//        title = { Text(text = "Select difficulty") },
-//        text = {
-//            Column(
-//                verticalArrangement = Arrangement.Center,
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                modifier = Modifier
-//                    .fillMaxSize()
-//            ) {
-//                // Pulsanti per le difficoltà
-//                for (diff in DifficultyType.entries) {
-//                    Button(
-//                        onClick = {
-//                            onDifficultySelected(diff.toString())
-//
-//                        }
-//                    ) {
-//                        Text(text = diff.toString())
-//                    }
-//                }
-//
-//            }
-//        },
-//        confirmButton = {
-//            // Se necessario, un pulsante "Conferma"
-//        }
-//    )
-//}
+

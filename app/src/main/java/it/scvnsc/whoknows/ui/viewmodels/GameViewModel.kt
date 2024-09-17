@@ -49,12 +49,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return availableCategories
     }
 
-    /* //TODO: da controllare
-    //Difficolta' e categoria impostate dall'utente
-    val chosenDifficulty: String = DifficultyType.MIXED.toString() //Default MIXED
-    val chosenCategory: String = "" //Default "" -> non scelgo la categoria = Mixed
-*/
-
     private val START_AMOUNT =
         20 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
     private val SMALL_AMOUNT =
