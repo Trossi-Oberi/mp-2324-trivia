@@ -49,10 +49,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return availableCategories
     }
 
-    private val START_AMOUNT =
-        20 //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
-    private val SMALL_AMOUNT =
-        10 //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
+    //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
+    private val START_AMOUNT = 20
+    //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
+    private val SMALL_AMOUNT = 10
 
     private var freshQuestions = mutableListOf<Question>() //Domande prese dall'API
     private var askedQuestions = mutableListOf<Question>() //Domande poste all'utente
@@ -62,7 +62,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val questionForUser: LiveData<Question> get() = _questionForUser
     private val _shuffledAnswers = MutableLiveData<List<String>>()
     val shuffledAnswers: LiveData<List<String>> get() = _shuffledAnswers
-
 
     //Controlla se si sta giocando
     private val _isPlaying = MutableLiveData(false)
@@ -77,6 +76,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val isRecord: LiveData<Boolean> get() = _isRecord
 
     //Timer di gioco
+    private var gameTimer = 0
     private val _elapsedTime = MutableLiveData<String>()
     val elapsedTime: LiveData<String> = _elapsedTime
 
@@ -196,8 +196,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun startGame() {
-        //TODO: category e difficulty vanno passati come parametro dinamicamente
-        //Ottimizzazione: se ci sono ancora domanda che non sono state poste all'utente non faccio una chiamata API
+        //Resetto il timer
+        _elapsedTime.postValue("")
         askedQuestions.clear()
         if (freshQuestions.size == 0) {
             questionRepository.resetSessionToken()
@@ -246,15 +246,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Inizializza il timer di gioco
     private fun startTimer() {
-        _isGameFinished.postValue(false)
+        _isGameFinished.value = false //per forza cosi', se utilizzo postValue non si aggiorna il timer
         viewModelScope.launch {
-            var seconds = 0
+            gameTimer = 0
             while (_isGameFinished.value == false) {
                 val formattedTime =
-                    String.format(Locale.getDefault(), "%02d:%02d", seconds / 60, seconds % 60)
+                    String.format(Locale.getDefault(), "%02d:%02d", gameTimer / 60, gameTimer % 60)
                 _elapsedTime.postValue(formattedTime)
                 delay(1000L)
-                seconds++
+                gameTimer++
             }
         }
     }
