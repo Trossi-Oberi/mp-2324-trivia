@@ -7,8 +7,6 @@ import androidx.room.Query
 import androidx.room.Update
 import it.scvnsc.whoknows.data.model.Question
 
-
-
 @Dao
 interface QuestionDAO {
 

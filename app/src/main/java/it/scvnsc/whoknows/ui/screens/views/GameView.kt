@@ -142,11 +142,7 @@ fun GameView(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-
-                                //TODO:: DA SISTEMARE URGENTE
                                 with(gameViewModel) {
-                                    //TODO: da sistemare
-
                                     //Timer nella UI
                                     GameTimer(this)
 

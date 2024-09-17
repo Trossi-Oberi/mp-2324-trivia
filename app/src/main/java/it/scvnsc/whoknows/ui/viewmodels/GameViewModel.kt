@@ -29,6 +29,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val DEFAULT_CATEGORY = "mixed"
     private val DEFAULT_DIFFICULTY = "mixed"
 
+    private var gameID = 1
+
 
     //Mostra all'utente la lista delle possibili difficolta'
     private val _showDifficultySelection = MutableLiveData(false)
@@ -165,13 +167,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             //Salvataggio game nel DB
             Log.d("Debug", "Game ended with score: ${_score.value}")
-            val playedGame = Game(
+            val playedGame = Game(gameID,
                 _score.value,
                 _selectedDifficulty.value!!,
                 _selectedCategory.value!!,
                 _elapsedTime.value,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             )
+            Log.d("Debug", "New game instance created with ID: ${playedGame.id}")
+            gameID++
+
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
             //TODO: Osservare isRecord per mostrare la notifica del record

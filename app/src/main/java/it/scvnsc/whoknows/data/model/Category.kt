@@ -1,11 +1,7 @@
 package it.scvnsc.whoknows.data.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "categories")
-data class Category(
-    //category id defined by TriviaAPI
-    @PrimaryKey(autoGenerate = false) val id: Int,
-    val name: String
+data class Category (
+        val id: Int,
+        val name: String
 )

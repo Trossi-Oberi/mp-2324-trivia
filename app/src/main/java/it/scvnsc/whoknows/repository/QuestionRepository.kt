@@ -82,19 +82,16 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         val fetchedQuestions = questionResponse.results
         Log.d("Debug", "Fetched Questions: $fetchedQuestions") //OK
         //Inserisco le domande nel DB, non passo mai le domande direttamente dall'API al ViewModel
-        val dbQuestions = mutableListOf<Question>()
+        //val dbQuestions = mutableListOf<Question>()
         withContext(Dispatchers.IO) {
             questionDAO.insertQuestions(fetchedQuestions)
-            dbQuestions.addAll(fetchedQuestions)
+            //dbQuestions.addAll(fetchedQuestions)
         }
-//        val q : List<Question>
-//        withContext(Dispatchers.IO) {
-//            q = questionDAO.getLastQuestions(amount)
-//        Log.d("Debug", q[0].question)
-//        dbQuestions.addAll(q)
-//        Log.d("Debug", "DB Questions: ${dbQuestions[0].question}")
+
+        /*Log.d("Debug", "DB Questions empty? ${dbQuestions.isEmpty()}")
+        Log.d("Debug", "DB Questions: ${dbQuestions[0].question}")*/
 //        Log.d("Debug", "DB Questions: ${dbQuestions[1].question}")
-        return dbQuestions
+        return fetchedQuestions
 
         //Faccio una query al DB per prendere le domande e al ViewModel returno una MutableList<Question>
 
