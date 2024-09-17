@@ -96,4 +96,8 @@ dependencies {
     //ImageLoader
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("io.coil-kt:coil-svg:2.7.0")
+
+    //Splashscreen
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
 }

@@ -9,7 +9,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
@@ -32,9 +35,26 @@ fun WhoKnowsTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = customTypography,
-        content = content
+        content = content,
     )
 }
+
+//funzione per creare un gradient background
+//TODO:: ancora non funziona
+fun gradientBackgroundBrush(isVertical: Boolean = true, colors: List<Color>): Brush {
+    val endOffset = if (isVertical) {
+        Offset(0f, Float.POSITIVE_INFINITY)
+    } else {
+        Offset(Float.POSITIVE_INFINITY, 0f)
+    }
+    return Brush.linearGradient(
+        colors = colors,
+        start = Offset(0f, 0f),
+        end = endOffset,
+        tileMode = TileMode.Clamp
+    )
+}
+
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,

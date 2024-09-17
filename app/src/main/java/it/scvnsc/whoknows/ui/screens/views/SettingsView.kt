@@ -1,23 +1,19 @@
 package it.scvnsc.whoknows.ui.screens.views
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -27,19 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
-import it.scvnsc.whoknows.ui.theme.fontSizeMedium
-import it.scvnsc.whoknows.ui.theme.titleTextStyle
+import it.scvnsc.whoknows.ui.theme.gradientBackgroundBrush
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 //TODO : credits, sounds, theme
 fun SettingsView(
     navController: NavHostController,
@@ -47,7 +40,9 @@ fun SettingsView(
 ) {
     val context = LocalContext.current
 
-    WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
+    WhoKnowsTheme(
+        darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true
+    ) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
