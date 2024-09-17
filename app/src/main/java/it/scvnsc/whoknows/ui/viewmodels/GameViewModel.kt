@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlin.random.Random
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -29,6 +28,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val DEFAULT_CATEGORY = "mixed"
     private val DEFAULT_DIFFICULTY = "mixed"
 
+    //TODO: Get last game ID altrimenti conflitto
     private var gameID = 1
 
 
@@ -37,7 +37,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //val showDifficultySelection: LiveData<Boolean> get() = _showDifficultySelection
 
     //Difficolta' selezionata dall'utente
-    private val _selectedDifficulty = MutableLiveData(DEFAULT_DIFFICULTY) //valore di default = MIXED
+    private val _selectedDifficulty =
+        MutableLiveData(DEFAULT_DIFFICULTY) //valore di default = MIXED
     val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
 
     //Categoria selezionata dall'utente
@@ -53,6 +54,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
     private val START_AMOUNT = 20
+
     //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
     private val SMALL_AMOUNT = 10
 
@@ -108,14 +110,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setDifficulty(difficulty: String) {
-        if (difficulty!=_selectedDifficulty.value){
+        if (difficulty != _selectedDifficulty.value) {
             freshQuestions.clear()
         }
         _selectedDifficulty.postValue(difficulty)
     }
 
     fun setCategory(categoryName: String) {
-        if (categoryName!=_selectedCategory.value){
+        if (categoryName != _selectedCategory.value) {
             freshQuestions.clear()
         }
         _selectedCategory.value = categoryName
@@ -138,36 +140,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onAnswerClicked(givenAnswer: String) {
         viewModelScope.launch {
-            checkAnswerCorrectness(givenAnswer)
+            evaluateAnswer(givenAnswer)
         }
     }
 
-    private fun checkNumberOfAvailableQuestions(): Int {
-        return freshQuestions.size
-    }
-
-    private suspend fun checkAnswerCorrectness(givenAnswer: String) {
+    private suspend fun evaluateAnswer(givenAnswer: String) {
         //Risposta corretta -> Fetch della prossima domanda, aggiornamento dello score
         if (givenAnswer == questionForUser.value?.correct_answer) {
             updateScore()
-            if (checkNumberOfAvailableQuestions() <= 2) {
-                //Se ci sono 2 o meno domande disponibili in memoria faccio una nuova chiamata API per prenderne altre (SMALL_AMOUNT)
-                val newQuestions = questionRepository.retrieveQuestions(
-                    SMALL_AMOUNT,
-                    convertMixed(_selectedCategory.value.toString()),
-                    convertMixed(_selectedDifficulty.value.toString().lowercase())
-                )
-                freshQuestions.addAll(newQuestions)
-            }
             _questionForUser.postValue(nextQuestion())
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
-            freshQuestions.clear()
 
             //Salvataggio game nel DB
+            //TODO: Modificare Game con ID autoincrement
             Log.d("Debug", "Game ended with score: ${_score.value}")
-            val playedGame = Game(gameID,
+            val playedGame = Game(
                 _score.value,
                 _selectedDifficulty.value!!,
                 _selectedCategory.value!!,
@@ -182,12 +171,17 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //TODO: Osservare isRecord per mostrare la notifica del record
 
             //In ogni caso salvo la partita
-            gameRepository.saveGame(playedGame)
-            gameQuestionRepository.saveGameAndQuestions(playedGame, askedQuestions)
+            saveGameAndQuestions(playedGame, askedQuestions)
             _isPlaying.postValue(false)
-            askedQuestions.clear()
         }
         Log.d("Debug", "Answer clicked")
+    }
+
+    private suspend fun saveGameAndQuestions(playedGame: Game, askedQuestions: MutableList<Question>) {
+        val newGameID = gameRepository.saveGame(playedGame)
+        playedGame.id = newGameID
+        Log.d("Debug", "Game saved with ID: ${playedGame.id}")
+        gameQuestionRepository.saveGameAndQuestions(playedGame, askedQuestions)
     }
 
     private suspend fun checkGameRecord(playedGame: Game) {
@@ -201,42 +195,43 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun startGame() {
-        //Resetto il timer
+        //Resetto il timer di gioco e il token per le domande
         _elapsedTime.postValue("")
+        questionRepository.resetSessionToken()
+
+        //Resetto la lista delle domande poste all'utente
         askedQuestions.clear()
-        if (freshQuestions.size == 0) {
-            questionRepository.resetSessionToken()
-            freshQuestions = questionRepository.retrieveQuestions(START_AMOUNT, convertMixed(_selectedCategory.value!!), convertMixed(_selectedDifficulty.value!!))
-        }
-        Log.d("Debug", "Fresh Questions: ${freshQuestions[0].question}")
-        Log.d("Debug", "Fresh Questions: ${freshQuestions[1].question}")
-        _questionForUser.postValue(nextQuestion())
 
         //Imposto punteggio a 0
         _score.postValue(0)
 
+        //Fetcho la nuova domanda
+        _questionForUser.postValue(nextQuestion())
+
         //Start timer della partita
         startTimer()
         Log.d("Debug", "Question for user: ${_questionForUser.value}")
-
     }
 
     //Funzione che converte la stringa "mixed" in "" in modo da far funzionare la richiesta all'API
     private fun convertMixed(text: String): String {
-        if (text != "mixed"){
+        if (text != "mixed") {
             return text
         }
         return ""
     }
 
-    //Funzione che ottiene la nuova domanda da presentare all'utente
-    private fun nextQuestion(): Question {
-        val r = Random.nextInt(freshQuestions.size)
-        val nextQ = freshQuestions[r]
-        freshQuestions.removeAt(r)
-        askedQuestions.add(nextQ)
-        _shuffledAnswers.postValue(shuffleAnswers(nextQ))
-        return nextQ
+    //TODO: L'API prende una domanda alla volta
+    //Funzione che ottiene la nuova domanda da presentare all'utente (l'API fornisce le domande in ordine casuale)
+    private suspend fun nextQuestion(): Question {
+        val newQuestion = questionRepository.retrieveNewQuestion(
+            1,
+            convertMixed(_selectedCategory.value.toString()),
+            convertMixed(_selectedDifficulty.value.toString().lowercase())
+        )
+        askedQuestions.add(newQuestion)
+        _shuffledAnswers.postValue(shuffleAnswers(newQuestion))
+        return newQuestion
     }
 
     //Funzione che mescola le possibili risposte alla domanda (altrimenti la risposta corretta sarebbe sempre la prima)
@@ -251,7 +246,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Inizializza il timer di gioco
     private fun startTimer() {
-        _isGameFinished.value = false //per forza cosi', se utilizzo postValue non si aggiorna il timer
+        _isGameFinished.value =
+            false //per forza cosi', se utilizzo postValue non si aggiorna il timer
         viewModelScope.launch {
             gameTimer = 0
             while (_isGameFinished.value == false) {
@@ -271,6 +267,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Aggiorna il punteggio
     private fun updateScore() {
+        //TODO: Idea: fare che easy vale 1 punto, medium vale 2 punti, hard vale 3 punti
         _score.postValue(_score.value!! + 1)
     }
 }

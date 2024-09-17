@@ -7,11 +7,11 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "games_questions")
 data class GameQuestion(
     @PrimaryKey(autoGenerate = true) val id: Int,
-    @ColumnInfo val gameID: Int,
-    @ColumnInfo val questionID: Int,
+    @ColumnInfo val gameID: Long,
+    @ColumnInfo val questionID: Long,
 ){
     constructor(
-        gameID: Int,
-        questionID: Int
+        gameID: Long,
+        questionID: Long
     ) : this(0, gameID, questionID)
 }

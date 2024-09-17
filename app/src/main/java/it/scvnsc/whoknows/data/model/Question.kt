@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat
 
 @Entity(tableName = "questions")
 data class Question(
-    @PrimaryKey(autoGenerate = false) val id: Int,
+    @PrimaryKey(autoGenerate = true) var id: Long,
     @ColumnInfo(name = "type") val type: String,
     @ColumnInfo(name = "difficulty") val difficulty: String,
     @ColumnInfo(name = "category") val category: String,
@@ -22,7 +22,6 @@ data class Question(
 ) :Serializable{
     @SuppressLint("SimpleDateFormat")
     constructor(
-        id: Int,
         type: String,
         difficulty: String,
         category: String,
@@ -30,6 +29,6 @@ data class Question(
         correct_answer: String,
         incorrect_answers: List<String>,
         categoryId: String
-    ) : this(id,type, difficulty, category, question, correct_answer, incorrect_answers, categoryId,
+    ) : this(0,type, difficulty, category, question, correct_answer, incorrect_answers, categoryId,
         date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()))
 }

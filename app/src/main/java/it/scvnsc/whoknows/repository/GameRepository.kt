@@ -5,11 +5,11 @@ import it.scvnsc.whoknows.data.model.Game
 
 class GameRepository (private val gameDAO : GameDAO) {
 
-    suspend fun saveGame(game: Game){
+    suspend fun saveGame(game: Game): Long{
         //TODO: Quando difficulty e category sono stringhe vuote vanno sostituite con "Mixed"
         if (game.difficulty == "") game.difficulty = "mixed"
         if (game.category == "") game.category = "mixed"
-        gameDAO.insertGame(game)
+        return gameDAO.insertGame(game)
     }
 
     suspend fun getMaxScore(): Int? {

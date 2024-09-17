@@ -5,14 +5,10 @@ import com.google.gson.GsonBuilder
 import it.scvnsc.whoknows.data.dao.QuestionDAO
 import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.data.network.ApiService
-import it.scvnsc.whoknows.data.network.QuestionResponse
 import it.scvnsc.whoknows.data.network.TokenResponse
 import it.scvnsc.whoknows.utils.CategoryManager
 import it.scvnsc.whoknows.utils.QuestionDeserializer
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -20,6 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class QuestionRepository(private val questionDAO: QuestionDAO) {
     //Si occupa dell'interazione tra la tabella del DB questions e ViewModel del game
 
+    private var lastQuestionID: Int? = 0
     private var SESSION_TOKEN = ""
 
     //Si occupa anche di fare la chiamata API per recuperare le domande
@@ -54,8 +51,9 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         apiService.resetToken(SESSION_TOKEN)
     }
 
-    // Step 3: Recupera un (amount) di domande della categoria e della difficolta' scelte ogni volta che l'utente clicka Play o risponde correttamente a tutte le domande precedenti
-    suspend fun retrieveQuestions(amount: Int, categoryName: String, difficulty: String): MutableList<Question> {
+    //TODO: Rimuovere parametro amount, mettere fisso ad 1 (valore costante qui in QuestionRepository)
+    //Step 3: Recupera un (amount) di domande della categoria e della difficolta' scelte ogni volta che l'utente clicka Play o risponde correttamente a tutte le domande precedenti
+    suspend fun retrieveNewQuestion(amount: Int, categoryName: String, difficulty: String): Question {
 
         //Prendo le nuove domande dall'API
         var categoryID: String? = ""
@@ -66,6 +64,11 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         Log.d("Debug", "Category ID: $categoryID")
         Log.d("Debug", "Difficulty: $difficulty")
 
+        /*//TODO: Togliere
+        lastQuestionID = questionDAO.getLastID() ?: 0
+        Log.d("Debug", "Last Question ID in QuestionRepository: $lastQuestionID")*/
+
+        //TODO: Dovrebbe esser fatto in dispatchers.io
         val questionResponse = apiService.getQuestions(
             amount,
             categoryID,
@@ -74,27 +77,29 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         )
         Log.d("Debug", "Question Response: $questionResponse")
 
-        //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token
+        //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token e rieseguo la query
         if (questionResponse.response_code == 4) {
-            resetSessionToken()
+            withContext(Dispatchers.IO) {
+                resetSessionToken()
+                retrieveNewQuestion(amount, categoryName, difficulty)
+            }
         }
 
+        //TODO: Fetched questions ora e' una question sola -> Oggetto Question invece che List
         val fetchedQuestions = questionResponse.results
-        Log.d("Debug", "Fetched Questions: $fetchedQuestions") //OK
-        //Inserisco le domande nel DB, non passo mai le domande direttamente dall'API al ViewModel
-        //val dbQuestions = mutableListOf<Question>()
+        val newQuestion = fetchedQuestions[0]
+        Log.d("Debug", "Fetched Question: $newQuestion")
+        val newQuestionID: Long
+
         withContext(Dispatchers.IO) {
-            questionDAO.insertQuestions(fetchedQuestions)
-            //dbQuestions.addAll(fetchedQuestions)
+            newQuestionID = questionDAO.insert(newQuestion)
         }
 
-        /*Log.d("Debug", "DB Questions empty? ${dbQuestions.isEmpty()}")
-        Log.d("Debug", "DB Questions: ${dbQuestions[0].question}")*/
-//        Log.d("Debug", "DB Questions: ${dbQuestions[1].question}")
-        return fetchedQuestions
+        newQuestion.id = newQuestionID
+        Log.d("Debug", "New Question ID: ${newQuestion.id}")
 
+        return newQuestion
         //Faccio una query al DB per prendere le domande e al ViewModel returno una MutableList<Question>
-
 
     }
 

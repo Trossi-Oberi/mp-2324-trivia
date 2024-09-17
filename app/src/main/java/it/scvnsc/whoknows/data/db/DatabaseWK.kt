@@ -14,10 +14,8 @@ import it.scvnsc.whoknows.data.model.Game
 import it.scvnsc.whoknows.data.model.GameQuestion
 import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.utils.Converters
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.internal.synchronized
 
-@Database(entities = [Question::class, Game::class, GameQuestion::class], version = 2)
+@Database(entities = [Question::class, Game::class, GameQuestion::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class DatabaseWK : RoomDatabase() {
 
@@ -31,7 +29,6 @@ abstract class DatabaseWK : RoomDatabase() {
         private var INSTANCE: DatabaseWK? = null
 
         //singleton for database instance
-        @OptIn(InternalCoroutinesApi::class)
         fun getInstance(context: Context): DatabaseWK {
             return INSTANCE ?: synchronized(this) {
                 val instance = databaseBuilder(

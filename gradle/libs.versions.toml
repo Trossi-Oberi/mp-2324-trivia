@@ -15,6 +15,7 @@ runtimeLivedata = "1.7.0"
 retrofit2 = "2.9.0"
 retrofit2gson = "2.9.0"
 graphicsShapesAndroid = "1.0.1"
+uiDesktop = "1.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,6 +41,7 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 retrofit2 = {module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit2"}
 retrofit2gson = {module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit2gson"}
 androidx-graphics-shapes-android = { group = "androidx.graphics", name = "graphics-shapes-android", version.ref = "graphicsShapesAndroid" }
+androidx-ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

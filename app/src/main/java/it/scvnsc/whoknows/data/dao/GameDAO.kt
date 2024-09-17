@@ -8,7 +8,7 @@ import it.scvnsc.whoknows.data.model.Game
 @Dao
 interface GameDAO {
     @Insert
-    suspend fun insertGame(game: Game)
+    suspend fun insertGame(game: Game): Long
 
     @Query("SELECT MAX(score) FROM games")
     suspend fun getMaxScore(): Int?

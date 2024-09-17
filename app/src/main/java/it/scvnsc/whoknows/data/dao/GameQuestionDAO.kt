@@ -24,7 +24,7 @@ interface GameQuestionDAO {
 
     //Questa query mi restituisce una lista di interi che sono gli ID delle domande fatte durante la partita
     @Query("SELECT questionID FROM games_questions WHERE gameId = :gameID")
-    suspend fun getQuestionsIDs(gameID: Int): List<Int>
+    suspend fun getQuestionsIDs(gameID: Long): List<Int>
 
 
 }

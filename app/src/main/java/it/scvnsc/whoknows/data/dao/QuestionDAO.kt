@@ -11,7 +11,7 @@ import it.scvnsc.whoknows.data.model.Question
 interface QuestionDAO {
 
     @Insert
-    suspend fun insert(question: Question)
+    suspend fun insert(question: Question): Long
     @Insert
     suspend fun insertQuestions(questions: List<Question>)
     @Update
@@ -27,6 +27,9 @@ interface QuestionDAO {
 
     @Query("SELECT * FROM questions WHERE id IN (:idList)")
     suspend fun getQuestionsByIDs(idList: List<Int>): List<Question>
+
+    @Query("SELECT MAX(id) FROM questions")
+    suspend fun getLastID(): Int?
 
 
 }
