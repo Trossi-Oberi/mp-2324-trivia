@@ -2,21 +2,15 @@ package it.scvnsc.whoknows
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.SystemClock.sleep
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import it.scvnsc.whoknows.data.db.DatabaseWK
-import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.views.GameView
 import it.scvnsc.whoknows.ui.screens.views.SettingsView
