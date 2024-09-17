@@ -5,10 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -91,6 +95,12 @@ fun StatsView(
                         .fillMaxSize()
                         .padding(padding)
                 ) {
+
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(120.dp),
+                        strokeWidth = 7.dp
+                    )
+
                     Text(
                         color = Color.Magenta,
                         text = "Benvenuto nelle statistiche!"
@@ -100,6 +110,7 @@ fun StatsView(
         )
     }
 }
+
 
 @Preview
 @Composable

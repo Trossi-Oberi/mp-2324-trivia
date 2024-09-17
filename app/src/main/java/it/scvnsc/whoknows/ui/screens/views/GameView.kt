@@ -1,6 +1,8 @@
 package it.scvnsc.whoknows.ui.screens.views
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,10 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
@@ -23,20 +25,25 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Hardware
+import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SportsScore
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,13 +53,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.scvnsc.whoknows.R
+import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
+import it.scvnsc.whoknows.ui.theme.fontSizeMedium
+import it.scvnsc.whoknows.ui.theme.gameButtonsTextStyle
+import it.scvnsc.whoknows.ui.theme.gameQuestionTextStyle
+import it.scvnsc.whoknows.ui.theme.gameScoreTextStyle
+import it.scvnsc.whoknows.ui.theme.gameTimerTextStyle
+import it.scvnsc.whoknows.ui.theme.game_buttons_height
+import it.scvnsc.whoknows.ui.theme.game_buttons_padding_top
+import it.scvnsc.whoknows.ui.theme.game_buttons_shape
+import it.scvnsc.whoknows.ui.theme.game_buttons_spacing
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
@@ -85,13 +106,17 @@ fun GameView(
                     .fillMaxSize(),
                 topBar = {
                     TopAppBar(
+                        modifier = Modifier
+                            .padding(bottom = 10.dp),
                         title = {
                             Text(
                                 text = context.getString(R.string.app_name),
                                 style = topBarTextStyle,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                fontSize = fontSizeMedium
                             )
                         },
                         navigationIcon = {
@@ -138,24 +163,8 @@ fun GameView(
                         }
 
                         if (gameViewModel.isPlaying.observeAsState().value == true) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                with(gameViewModel) {
-                                    //Timer nella UI
-                                    GameTimer(this)
+                            GameViewInGame(gameViewModel)
 
-                                    //Punteggio nella UI
-                                    GameScore(this)
-
-                                    //Domanda nella UI
-                                    ShowQuestion(this)
-
-                                    //Possibili risposte nella UI
-                                    ShowAnswers(this)
-                                }
-                            }
                         }
                     }
 
@@ -165,6 +174,285 @@ fun GameView(
         }
 
     }
+}
+
+@Composable
+fun GameViewInGame(gameViewModel: GameViewModel) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                //Game timer box
+                Box(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 10.dp, end = 10.dp)
+                        .fillMaxWidth()
+                ) {
+                    //Timer nella UI
+                    GameTimer(gameViewModel)
+                }
+
+                //Game score box
+                Box(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 10.dp)
+                ) {
+                    //Punteggio nella UI
+                    GameScore(gameViewModel)
+                }
+            }
+
+            Spacer(modifier = Modifier.size(20.dp))
+
+            //Categoria
+            //TODO:: da sistemare
+            //ShowCategory(gameViewModel)
+
+            //Difficoltà
+            ShowDifficulty(gameViewModel)
+
+            Spacer(modifier = Modifier.size(20.dp))
+
+            QuestionBox(gameViewModel)
+        }
+    }
+}
+
+@Composable
+fun GameTimer(gameViewModel: GameViewModel) {
+    val timer = gameViewModel.elapsedTime.observeAsState().value
+
+    Button(
+        onClick = { /* do nothing */ },
+        modifier = Modifier
+            .fillMaxWidth(),
+        enabled = false,
+        shape = CircleShape,
+        content = {
+            Row(
+                modifier = Modifier
+                    .padding(small_padding)
+            ) {
+                Icon(
+                    Icons.Default.Timer,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .fillMaxSize()
+                        .padding(end = 10.dp)
+                )
+
+                Text(
+                    "Time:\n$timer",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = gameTimerTextStyle,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+        },
+        colors = ButtonDefaults.buttonColors(
+            Color.Transparent,
+            Color.Transparent,
+            MaterialTheme.colorScheme.primary,
+            Color.Transparent
+        )
+    )
+}
+
+@Composable
+fun GameScore(gameViewModel: GameViewModel) {
+    val currentScore = gameViewModel.score.observeAsState().value
+
+    Button(
+        onClick = { /* do nothing */ },
+        modifier = Modifier
+            .fillMaxWidth(),
+        enabled = false,
+        shape = CircleShape,
+        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 20.dp),
+        content = {
+            Row(
+                modifier = Modifier
+                    .padding(small_padding)
+            ) {
+                Icon(
+                    Icons.Default.SportsScore,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .fillMaxSize()
+                        .padding(end = 10.dp)
+                )
+
+                Text(
+                    "Score:\n$currentScore",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = gameScoreTextStyle,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+        },
+        colors = ButtonDefaults.buttonColors(
+            Color.Transparent,
+            Color.Transparent,
+            MaterialTheme.colorScheme.primary,
+            Color.Transparent
+        )
+    )
+}
+
+@Composable
+fun ShowDifficulty(gameViewModel: GameViewModel) {
+    Button(
+        onClick = { /* do nothing */ },
+        modifier = Modifier
+            .padding(start = 80.dp, end = 80.dp)
+            .fillMaxWidth(),
+        enabled = false,
+        content = {
+            when (gameViewModel.questionForUser.observeAsState().value?.difficulty) {
+                "easy" -> {
+                    Icon(
+                        Icons.Default.Star,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .fillMaxSize()
+                    )
+                }
+
+                "medium" -> {
+                    Row {
+                        for (i in 1..2) {
+                            Icon(
+                                Icons.Default.Star,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .fillMaxSize()
+                            )
+                        }
+                    }
+//                    Text(
+//                        "Medium",
+//                        style = gameButtonsTextStyle
+//                    )
+                }
+
+                "hard" -> {
+
+                    Row {
+                        for (i in 1..3) {
+                            Icon(
+                                Icons.Default.Star,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .fillMaxSize()
+                            )
+                        }
+                    }
+//                    Text(
+//                        "Hard",
+//                        style = gameButtonsTextStyle
+//                    )
+                }
+            }
+        }
+    )
+
+
+    //Text("Difficulty: " + (gameViewModel.questionForUser.observeAsState().value?.difficulty ?: ""))
+}
+
+@Composable
+fun ShowCategory(gameViewModel: GameViewModel) {
+    Text("Category: " + (gameViewModel.questionForUser.observeAsState().value?.category ?: ""))
+}
+
+@Composable
+fun QuestionBox(gameViewModel: GameViewModel) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp)
+    ) {
+        //Domanda nella UI
+        ShowQuestion(gameViewModel)
+
+        //Possibili risposte nella UI
+        ShowAnswers(gameViewModel)
+    }
+
+}
+
+@Composable
+fun ShowQuestion(gameViewModel: GameViewModel) {
+    Log.d("Debug", "Question for user: ${gameViewModel.questionForUser.observeAsState().value}")
+
+
+    Text(
+        text = gameViewModel.questionForUser.observeAsState().value?.question ?: "",
+        style = gameQuestionTextStyle,
+        textAlign = TextAlign.Center
+    )
+}
+
+@Composable
+fun ShowAnswers(gvm: GameViewModel) {
+    val answers = gvm.shuffledAnswers.observeAsState().value
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(game_buttons_spacing),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = game_buttons_padding_top)
+    ) {
+        for (ans in answers!!) {
+            Button(
+                onClick = {
+                    gvm.onAnswerClicked(ans)
+                },
+                elevation = ButtonDefaults.buttonElevation(5.dp, 0.dp, 0.dp, 0.dp, 20.dp),
+                shape = RoundedCornerShape(game_buttons_shape),
+                modifier = Modifier
+                    //.padding(start = 20.dp, end = 20.dp)
+                    .fillMaxWidth()
+                    .height(game_buttons_height)
+            ) {
+                Text(
+                    text = ans,
+                    style = gameButtonsTextStyle,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+
 }
 
 @Composable
@@ -332,14 +620,6 @@ fun DifficultySelectionDialog(
                     .height(300.dp)
             ) {
                 for (diff in DifficultyType.entries) {
-//                    TextButton(onClick = {
-//                        onDifficultySelected(diff.toString())
-//                        onDismissRequest()
-//                        Log.d("Debug", "Selected difficulty: $diff")
-//                    }) {
-//                        Text(text = diff.toString())
-//                    }
-
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -349,11 +629,7 @@ fun DifficultySelectionDialog(
                                     .lowercase() == gameViewModel.selectedDifficulty.value),
                                 onClick = {
                                     onDifficultySelected(diff.toString())
-                                    Log.d("Debug", "$radioSelected")
-                                    radioSelected = diff
-                                        .toString()
-                                        .lowercase()
-                                    Log.d("Debug", "Selected category: ${diff.toString().lowercase()}")
+                                    radioSelected = diff.toString().lowercase()
                                 }
                             )
                             .padding(horizontal = 16.dp),
@@ -362,14 +638,10 @@ fun DifficultySelectionDialog(
                         RadioButton(
                             onClick = {
                                 onDifficultySelected(diff.toString())
-                                radioSelected = diff
-                                    .toString()
-                                    .lowercase()
+                                radioSelected = diff.toString().lowercase()
                                 Log.d("Debug", "Selected category: ${diff.toString().lowercase()}")
                             },
-                            selected = (diff
-                                .toString()
-                                .lowercase() == gameViewModel.selectedDifficulty.value),
+                            selected = (diff.toString().lowercase() == radioSelected),
                             enabled = true
                         )
 
@@ -461,39 +733,6 @@ fun CategorySelectionDialog(
             }
         }
     )
-}
-
-@Composable
-fun GameScore(gameViewModel: GameViewModel) {
-    val currentScore = gameViewModel.score.observeAsState().value
-    Text("Score: $currentScore")
-}
-
-@Composable
-fun GameTimer(gameViewModel: GameViewModel) {
-    val timer = gameViewModel.elapsedTime.observeAsState().value
-    Text("Game time: $timer")
-}
-
-@Composable
-fun ShowQuestion(gameViewModel: GameViewModel) {
-    val currentQuestion = gameViewModel.questionForUser.observeAsState().value
-    Log.d("Debug", "Question for user: $currentQuestion")
-    Text("Category: " + (currentQuestion?.category ?: ""))
-    Text("Difficulty: " + (currentQuestion?.difficulty ?: ""))
-    Text(currentQuestion?.question ?: "")
-}
-
-@Composable
-fun ShowAnswers(gvm: GameViewModel) {
-    val answers = gvm.shuffledAnswers.observeAsState().value
-    for (ans in answers!!) {
-        Button(onClick = {
-            gvm.onAnswerClicked(ans)
-        }) {
-            Text(ans)
-        }
-    }
 }
 
 

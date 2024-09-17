@@ -25,6 +25,30 @@ val buttonsTextStyle = TextStyle(
     fontFamily = customTextFont
 )
 
+val gameQuestionTextStyle = TextStyle(
+    fontSize = fontSizeNormal,
+    fontWeight = FontWeight.Normal,
+    fontFamily = customTextFont
+)
+
+val gameButtonsTextStyle = TextStyle(
+    fontSize = fontSizeNormal,
+    fontWeight = FontWeight.Bold,
+    fontFamily = customTextFont
+)
+
+val gameTimerTextStyle = TextStyle(
+    fontSize = fontSizeUpperNormal,
+    fontWeight = FontWeight.SemiBold,
+    fontFamily = customTextFont
+)
+
+val gameScoreTextStyle = TextStyle(
+    fontSize = fontSizeUpperNormal,
+    fontWeight = FontWeight.SemiBold,
+    fontFamily = customTextFont
+)
+
 //Answers text
 //TODO::
 

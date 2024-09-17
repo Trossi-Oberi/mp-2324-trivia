@@ -25,6 +25,12 @@ val home_buttons_shape = 30.dp
 val home_buttons_width = 300.dp
 val home_buttons_height = 150.dp
 
+//GameView
+val game_buttons_padding_top = 100.dp
+val game_buttons_spacing = 30.dp
+val game_buttons_shape = 30.dp
+val game_buttons_height = 70.dp
+
 //SettingsView
 //TODO::
 
@@ -32,7 +38,9 @@ val home_buttons_height = 150.dp
 //TODO::
 
 //Font
+val fontSizeSmall = 12.sp
 val fontSizeNormal = 16.sp
+val fontSizeUpperNormal = 20.sp
 val fontSizeMedium = 24.sp
 val fontSizeBig = 36.sp
 
