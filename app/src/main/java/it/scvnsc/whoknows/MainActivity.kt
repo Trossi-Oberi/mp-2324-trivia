@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
             }
 
             composable("stats") {
-                StatsView(navController, statsViewModel)
+                StatsView(navController, statsViewModel, settingsViewModel)
             }
 
             composable("settings") {

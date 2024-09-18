@@ -127,14 +127,14 @@ fun GameViewInGame(
     if (isLandscape) {
         //TODO:: da sistemare
     } else {
-        Column(){
-            Box () {
+        Column() {
+            Box() {
                 GameTopBar(navController, gameViewModel, settingsViewModel)
             }
 
             Spacer(modifier = Modifier.size(20.dp))
 
-            Box () {
+            Box() {
                 GameBox(gameViewModel)
             }
         }
@@ -507,9 +507,27 @@ fun GameViewMainPage(
     if (isLandscape) {
         //TODO:: da sistemare
     } else {
-        MainPageTopBar(navController, settingsViewModel)
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(top = top_bar_padding)
+                    .height(top_bar_height)
+                    .fillMaxWidth()
+                    .border(1.dp, Color.Red)
+            ) {
+                MainPageTopBar(navController, settingsViewModel)
+            }
 
-        MainPageButtons(gameViewModel)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color.Green)
+            ) {
+                MainPageButtons(gameViewModel)
+            }
+        }
     }
 }
 
@@ -525,164 +543,154 @@ fun MainPageButtons(
     var selectedDifficulty by rememberSaveable { mutableStateOf("") }
     var selectedCategory by rememberSaveable { mutableStateOf("") }
 
-
-    //Difficulty Selection Dialog
-    if (showDifficultySelectionDialog) {
-        DifficultySelectionDialog(
-            onDismissRequest = {
-                showDifficultySelectionDialog = false
-            },
-            onDifficultySelected = {
-                selectedDifficulty = it
-                gameViewModel.setDifficulty(it.lowercase())
-            },
-            gameViewModel = gameViewModel
-        )
-    }
-
-    //Category selection dialog
-    if (showCategorySelectionDialog) {
-        CategorySelectionDialog(
-            onDismissRequest = {
-                showCategorySelectionDialog = false
-            },
-            categories = gameViewModel.getCategories(),
-            onCategorySelected = {
-                selectedCategory = it
-                gameViewModel.setCategory(it)
-            },
-            gameViewModel = gameViewModel
-        )
-    }
-
-    Box(
+    Column(
+        verticalArrangement = Arrangement.spacedBy(40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 120.dp)
-            .border(1.dp, Color.Cyan)
+            .padding(top = 40.dp, bottom = 100.dp)
     ) {
+        //Difficulty Selection Dialog
+        if (showDifficultySelectionDialog) {
+            DifficultySelectionDialog(
+                onDismissRequest = {
+                    showDifficultySelectionDialog = false
+                },
+                onDifficultySelected = {
+                    selectedDifficulty = it
+                    gameViewModel.setDifficulty(it.lowercase())
+                },
+                gameViewModel = gameViewModel
+            )
+        }
+
+        //Category selection dialog
+        if (showCategorySelectionDialog) {
+            CategorySelectionDialog(
+                onDismissRequest = {
+                    showCategorySelectionDialog = false
+                },
+                categories = gameViewModel.getCategories(),
+                onCategorySelected = {
+                    selectedCategory = it
+                    gameViewModel.setCategory(it)
+                },
+                gameViewModel = gameViewModel
+            )
+        }
+
         //App title
         AppTitle(context)
 
-        Column(
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally,
+        //Start game button
+        Button(
+            onClick = {
+                gameViewModel.onStartClicked()
+            },
+            shape = RoundedCornerShape(home_buttons_shape),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 65.dp)
+                .height(home_buttons_height)
+                .width(home_buttons_width)
         ) {
-
-            //Start game button
-            Button(
-                onClick = {
-                    gameViewModel.onStartClicked()
-                },
-                shape = RoundedCornerShape(home_buttons_shape),
+            Row(
                 modifier = Modifier
-                    .height(home_buttons_height)
-                    .width(home_buttons_width)
+                    .fillMaxSize()
+                    .padding(small_padding),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(small_padding),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        Icons.Filled.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier.size(50.dp)
-                    )
+                Icon(
+                    Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    modifier = Modifier.size(50.dp)
+                )
 
-                    Spacer(modifier = Modifier.size(15.dp))
+                Spacer(modifier = Modifier.size(15.dp))
 
-                    Text(
-                        text = "Start Game",
-                        style = buttonsTextStyle
-                    )
-                }
-
+                Text(
+                    text = "Start Game",
+                    style = buttonsTextStyle
+                )
             }
 
-            //Choose difficulty button
-            Button(
-                onClick = {
-                    showDifficultySelectionDialog = true
-                },
-                shape = RoundedCornerShape(home_buttons_shape),
+        }
+
+        //Choose difficulty button
+        Button(
+            onClick = {
+                showDifficultySelectionDialog = true
+            },
+            shape = RoundedCornerShape(home_buttons_shape),
+            modifier = Modifier
+                .height(home_buttons_height)
+                .width(home_buttons_width)
+        ) {
+            Row(
                 modifier = Modifier
-                    .height(home_buttons_height)
-                    .width(home_buttons_width)
+                    .fillMaxSize()
+                    .padding(small_padding),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(small_padding),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        Icons.Filled.Hardware,
-                        contentDescription = null,
-                        modifier = Modifier.size(50.dp)
-                    )
+                Icon(
+                    Icons.Filled.Hardware,
+                    contentDescription = null,
+                    modifier = Modifier.size(50.dp)
+                )
 
-                    Spacer(modifier = Modifier.size(15.dp))
+                Spacer(modifier = Modifier.size(15.dp))
 
-                    Text(
-                        text = "Difficulty",
-                        style = buttonsTextStyle,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Text(
+                    text = "Difficulty",
+                    style = buttonsTextStyle,
+                    textAlign = TextAlign.Center
+                )
             }
+        }
 
-            //Choose category button
-            Button(
-                onClick = {
-                    showCategorySelectionDialog = true
-                },
-                shape = RoundedCornerShape(home_buttons_shape),
+        //Choose category button
+        Button(
+            onClick = {
+                showCategorySelectionDialog = true
+            },
+            shape = RoundedCornerShape(home_buttons_shape),
+            modifier = Modifier
+                .height(home_buttons_height)
+                .width(home_buttons_width)
+        ) {
+            Row(
                 modifier = Modifier
-                    .height(home_buttons_height)
-                    .width(home_buttons_width)
+                    .fillMaxSize()
+                    .padding(small_padding),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(small_padding),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        Icons.Filled.Category,
-                        contentDescription = null,
-                        modifier = Modifier.size(50.dp)
-                    )
+                Icon(
+                    Icons.Filled.Category,
+                    contentDescription = null,
+                    modifier = Modifier.size(50.dp)
+                )
 
-                    Spacer(modifier = Modifier.size(15.dp))
+                Spacer(modifier = Modifier.size(15.dp))
 
-                    Text(
-                        text = "Category",
-                        style = buttonsTextStyle,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Text(
+                    text = "Category",
+                    style = buttonsTextStyle,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
 }
 
+
 @Composable
 fun MainPageTopBar(navController: NavController, settingsViewModel: SettingsViewModel) {
     //Top app bar
     Row(
-        verticalAlignment = Alignment.Top,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = top_bar_padding)
-            .height(top_bar_height)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.Top
     ) {
         //Go back button
         Box(
