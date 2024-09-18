@@ -123,10 +123,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _selectedCategory.value = categoryName
     }
 
-    fun setShowDifficultySelection(show: Boolean) {
-        _showDifficultySelection.value = show
-    }
-
     fun onStartClicked() {
         viewModelScope.launch {
             try {
@@ -174,7 +170,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             saveGameAndQuestions(playedGame, askedQuestions)
             _isPlaying.postValue(false)
         }
-        Log.d("Debug", "Answer clicked")
     }
 
     private suspend fun saveGameAndQuestions(playedGame: Game, askedQuestions: MutableList<Question>) {

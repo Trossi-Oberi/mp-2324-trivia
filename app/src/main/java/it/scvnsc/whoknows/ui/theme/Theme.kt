@@ -2,6 +2,7 @@ package it.scvnsc.whoknows.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -36,23 +37,6 @@ fun WhoKnowsTheme(
         colorScheme = colorScheme,
         typography = customTypography,
         content = content,
-    )
-}
-
-//funzione per creare un gradient background
-//TODO:: ancora non funziona
-// fare in modo che venga mostrato un gradient o un'immagine come sfondo
-fun gradientBackgroundBrush(isVertical: Boolean = true, colors: List<Color>): Brush {
-    val endOffset = if (isVertical) {
-        Offset(0f, Float.POSITIVE_INFINITY)
-    } else {
-        Offset(Float.POSITIVE_INFINITY, 0f)
-    }
-    return Brush.linearGradient(
-        colors = colors,
-        start = Offset(0f, 0f),
-        end = endOffset,
-        tileMode = TileMode.Clamp
     )
 }
 

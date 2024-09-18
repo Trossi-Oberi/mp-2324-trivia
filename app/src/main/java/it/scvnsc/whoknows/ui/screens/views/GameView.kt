@@ -158,13 +158,19 @@ fun GameView(
                             .fillMaxSize()
                             .padding(padding)
                     ) {
-                        if (gameViewModel.isPlaying.observeAsState().value == false) {
-                            GameViewMainPage(gameViewModel)
-                        }
+                        with(gameViewModel) {
+                            //
+                            if (isPlaying.observeAsState().value == false && isGameFinished.observeAsState().value == true) {
+                                //TODO:: da terminare
+                            }
 
-                        if (gameViewModel.isPlaying.observeAsState().value == true) {
-                            GameViewInGame(gameViewModel)
+                            if (isPlaying.observeAsState().value == false) {
+                                GameViewMainPage(gameViewModel)
+                            }
 
+                            if (isPlaying.observeAsState().value == true) {
+                                GameViewInGame(gameViewModel)
+                            }
                         }
                     }
 
@@ -354,10 +360,6 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
                             )
                         }
                     }
-//                    Text(
-//                        "Medium",
-//                        style = gameButtonsTextStyle
-//                    )
                 }
 
                 "hard" -> {
@@ -374,10 +376,6 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
                             )
                         }
                     }
-//                    Text(
-//                        "Hard",
-//                        style = gameButtonsTextStyle
-//                    )
                 }
             }
         }
@@ -387,6 +385,7 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
     //Text("Difficulty: " + (gameViewModel.questionForUser.observeAsState().value?.difficulty ?: ""))
 }
 
+//TODO:: da completare
 @Composable
 fun ShowCategory(gameViewModel: GameViewModel) {
     Text("Category: " + (gameViewModel.questionForUser.observeAsState().value?.category ?: ""))
