@@ -13,7 +13,7 @@ val titleTextStyle = TextStyle(
 )
 
 val topBarTextStyle = TextStyle(
-    fontSize = fontSizeNormal,
+    fontSize = fontSizeBig,
     fontWeight = FontWeight.Medium,
     fontFamily = customTitleFont
 )
