@@ -46,6 +46,7 @@ import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
+import it.scvnsc.whoknows.utils.isLandscape
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,116 +58,34 @@ fun StatsView(
 ) {
 
     //TODO:: reset statistiche
-
-    //Osservo i game che il viewmodel prende dal DAO
-    val games = statsViewModel.retrievedGames.observeAsState().value
-    with(statsViewModel){
-        retrieveGamesOnStart()
-    }
-
     val context = LocalContext.current
 
-    WhoKnowsTheme (darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
+    //determino orientamento schermo
+    val isLandscape = isLandscape()
+
+    WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
             content = {
-                Row(
-                        modifier = Modifier
-                            .padding(top = 35.dp)
-                            .fillMaxWidth()
-                            .height(90.dp)
-                            .border(1.dp, Color.Red),
-                        verticalAlignment = Alignment.Top
+                if (isLandscape) {
+                    //TODO:: da sistemare
+                } else {
+                    Column(
+
                     ) {
-                        //Go back button
                         Box(
-                            modifier = Modifier
-                                .weight(0.2F)
-                                .fillMaxSize()
-                                .border(1.dp, Color.Blue)
+
                         ) {
-                            IconButton(
-                                onClick = { navController.navigate("home") },
-                                colors = IconButtonDefaults.iconButtonColors(DarkYellow),
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
+                            StatsTopBar(navController, settingsViewModel)
                         }
 
-                        //App title
                         Box(
-                            modifier = Modifier
-                                .weight(0.6F)
-                                .fillMaxSize()
-                                .border(1.dp, Color.Blue)
-                        ) {
-                            Text(
-                                text = context.getString(R.string.app_name),
-                                style = topBarTextStyle,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            )
-                        }
 
-                        //Theme (dark/light switch button)
-                        Box(
-                            modifier = Modifier
-                                .weight(0.2F)
-                                .fillMaxSize()
-                                .border(1.dp, Color.Magenta)
                         ) {
-                            with(settingsViewModel) {
-                                IconButton(
-                                    onClick = { toggleDarkTheme() },
-                                    colors = IconButtonDefaults.iconButtonColors(DarkYellow),
-                                    modifier = Modifier
-                                        .align(Alignment.Center)
-                                ) {
-                                    if (isDarkTheme.value == true) {
-                                        Icon(
-                                            Icons.Filled.DarkMode,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    } else {
-                                        Icon(
-                                            Icons.Filled.WbSunny,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    }
-                                }
-                            }
+                            StatsPage(statsViewModel)
                         }
                     }
-
-                //Colonna portante che racchiude tutta la schermata
-                Column(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    Column {
-                        //HEADER
-                        StatsHeader()
-                    }
-                    //Al suo interno usa una LazyColumn per mostrare i game
-                    ShowGames(games)
-
-                    /*CircularProgressIndicator(
-                        modifier = Modifier.size(120.dp),
-                        strokeWidth = 7.dp
-                    )*/
                 }
             }
         )
@@ -174,11 +93,123 @@ fun StatsView(
 }
 
 @Composable
+fun StatsPage(statsViewModel: StatsViewModel) {
+    //Osservo i game che il viewmodel prende dal DAO
+    val games = statsViewModel.retrievedGames.observeAsState().value
+    with(statsViewModel) {
+        retrieveGamesOnStart()
+    }
+
+    //Colonna portante che racchiude tutta la schermata
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Column {
+            //HEADER
+            StatsHeader()
+        }
+        //Al suo interno usa una LazyColumn per mostrare i game
+        ShowGames(games)
+
+        /*CircularProgressIndicator(
+            modifier = Modifier.size(120.dp),
+            strokeWidth = 7.dp
+        )*/
+    }
+}
+
+@Composable
+fun StatsTopBar(navController: NavHostController, settingsViewModel: SettingsViewModel) {
+    val context = LocalContext.current
+
+    Row(
+        modifier = Modifier
+            .padding(top = 35.dp)
+            .fillMaxWidth()
+            .height(90.dp)
+            .border(1.dp, Color.Red),
+        verticalAlignment = Alignment.Top
+    ) {
+        //Go back button
+        Box(
+            modifier = Modifier
+                .weight(0.2F)
+                .fillMaxSize()
+                .border(1.dp, Color.Blue)
+        ) {
+            IconButton(
+                onClick = { navController.navigate("home") },
+                colors = IconButtonDefaults.iconButtonColors(DarkYellow),
+                modifier = Modifier
+                    .align(Alignment.Center)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+
+        //App title
+        Box(
+            modifier = Modifier
+                .weight(0.6F)
+                .fillMaxSize()
+                .border(1.dp, Color.Blue)
+        ) {
+            Text(
+                text = context.getString(R.string.app_name),
+                style = topBarTextStyle,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+        }
+
+        //Theme (dark/light switch button)
+        Box(
+            modifier = Modifier
+                .weight(0.2F)
+                .fillMaxSize()
+                .border(1.dp, Color.Magenta)
+        ) {
+            with(settingsViewModel) {
+                IconButton(
+                    onClick = { toggleDarkTheme() },
+                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(it.scvnsc.whoknows.ui.theme.DarkYellow),
+                    modifier = androidx.compose.ui.Modifier
+                        .align(androidx.compose.ui.Alignment.Center)
+                ) {
+                    if (isDarkTheme.value == true) {
+                        Icon(
+                            androidx.compose.material.icons.Icons.Filled.DarkMode,
+                            contentDescription = null,
+                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Icon(
+                            androidx.compose.material.icons.Icons.Filled.WbSunny,
+                            contentDescription = null,
+                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun ShowGames(games: List<Game>?) {
     if (games != null) {
         LazyColumn {
-            items(games){
-                game -> StatsRow(game)
+            items(games) { game ->
+                StatsRow(game)
             }
         }
     }
@@ -186,7 +217,7 @@ fun ShowGames(games: List<Game>?) {
 
 @Composable
 fun StatsRow(game: Game) {
-    Row (
+    Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -194,7 +225,7 @@ fun StatsRow(game: Game) {
             .fillMaxWidth()
             .border(3.dp, Color.Magenta)
 
-    ){
+    ) {
         //BOX SCORE
         Box(
             contentAlignment = Alignment.Center,
@@ -204,7 +235,7 @@ fun StatsRow(game: Game) {
                 .weight(0.33F)
                 .border(3.dp, Color.Red)
 
-        ){
+        ) {
             Text(
                 text = "${game.score}",
                 style = buttonsTextStyle,
@@ -219,7 +250,7 @@ fun StatsRow(game: Game) {
                 .fillMaxSize()
                 .weight(0.33F)
                 .border(3.dp, Color.Red)
-        ){
+        ) {
             Text(
                 text = game.difficulty,
                 style = buttonsTextStyle,
@@ -233,7 +264,7 @@ fun StatsRow(game: Game) {
                 .fillMaxSize()
                 .weight(0.33F)
                 .border(3.dp, Color.Red)
-        ){
+        ) {
             Text(
                 text = game.date,
                 style = buttonsTextStyle,
@@ -245,7 +276,7 @@ fun StatsRow(game: Game) {
 
 @Composable
 fun StatsHeader() {
-    Row (
+    Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -253,7 +284,7 @@ fun StatsHeader() {
             .fillMaxWidth()
             .border(3.dp, Color.Magenta)
 
-    ){
+    ) {
         //BOX SCORE
         Box(
             contentAlignment = Alignment.Center,
@@ -263,7 +294,7 @@ fun StatsHeader() {
                 .weight(0.33F)
                 .border(3.dp, Color.Red)
 
-        ){
+        ) {
             Text(
                 text = "Score",
                 style = buttonsTextStyle,
@@ -278,7 +309,7 @@ fun StatsHeader() {
                 .fillMaxSize()
                 .weight(0.33F)
                 .border(3.dp, Color.Red)
-        ){
+        ) {
             Text(
                 text = "Difficulty",
                 style = buttonsTextStyle,
@@ -286,17 +317,37 @@ fun StatsHeader() {
         }
 
         Box(
-            contentAlignment = Alignment.Center,
+            //contentAlignment = Alignment.Center,
             modifier = Modifier
-                .align(Alignment.CenterVertically)
+                //.align(Alignment.CenterVertically)
                 .fillMaxSize()
                 .weight(0.33F)
-                .border(3.dp, Color.Red)
-        ){
-            Text(
-                text = "Date",
-                style = buttonsTextStyle,
-            )
+        ) {
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(3.dp, Color.Blue)
+            ) {
+                Text(
+                    text = "Date",
+                    style = buttonsTextStyle,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier
+                        .border(1.dp, Color.Black)
+                        .fillMaxSize()
+                        .weight(0.5f)
+                )
+                Text(
+                    text = "Date",
+                    style = buttonsTextStyle,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier
+                        .border(1.dp, Color.Black)
+                        .fillMaxSize()
+                        .weight(0.5f)
+                )
+            }
+
         }
     }
 }
