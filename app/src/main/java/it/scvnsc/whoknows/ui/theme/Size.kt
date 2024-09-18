@@ -47,3 +47,5 @@ val fontSizeBig = 36.sp
 //Utils
 val iconSize = 24.dp
 val lineHeight = 32.sp
+val top_bar_height = 90.dp
+val top_bar_padding = 35.dp

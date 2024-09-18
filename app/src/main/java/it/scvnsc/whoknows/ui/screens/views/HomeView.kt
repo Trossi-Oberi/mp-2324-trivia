@@ -1,8 +1,10 @@
 package it.scvnsc.whoknows.ui.screens.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.PlayArrow
@@ -27,6 +30,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -45,17 +49,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
+import it.scvnsc.whoknows.ui.theme.DarkYellow
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
+import it.scvnsc.whoknows.ui.theme.big_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_padding
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
+import it.scvnsc.whoknows.ui.theme.medium_padding
 import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.theme.titleTextStyle
+import it.scvnsc.whoknows.ui.theme.topBarTextStyle
+import it.scvnsc.whoknows.ui.theme.top_bar_height
+import it.scvnsc.whoknows.ui.theme.top_bar_padding
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.isLandscape
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeView(
@@ -67,33 +78,55 @@ fun HomeView(
     val isLandscape = isLandscape()
     val context = LocalContext.current
 
-    WhoKnowsTheme(
-        darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true
-    ) {
+    WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            //contenuto topBar
-            topBar = {
-                TopAppBar(
-                    title = { //empty
-                    },
-                    actions = {
-                        //pulsante per cambiare tema
+            //contenuto principale
+            content = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = top_bar_padding)
+                        .height(top_bar_height),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.Absolute.Right
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .weight(0.8F)
+                            .fillMaxSize()
+                    )
+
+                    //Theme (dark/light switch button)
+                    Box(
+                        modifier = Modifier
+                            .weight(0.2F)
+                            .fillMaxSize()
+                    ) {
                         with(settingsViewModel) {
-                            IconButton(onClick = { toggleDarkTheme() }) {
+                            IconButton(
+                                onClick = { toggleDarkTheme() },
+                                colors = IconButtonDefaults.iconButtonColors(DarkYellow),
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            ) {
                                 if (isDarkTheme.value == true) {
-                                    Icon(Icons.Filled.DarkMode, contentDescription = null)
+                                    Icon(
+                                        Icons.Filled.DarkMode,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onPrimary
+                                    )
                                 } else {
-                                    Icon(Icons.Filled.WbSunny, contentDescription = null)
+                                    Icon(
+                                        Icons.Filled.WbSunny,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onPrimary
+                                    )
                                 }
                             }
                         }
                     }
-                )
-            },
-
-            //contenuto principale
-            content = { padding ->
+                }
 
                 //se orientamento orizzontale dispone i bottoni su una fila orizzontale
                 if (isLandscape) {
@@ -105,7 +138,7 @@ fun HomeView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(home_buttons_padding),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         //TODO::
                         //tre bottoni principali dell'applicazione
@@ -144,22 +177,18 @@ fun HomeView(
                             )
                         }
                     }
-                } else {
 
+
+                } else {
                     Column(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(padding)
+                            .padding(top = 50.dp)
                     ) {
-                        Text(
-                            text = "¿WhoKnows?",
-                            style = titleTextStyle,
-                            textAlign = TextAlign.Center
-                        )
-
-
+                        //Titolo applicazione
+                        AppTitle(context)
                         //tre bottoni principali dell'applicazione
                         //TODO: separare funzione in diverse composable
                         //TODO:
@@ -267,15 +296,14 @@ fun HomeView(
     }
 }
 
-
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun AppTitle(context: Context) {
     Text(
         text = context.getString(R.string.app_name),
+        style = titleTextStyle,
         textAlign = TextAlign.Center,
         modifier = Modifier
-            .fillMaxHeight()
+            .fillMaxWidth()
     )
 }
 
