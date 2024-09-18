@@ -1,9 +1,6 @@
 package it.scvnsc.whoknows.ui.screens.views
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,12 +21,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImagePainter
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
@@ -79,12 +73,12 @@ fun SettingsView(
                                 IconButton(onClick = { toggleDarkTheme() }) {
                                     if (isDarkTheme.observeAsState().value == true) {
                                         Icon(
-                                            androidx.compose.material.icons.Icons.Filled.DarkMode,
+                                            Icons.Filled.DarkMode,
                                             contentDescription = null
                                         )
                                     } else {
                                         Icon(
-                                            androidx.compose.material.icons.Icons.Filled.WbSunny,
+                                            Icons.Filled.WbSunny,
                                             contentDescription = null
                                         )
                                     }
