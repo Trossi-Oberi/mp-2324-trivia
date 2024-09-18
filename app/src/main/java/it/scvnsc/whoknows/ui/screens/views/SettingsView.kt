@@ -32,7 +32,6 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
-import it.scvnsc.whoknows.ui.theme.gradientBackgroundBrush
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 

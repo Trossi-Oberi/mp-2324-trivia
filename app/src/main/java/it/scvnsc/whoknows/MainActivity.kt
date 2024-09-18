@@ -18,6 +18,7 @@ import it.scvnsc.whoknows.ui.screens.views.StatsView
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
+import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         val settingsViewModel: SettingsViewModel = viewModel<SettingsViewModel>()
         val gameViewModel: GameViewModel = viewModel<GameViewModel>()
+        val statsViewModel: StatsViewModel = viewModel<StatsViewModel>()
 
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
@@ -46,7 +48,7 @@ class MainActivity : ComponentActivity() {
             }
 
             composable("stats") {
-                StatsView(navController, settingsViewModel)
+                StatsView(navController, statsViewModel)
             }
 
             composable("settings") {
