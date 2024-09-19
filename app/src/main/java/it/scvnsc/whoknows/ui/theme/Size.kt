@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.sp
 
 //Padding
 val small_padding = 8.dp
-val medium_padding = 16.dp
+val medium_padding = 20.dp
 val big_padding = 32.dp
 
 //Spacing
@@ -42,7 +42,7 @@ val fontSizeSmall = 12.sp
 val fontSizeNormal = 16.sp
 val fontSizeUpperNormal = 20.sp
 val fontSizeMedium = 24.sp
-val fontSizeBig = 36.sp
+val fontSizeBig = 45.sp
 
 //Utils
 val iconSize = 24.dp

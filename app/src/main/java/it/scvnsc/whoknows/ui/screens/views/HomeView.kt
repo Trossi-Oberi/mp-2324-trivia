@@ -2,6 +2,7 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,38 +17,39 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
+import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
-import it.scvnsc.whoknows.ui.theme.home_buttons_padding
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
 import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.theme.titleTextStyle
-import it.scvnsc.whoknows.ui.theme.top_bar_height
-import it.scvnsc.whoknows.ui.theme.top_bar_padding
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.isLandscape
 
@@ -72,22 +74,34 @@ fun HomeView(
                     //TODO:: da sistemare
                 } else {
                     Column (
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .paint(
+                                // Replace with your image id
+                                painterResource(
+                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.dark_background_pattern else R.drawable.light_background_pattern
+                                ),
+                                contentScale = ContentScale.Crop
+                            )
+                            .fillMaxSize()
+
                     ){
                         Box (
                             modifier = Modifier
-                                .padding(top = top_bar_padding)
-                                .height(top_bar_height)
                                 .fillMaxWidth()
-                                .border(1.dp, Color.Red)
                         ){
-                            HomeViewTopBar(settingsViewModel)
+                            //TODO:: sto creando un component generico per la TopBar
+                            // HomeViewTopBar(settingsViewModel)
+                            TopBar(
+                                showTitle = false,
+                                showThemeChange = true,
+                                settingsViewModel = settingsViewModel,
+                                gameViewModel = null
+                            )
                         }
 
                         Box (
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .border(1.dp, Color.Green)
                         ){
                             HomeViewButtons(navController)
                         }
@@ -112,7 +126,7 @@ fun HomeViewButtons(navController: NavHostController) {
         //Titolo applicazione
         AppTitle(context)
 
-        //tre bottoni principali dell'applicazione
+        //play button
         Button(
             onClick = {
                 navController.navigate("game")
@@ -146,6 +160,7 @@ fun HomeViewButtons(navController: NavHostController) {
 
         }
 
+        //stats button
         Button(
             onClick = {
                 navController.navigate("stats")
@@ -178,6 +193,7 @@ fun HomeViewButtons(navController: NavHostController) {
             }
         }
 
+        //settings button
         Button(
             onClick = {
                 navController.navigate("settings")
@@ -212,6 +228,7 @@ fun HomeViewButtons(navController: NavHostController) {
     }
 }
 
+/*
 @Composable
 fun HomeViewTopBar(settingsViewModel: SettingsViewModel) {
     Row(
@@ -257,6 +274,7 @@ fun HomeViewTopBar(settingsViewModel: SettingsViewModel) {
         }
     }
 }
+ */
 
 @Composable
 fun AppTitle(context: Context) {

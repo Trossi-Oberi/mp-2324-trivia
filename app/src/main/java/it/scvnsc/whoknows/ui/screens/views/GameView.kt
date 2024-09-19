@@ -2,7 +2,6 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,19 +22,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Hardware
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SportsScore
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -48,13 +43,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.scvnsc.whoknows.R
-import it.scvnsc.whoknows.ui.theme.DarkYellow
+import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.gameButtonsTextStyle
@@ -68,10 +66,8 @@ import it.scvnsc.whoknows.ui.theme.game_buttons_spacing
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
+import it.scvnsc.whoknows.ui.theme.medium_padding
 import it.scvnsc.whoknows.ui.theme.small_padding
-import it.scvnsc.whoknows.ui.theme.topBarTextStyle
-import it.scvnsc.whoknows.ui.theme.top_bar_height
-import it.scvnsc.whoknows.ui.theme.top_bar_padding
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
@@ -123,18 +119,42 @@ fun GameViewInGame(
 ) {
     //determino orientamento schermo
     val isLandscape = isLandscape()
+    val context = LocalContext.current
 
     if (isLandscape) {
         //TODO:: da sistemare
     } else {
-        Column() {
-            Box() {
-                GameTopBar(navController, gameViewModel, settingsViewModel)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                //TODO:: da rimuovere quella generica
+                // GameTopBar(navController, gameViewModel, settingsViewModel)
+                TopBar(
+                    navController = navController,
+                    onClick = {
+                        navController.navigate("home")
+                        //gameViewModel.onQuitGame()
+                    },
+                    navIcon = Icons.Default.Close,
+                    showTitle = true,
+                    title = context.getString(R.string.app_name),
+                    settingsViewModel = settingsViewModel,
+                    gameViewModel = gameViewModel
+                )
+
             }
 
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(medium_padding))
 
-            Box() {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
                 GameBox(gameViewModel)
             }
         }
@@ -191,6 +211,7 @@ fun GameBox(gameViewModel: GameViewModel) {
     }
 }
 
+/*
 @Composable
 fun GameTopBar(
     navController: NavController,
@@ -281,6 +302,7 @@ fun GameTopBar(
         }
     }
 }
+*/
 
 @Composable
 fun GameTimer(gameViewModel: GameViewModel) {
@@ -291,6 +313,7 @@ fun GameTimer(gameViewModel: GameViewModel) {
         modifier = Modifier
             .fillMaxWidth(),
         enabled = false,
+        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 5.dp),
         shape = CircleShape,
         content = {
             Row(
@@ -336,7 +359,7 @@ fun GameScore(gameViewModel: GameViewModel) {
             .fillMaxWidth(),
         enabled = false,
         shape = CircleShape,
-        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 20.dp),
+        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 5.dp),
         content = {
             Row(
                 modifier = Modifier
@@ -378,6 +401,7 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
         modifier = Modifier
             .padding(start = 80.dp, end = 80.dp)
             .fillMaxWidth(),
+        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 5.dp),
         enabled = false,
         content = {
             when (gameViewModel.questionForUser.observeAsState().value?.difficulty) {
@@ -508,22 +532,36 @@ fun GameViewMainPage(
         //TODO:: da sistemare
     } else {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .paint(
+                    // Replace with your image id
+                    painterResource(
+                        id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.dark_background_pattern else R.drawable.light_background_pattern
+                    ),
+                    contentScale = ContentScale.Crop
+                )
+
         ) {
             Box(
                 modifier = Modifier
-                    .padding(top = top_bar_padding)
-                    .height(top_bar_height)
                     .fillMaxWidth()
-                    .border(1.dp, Color.Red)
             ) {
-                MainPageTopBar(navController, settingsViewModel)
+                //TODO:: da rimuovere quella generica
+                // MainPageTopBar(navController, settingsViewModel)
+                TopBar(
+                    navController = navController,
+                    onClick = { navController.navigate("home") },
+                    navIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                    showTitle = false,
+                    settingsViewModel = settingsViewModel,
+                    gameViewModel = null
+                )
             }
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, Color.Green)
             ) {
                 MainPageButtons(gameViewModel)
             }
@@ -683,7 +721,7 @@ fun MainPageButtons(
     }
 }
 
-
+/*
 @Composable
 fun MainPageTopBar(navController: NavController, settingsViewModel: SettingsViewModel) {
     //Top app bar
@@ -751,6 +789,7 @@ fun MainPageTopBar(navController: NavController, settingsViewModel: SettingsView
         }
     }
 }
+ */
 
 
 @Composable
