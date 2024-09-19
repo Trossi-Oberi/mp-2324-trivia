@@ -77,7 +77,10 @@ fun StatsView(
                         Box(
 
                         ) {
+
+                            //Remove this when done
                             StatsTopBar(navController, settingsViewModel)
+                            //TODO:: replace with TopBar
                         }
 
                         Box(
