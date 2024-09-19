@@ -37,8 +37,8 @@ fun TopBar(
     showTitle: Boolean = true,
     title: String? = null,
     showThemeChange: Boolean = true,
-    settingsViewModel: SettingsViewModel,
-    gameViewModel: GameViewModel?
+    settingsViewModel: SettingsViewModel? = null,
+    gameViewModel: GameViewModel? = null
 ) {
     Row(
         modifier = Modifier
@@ -110,12 +110,12 @@ fun TopBar(
             ) {
                 with(settingsViewModel) {
                     IconButton(
-                        onClick = { toggleDarkTheme() },
+                        onClick = { this?.toggleDarkTheme() },
                         colors = IconButtonDefaults.iconButtonColors(DarkYellow),
                         modifier = Modifier
                             .align(Alignment.Center)
                     ) {
-                        if (isDarkTheme.value == true) {
+                        if (this?.isDarkTheme?.value == true) {
                             Icon(
                                 Icons.Filled.DarkMode,
                                 contentDescription = null,

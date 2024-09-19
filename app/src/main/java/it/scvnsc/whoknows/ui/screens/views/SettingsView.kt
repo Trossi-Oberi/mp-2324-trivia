@@ -1,6 +1,8 @@
 package it.scvnsc.whoknows.ui.screens.views
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,10 +27,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
+import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
+import it.scvnsc.whoknows.utils.isLandscape
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 //TODO : credits, sounds, theme
@@ -36,72 +41,65 @@ fun SettingsView(
     navController: NavHostController,
     settingsViewModel: SettingsViewModel
 ) {
+    //determino orientamento schermo
     val context = LocalContext.current
+    val isLandscape = isLandscape()
 
     WhoKnowsTheme(
         darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true,
     ) {
-        Surface (
+        Scaffold(
             modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Scaffold(
-                modifier = Modifier
-                    .fillMaxSize(),
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = context.getString(R.string.app_name),
-                                style = topBarTextStyle,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { navController.navigate("home") }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = null
-                                )
-                            }
-                        },
-                        actions = {
-                            //pulsante per cambiare tema
-                            with(settingsViewModel) {
-                                IconButton(onClick = { toggleDarkTheme() }) {
-                                    if (isDarkTheme.observeAsState().value == true) {
-                                        Icon(
-                                            Icons.Filled.DarkMode,
-                                            contentDescription = null
-                                        )
-                                    } else {
-                                        Icon(
-                                            Icons.Filled.WbSunny,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    )
-                },
-                content = { padding ->
+                .fillMaxSize(),
+            content = {
+                if(isLandscape){
+                    //TODO:: da sistemare
+                } else {
+                    //Main column
                     Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(padding),
                     ) {
-                        Text(
-                            color = Color.Green,
-                            text = "Benvenuto nelle impostazioni!"
-                        )
+                        //Top app bar
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            TopBar(
+                                showTitle = true,
+                                showThemeChange = false,
+                                navController = navController,
+                                onClick = { navController.navigate("home") }
+                            )
+                        }
+
+                        //Settings buttons
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            SettingsButtons()
+                        }
+
                     }
                 }
-            )
-        }
+            }
+        )
     }
+}
+
+@Composable
+fun SettingsButtons() {
+    val context = LocalContext.current
+
+    Column(
+        //TODO:: da inserire tutte le impostazioni
+    ) {
+        Text(
+            color = Color.Green,
+            text = "Benvenuto nelle impostazioni!"
+        )
+    }
+
+
 }
