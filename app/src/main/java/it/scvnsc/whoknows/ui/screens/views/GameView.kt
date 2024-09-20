@@ -691,7 +691,7 @@ fun DifficultySelectionDialog(
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(200.dp)
             ) {
                 for (diff in DifficultyType.entries) {
                     Row(
