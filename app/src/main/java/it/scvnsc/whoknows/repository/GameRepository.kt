@@ -7,8 +7,8 @@ class GameRepository (private val gameDAO : GameDAO) {
 
     suspend fun saveGame(game: Game): Long{
 
-        if (game.difficulty == "") game.difficulty = "mixed"
-        if (game.category == "") game.category = "mixed"
+        if (game.difficulty == "") game.difficulty = "Mixed"
+        if (game.category == "") game.category = "Mixed"
         return gameDAO.insertGame(game)
     }
 

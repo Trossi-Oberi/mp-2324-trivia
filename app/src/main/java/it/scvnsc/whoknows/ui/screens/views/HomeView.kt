@@ -78,7 +78,7 @@ fun HomeView(
                             .paint(
                                 // Replace with your image id
                                 painterResource(
-                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.dark_background_pattern else R.drawable.light_background_pattern
+                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white_2
                                 ),
                                 contentScale = ContentScale.Crop
                             )

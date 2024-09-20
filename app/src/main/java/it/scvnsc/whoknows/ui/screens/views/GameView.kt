@@ -2,6 +2,10 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -72,6 +77,7 @@ import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
 import it.scvnsc.whoknows.utils.isLandscape
+import kotlinx.coroutines.delay
 
 //TODO: inizializzare un timer dopo la chiamata API per le domande della durata di 5 secondi che modifica una variabile booleana da false a true (è possibile effettuare una nuova chiamata all'API delle domande)
 // initial = true, poi diventa false passano 5 secondi e ritorna true (_canMakeNewAPICalls: LiveData<Boolean>)
@@ -478,7 +484,6 @@ fun QuestionBox(gameViewModel: GameViewModel) {
 fun ShowQuestion(gameViewModel: GameViewModel) {
     Log.d("Debug", "Question for user: ${gameViewModel.questionForUser.observeAsState().value}")
 
-
     Text(
         text = gameViewModel.questionForUser.observeAsState().value?.question ?: "",
         style = gameQuestionTextStyle,
@@ -488,6 +493,7 @@ fun ShowQuestion(gameViewModel: GameViewModel) {
 
 @Composable
 fun ShowAnswers(gvm: GameViewModel) {
+    val question = gvm.questionForUser.observeAsState().value
     val answers = gvm.shuffledAnswers.observeAsState().value
 
     Column(
@@ -498,26 +504,70 @@ fun ShowAnswers(gvm: GameViewModel) {
             .padding(top = game_buttons_padding_top)
     ) {
         for (ans in answers!!) {
-            Button(
-                onClick = {
-                    gvm.onAnswerClicked(ans)
-                },
-                elevation = ButtonDefaults.buttonElevation(5.dp, 0.dp, 0.dp, 0.dp, 20.dp),
-                shape = RoundedCornerShape(game_buttons_shape),
-                modifier = Modifier
-                    //.padding(start = 20.dp, end = 20.dp)
-                    .fillMaxWidth()
-                    .height(game_buttons_height)
-            ) {
-                Text(
-                    text = ans,
-                    style = gameButtonsTextStyle,
-                    textAlign = TextAlign.Center
-                )
-            }
+            AnswerButton(
+                answerText = ans,
+                //isCorrect = question?.correct_answer == ans,
+                gvm = gvm
+            )
+//            Button(
+//                onClick = {
+//                    gvm.onAnswerClicked(ans)
+//                },
+//                elevation = ButtonDefaults.buttonElevation(5.dp, 0.dp, 0.dp, 0.dp, 20.dp),
+//                shape = RoundedCornerShape(game_buttons_shape),
+//                modifier = Modifier
+//                    //.padding(start = 20.dp, end = 20.dp)
+//                    .fillMaxWidth()
+//                    .height(game_buttons_height)
+//            ) {
+//                Text(
+//                    text = ans,
+//                    style = gameButtonsTextStyle,
+//                    textAlign = TextAlign.Center
+//                )
+//            }
         }
     }
 }
+
+@Composable
+fun AnswerButton(
+    answerText: String,
+    //isCorrect: Boolean,
+    gvm: GameViewModel
+) {
+    val isCorrect = gvm.isAnswerCorrect.observeAsState().value
+    val isClicked = gvm.isAnswerSelected.observeAsState().value
+
+    //TODO: Vedere se si può fare qualcosa di più carino animando invece di cambiare direttamente colore
+    val backgroundColor = when {
+        !isClicked!! && !isCorrect!! -> MaterialTheme.colorScheme.primary
+        isClicked && !isCorrect!! -> Color.Red
+        else -> Color.Green
+    }
+
+    Log.d("Debug", "I am button $answerText, isCorrect: $isCorrect")
+
+    Button(
+        elevation = ButtonDefaults.buttonElevation(5.dp, 0.dp, 0.dp, 0.dp, 20.dp),
+        shape = RoundedCornerShape(game_buttons_shape),
+        modifier = Modifier
+            //.padding(start = 20.dp, end = 20.dp)
+            .fillMaxWidth()
+            .height(game_buttons_height),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backgroundColor
+        ),
+        onClick = { gvm.onAnswerClicked(answerText) },
+    ) {
+        Text(
+            text = answerText,
+            style = gameButtonsTextStyle,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
 
 @Composable
 fun GameViewMainPage(
@@ -834,7 +884,10 @@ fun DifficultySelectionDialog(
                             onClick = {
                                 onDifficultySelected(diff.toString())
                                 radioSelected = diff.toString().lowercase()
-                                Log.d("Debug", "Selected category: ${diff.toString().lowercase()}")
+                                Log.d(
+                                    "Debug",
+                                    "Selected category: ${diff.toString().lowercase()}"
+                                )
                             },
                             selected = (diff.toString().lowercase() == radioSelected),
                             enabled = true

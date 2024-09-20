@@ -75,6 +75,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _isGameFinished = MutableLiveData(false)
     val isGameFinished: LiveData<Boolean> get() = _isGameFinished
 
+    //Controlla se è stata selezionata una risposta
+    private val _isAnswerSelected = MutableLiveData(false)
+    val isAnswerSelected: LiveData<Boolean> get() = _isAnswerSelected
+
+    //Controlla se la risposta selezionata e' corretta
+    private val _isAnswerCorrect = MutableLiveData(false)
+    val isAnswerCorrect: LiveData<Boolean> get() = _isAnswerCorrect
+
     //Controlla se il nuovo punteggio e' un record
     private val _isRecord = MutableLiveData(false)
     val isRecord: LiveData<Boolean> get() = _isRecord
@@ -135,22 +143,25 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onAnswerClicked(givenAnswer: String) {
+        _isAnswerSelected.value = true
         viewModelScope.launch {
             evaluateAnswer(givenAnswer)
         }
+        _isAnswerSelected.value = false
     }
 
     private suspend fun evaluateAnswer(givenAnswer: String) {
         //Risposta corretta -> Fetch della prossima domanda, aggiornamento dello score
         if (givenAnswer == questionForUser.value?.correct_answer) {
+            _isAnswerCorrect.value = true
             updateScore()
             _questionForUser.postValue(nextQuestion())
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
+            _isAnswerCorrect.value = false
             stopTimer()
 
             //Salvataggio game nel DB
-            //TODO: Modificare Game con ID autoincrement
             Log.d("Debug", "Game ended with score: ${_score.value}")
             val playedGame = Game(
                 _score.value,
@@ -170,6 +181,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             saveGameAndQuestions(playedGame, askedQuestions)
             _isPlaying.postValue(false)
         }
+        delay(1000L)
+        _isAnswerCorrect.value = false
     }
 
     private suspend fun saveGameAndQuestions(playedGame: Game, askedQuestions: MutableList<Question>) {
