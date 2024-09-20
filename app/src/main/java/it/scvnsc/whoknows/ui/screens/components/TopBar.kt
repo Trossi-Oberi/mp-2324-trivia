@@ -26,19 +26,20 @@ import it.scvnsc.whoknows.ui.theme.DarkYellow
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.theme.top_bar_height
 import it.scvnsc.whoknows.ui.theme.top_bar_padding
-import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 
 @Composable
 fun TopBar(
     navController: NavController? = null, //parametri opzionali (il pulsante di chiusura o goBack viene mostrato solo se navController != null)
-    onClick: () -> Unit = {}, //parametri opzionali
-    navIcon: ImageVector? = null, //parametri opzionali (scelta dell'icona se presente navController
+    onLeftClick: () -> Unit = {}, //parametri opzionali
+    leftBtnIcon: ImageVector? = null, //parametri opzionali (scelta dell'icona se presente navController
     showTitle: Boolean = true,
     title: String? = null,
+    showRightButton: Boolean = false,
+    rightBtnIcon: ImageVector? = null,
+    onRightBtnClick: () -> Unit = {},
     showThemeChange: Boolean = true,
-    settingsViewModel: SettingsViewModel? = null,
-    gameViewModel: GameViewModel? = null
+    settingsViewModel: SettingsViewModel? = null
 ) {
     Row(
         modifier = Modifier
@@ -55,14 +56,14 @@ fun TopBar(
                     .fillMaxSize()
             ) {
                 IconButton(
-                    onClick = onClick,
+                    onClick = onLeftClick,
                     colors = IconButtonDefaults.iconButtonColors(DarkYellow),
                     modifier = Modifier
                         .align(Alignment.Center)
                 ) {
-                    if (navIcon != null) {
+                    if (leftBtnIcon != null) {
                         Icon(
-                            imageVector = navIcon,
+                            imageVector = leftBtnIcon,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
@@ -78,7 +79,7 @@ fun TopBar(
         }
 
         // App title
-        if(showTitle && title != null) {
+        if (showTitle && title != null) {
             Box(
                 modifier = Modifier
                     .weight(0.6F)
@@ -101,29 +102,48 @@ fun TopBar(
             )
         }
 
-        // Theme (dark/light switch button)
-        if(showThemeChange) {
+        // Other button
+        if (showRightButton) {
             Box(
                 modifier = Modifier
                     .weight(0.2F)
                     .fillMaxSize()
             ) {
-                with(settingsViewModel) {
+                if (showThemeChange) {
+                    with(settingsViewModel) {
+                        IconButton(
+                            onClick = { this?.toggleDarkTheme() },
+                            colors = IconButtonDefaults.iconButtonColors(DarkYellow),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                        ) {
+                            if (this?.isDarkTheme?.value == true) {
+                                Icon(
+                                    Icons.Filled.DarkMode,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Filled.WbSunny,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    //General right button
+
                     IconButton(
-                        onClick = { this?.toggleDarkTheme() },
+                        onClick = { onRightBtnClick() },
                         colors = IconButtonDefaults.iconButtonColors(DarkYellow),
                         modifier = Modifier
                             .align(Alignment.Center)
                     ) {
-                        if (this?.isDarkTheme?.value == true) {
+                        if (rightBtnIcon != null) {
                             Icon(
-                                Icons.Filled.DarkMode,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Icon(
-                                Icons.Filled.WbSunny,
+                                rightBtnIcon,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
@@ -141,210 +161,3 @@ fun TopBar(
 
     }
 }
-
-/*
-@Composable
-fun HomeViewTopBar(settingsViewModel: SettingsViewModel) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.Absolute.Right
-    ) {
-        Spacer(
-            modifier = Modifier
-                .weight(0.8F)
-                .fillMaxSize()
-        )
-
-        //Theme (dark/light switch button)
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-        ) {
-            with(settingsViewModel) {
-                IconButton(
-                    onClick = { toggleDarkTheme() },
-                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(it.scvnsc.whoknows.ui.theme.DarkYellow),
-                    modifier = androidx.compose.ui.Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
-                ) {
-                    if (isDarkTheme.value == true) {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.DarkMode,
-                            contentDescription = null,
-                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.WbSunny,
-                            contentDescription = null,
-                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun GameTopBar(
-    navController: NavController,
-    gameViewModel: GameViewModel,
-    settingsViewModel: SettingsViewModel
-) {
-    val context = LocalContext.current
-
-    Row(
-        modifier = Modifier
-            .padding(top = 35.dp)
-            .fillMaxWidth()
-            .height(90.dp)
-            .border(1.dp, Color.Red),
-        verticalAlignment = Alignment.Top
-    ) {
-        //Quit game button
-        //TODO:: fare Quit Game button
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-                .border(1.dp, Color.Blue)
-        ) {
-            IconButton(
-                onClick = {
-                    //DA CAMBIARE
-                    navController.navigate("game")
-                },
-                colors = IconButtonDefaults.iconButtonColors(DarkYellow),
-                modifier = Modifier
-                    .align(Alignment.Center)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-
-        //App title
-        Box(
-            modifier = Modifier
-                .weight(0.6F)
-                .fillMaxSize()
-                .border(1.dp, Color.Blue)
-        ) {
-            Text(
-                text = context.getString(R.string.app_name),
-                style = topBarTextStyle,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-        }
-
-        //Theme (dark/light switch button)
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-                .border(1.dp, Color.Magenta)
-        ) {
-            with(settingsViewModel) {
-                IconButton(
-                    onClick = { toggleDarkTheme() },
-                    colors = IconButtonDefaults.iconButtonColors(DarkYellow),
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                ) {
-                    if (isDarkTheme.value == true) {
-                        Icon(
-                            Icons.Filled.DarkMode,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(
-                            Icons.Filled.WbSunny,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun MainPageTopBar(navController: NavController, settingsViewModel: SettingsViewModel) {
-    //Top app bar
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.Top
-    ) {
-        //Go back button
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-        ) {
-            IconButton(
-                onClick = { navController.navigate("home") },
-                colors = IconButtonDefaults.iconButtonColors(DarkYellow),
-                modifier = Modifier
-                    .align(Alignment.Center)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-
-        Spacer(
-            modifier = Modifier
-                .weight(0.6F)
-                .fillMaxSize()
-        )
-
-        //Theme (dark/light switch button)
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-        ) {
-            with(settingsViewModel) {
-                IconButton(
-                    onClick = { toggleDarkTheme() },
-                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
-                        it.scvnsc.whoknows.ui.theme.DarkYellow
-                    ),
-                    modifier = androidx.compose.ui.Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
-                ) {
-                    if (isDarkTheme.value == true) {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.DarkMode,
-                            contentDescription = null,
-                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.WbSunny,
-                            contentDescription = null,
-                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-*/
