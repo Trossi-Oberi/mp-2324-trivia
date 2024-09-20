@@ -140,6 +140,7 @@ fun TopBar(
                         colors = IconButtonDefaults.iconButtonColors(DarkYellow),
                         modifier = Modifier
                             .align(Alignment.Center)
+
                     ) {
                         if (rightBtnIcon != null) {
                             Icon(

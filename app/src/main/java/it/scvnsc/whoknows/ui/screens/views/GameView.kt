@@ -55,6 +55,8 @@ import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
+import it.scvnsc.whoknows.ui.theme.default_elevation
+import it.scvnsc.whoknows.ui.theme.disabled_elevation
 import it.scvnsc.whoknows.ui.theme.gameButtonsTextStyle
 import it.scvnsc.whoknows.ui.theme.gameQuestionTextStyle
 import it.scvnsc.whoknows.ui.theme.gameScoreTextStyle
@@ -67,6 +69,7 @@ import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
 import it.scvnsc.whoknows.ui.theme.medium_padding
+import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
@@ -217,7 +220,7 @@ fun GameTimer(gameViewModel: GameViewModel) {
         modifier = Modifier
             .fillMaxWidth(),
         enabled = false,
-        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 5.dp),
+        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         shape = CircleShape,
         content = {
             Row(
@@ -263,7 +266,7 @@ fun GameScore(gameViewModel: GameViewModel) {
             .fillMaxWidth(),
         enabled = false,
         shape = CircleShape,
-        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 5.dp),
+        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         content = {
             Row(
                 modifier = Modifier
@@ -305,7 +308,7 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
         modifier = Modifier
             .padding(start = 80.dp, end = 80.dp)
             .fillMaxWidth(),
-        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 5.dp),
+        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
         content = {
             when (gameViewModel.questionForUser.observeAsState().value?.difficulty) {
@@ -447,7 +450,7 @@ fun AnswerButton(
     Log.d("Debug", "I am button $answerText, isCorrect: $isCorrect")
 
     Button(
-        elevation = ButtonDefaults.buttonElevation(5.dp, 0.dp, 0.dp, 0.dp, 20.dp),
+        elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
         shape = RoundedCornerShape(game_buttons_shape),
         modifier = Modifier
             //.padding(start = 20.dp, end = 20.dp)
@@ -485,7 +488,7 @@ fun GameViewMainPage(
                 .paint(
                     // Replace with your image id
                     painterResource(
-                        id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.dark_background_pattern else R.drawable.light_background_pattern
+                        id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
                     ),
                     contentScale = ContentScale.Crop
                 )
@@ -571,6 +574,7 @@ fun MainPageButtons(
             onClick = {
                 gameViewModel.onStartClicked()
             },
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             shape = RoundedCornerShape(home_buttons_shape),
             modifier = Modifier
                 .height(home_buttons_height)
@@ -605,6 +609,7 @@ fun MainPageButtons(
                 showDifficultySelectionDialog = true
             },
             shape = RoundedCornerShape(home_buttons_shape),
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             modifier = Modifier
                 .height(home_buttons_height)
                 .width(home_buttons_width)
@@ -638,6 +643,7 @@ fun MainPageButtons(
                 showCategorySelectionDialog = true
             },
             shape = RoundedCornerShape(home_buttons_shape),
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             modifier = Modifier
                 .height(home_buttons_height)
                 .width(home_buttons_width)
@@ -733,6 +739,7 @@ fun DifficultySelectionDialog(
             Button(
                 onClick = onDismissRequest,
                 enabled = true,
+                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Ok")
@@ -800,6 +807,7 @@ fun CategorySelectionDialog(
             Button(
                 onClick = onDismissRequest,
                 enabled = true,
+                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Ok")

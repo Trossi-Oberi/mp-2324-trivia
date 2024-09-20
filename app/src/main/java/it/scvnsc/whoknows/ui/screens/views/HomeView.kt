@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,9 +39,11 @@ import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
+import it.scvnsc.whoknows.ui.theme.default_elevation
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
+import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.theme.titleTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
@@ -69,7 +72,7 @@ fun HomeView(
                             .paint(
                                 // Replace with your image id
                                 painterResource(
-                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white_2
+                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
                                 ),
                                 contentScale = ContentScale.Crop
                             )
@@ -121,6 +124,7 @@ fun HomeViewButtons(navController: NavHostController) {
             onClick = {
                 navController.navigate("game")
             },
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             shape = RoundedCornerShape(home_buttons_shape),
             modifier = Modifier
                 .height(home_buttons_height)
@@ -156,6 +160,7 @@ fun HomeViewButtons(navController: NavHostController) {
                 navController.navigate("stats")
             },
             shape = RoundedCornerShape(home_buttons_shape),
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             modifier = Modifier
                 .height(home_buttons_height)
                 .width(home_buttons_width)
@@ -189,6 +194,7 @@ fun HomeViewButtons(navController: NavHostController) {
                 navController.navigate("settings")
             },
             shape = RoundedCornerShape(home_buttons_shape),
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             modifier = Modifier
                 .height(home_buttons_height)
                 .width(home_buttons_width)
