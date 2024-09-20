@@ -65,6 +65,7 @@ fun StatsView(
                         val deletedGamesCount =
                             statsViewModel.deletedGamesCount.observeAsState().value
 
+                        //TODO:: known issue: Toast shows at StatsView launch
                         //Osservo il cambiamento nel numero di giochi (se cancellati per esempio)
                         LaunchedEffect(key1 = deletedGamesCount) {
                             Toast.makeText(
