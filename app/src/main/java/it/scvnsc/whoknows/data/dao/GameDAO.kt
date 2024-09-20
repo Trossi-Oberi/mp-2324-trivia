@@ -15,4 +15,7 @@ interface GameDAO {
 
     @Query("SELECT * FROM games")
     suspend fun retrieveAllGames(): List<Game>
+
+    @Query("DELETE FROM games")
+    suspend fun deleteAllGames(): Int
 }
