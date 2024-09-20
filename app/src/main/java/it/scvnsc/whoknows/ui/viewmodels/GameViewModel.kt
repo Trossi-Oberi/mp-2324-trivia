@@ -238,10 +238,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private fun shuffleAnswers(question: Question): MutableList<String> {
         val corrAnswer = question.correct_answer
         val incAnswers = question.incorrect_answers.toMutableList()
-        val possibleAnswers = incAnswers
-        possibleAnswers.add(corrAnswer)
-        possibleAnswers.shuffle()
-        return possibleAnswers
+        incAnswers.add(corrAnswer)
+        incAnswers.shuffle()
+        return incAnswers
     }
 
     //Inizializza il timer di gioco

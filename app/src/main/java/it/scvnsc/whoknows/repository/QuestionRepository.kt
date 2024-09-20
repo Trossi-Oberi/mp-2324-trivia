@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import it.scvnsc.whoknows.data.dao.QuestionDAO
 import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.data.network.ApiService
+import it.scvnsc.whoknows.data.network.QuestionResponse
 import it.scvnsc.whoknows.data.network.TokenResponse
 import it.scvnsc.whoknows.utils.CategoryManager
 import it.scvnsc.whoknows.utils.QuestionDeserializer
@@ -69,19 +70,27 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         Log.d("Debug", "Last Question ID in QuestionRepository: $lastQuestionID")*/
 
         //TODO: Dovrebbe esser fatto in dispatchers.io
-        val questionResponse = apiService.getQuestions(
-            amount,
-            categoryID,
-            difficulty,
-            SESSION_TOKEN
-        )
-        Log.d("Debug", "Question Response: $questionResponse")
+        val questionResponse: QuestionResponse
+        withContext(Dispatchers.IO) {
+            questionResponse = apiService.getQuestions(
+                amount,
+                categoryID,
+                difficulty,
+                SESSION_TOKEN
+            )
+            Log.d("Debug", "Question Response: $questionResponse")
 
-        //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token e rieseguo la query
-        if (questionResponse.response_code == 4) {
-            withContext(Dispatchers.IO) {
-                resetSessionToken()
-                retrieveNewQuestion(amount, categoryName, difficulty)
+            //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token e rieseguo la query
+            if (questionResponse.response_code == 4) {
+                withContext(Dispatchers.IO) {
+                    resetSessionToken()
+                    retrieveNewQuestion(amount, categoryName, difficulty)
+                }
+            }
+
+            if(questionResponse.response_code == 5) {
+                //TODO:: gestione del TooManyRequests HTTP error 429
+                Log.d("Debug", "TooManyRequests")
             }
         }
 
@@ -90,6 +99,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         val newQuestion = fetchedQuestions[0]
         Log.d("Debug", "Fetched Question: $newQuestion")
         val newQuestionID: Long
+
 
         withContext(Dispatchers.IO) {
             newQuestionID = questionDAO.insert(newQuestion)

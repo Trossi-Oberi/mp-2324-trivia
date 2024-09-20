@@ -31,7 +31,7 @@ import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 @Composable
 fun TopBar(
     navController: NavController? = null, //parametri opzionali (il pulsante di chiusura o goBack viene mostrato solo se navController != null)
-    onLeftClick: () -> Unit = {}, //parametri opzionali
+    onLeftBtnClick: () -> Unit = {}, //parametri opzionali
     leftBtnIcon: ImageVector? = null, //parametri opzionali (scelta dell'icona se presente navController
     showTitle: Boolean = true,
     title: String? = null,
@@ -56,7 +56,7 @@ fun TopBar(
                     .fillMaxSize()
             ) {
                 IconButton(
-                    onClick = onLeftClick,
+                    onClick = onLeftBtnClick,
                     colors = IconButtonDefaults.iconButtonColors(DarkYellow),
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -119,13 +119,13 @@ fun TopBar(
                         ) {
                             if (this?.isDarkTheme?.value == true) {
                                 Icon(
-                                    Icons.Filled.DarkMode,
+                                    Icons.Filled.WbSunny,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             } else {
                                 Icon(
-                                    Icons.Filled.WbSunny,
+                                    Icons.Filled.DarkMode,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onPrimary
                                 )

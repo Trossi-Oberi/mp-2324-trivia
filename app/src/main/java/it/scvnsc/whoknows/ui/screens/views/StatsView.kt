@@ -49,6 +49,9 @@ fun StatsView(
     //determino orientamento schermo
     val isLandscape = isLandscape()
 
+    val deletedGamesCount = statsViewModel.deletedGamesCount.observeAsState().value
+
+
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier
@@ -61,9 +64,6 @@ fun StatsView(
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-
-                        val deletedGamesCount =
-                            statsViewModel.deletedGamesCount.observeAsState().value
 
                         //TODO:: known issue: Toast shows at StatsView launch
                         //Osservo il cambiamento nel numero di giochi (se cancellati per esempio)
@@ -82,7 +82,7 @@ fun StatsView(
                         ) {
                             TopBar(
                                 navController = navController,
-                                onLeftClick = { navController.navigate("home") },
+                                onLeftBtnClick = { navController.navigate("home") },
                                 leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
                                 showTitle = true,
                                 title = context.getString(R.string.app_name),

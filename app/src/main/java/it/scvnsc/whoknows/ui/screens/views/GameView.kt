@@ -142,7 +142,7 @@ fun GameViewInGame(
             ) {
                 TopBar(
                     navController = navController,
-                    onLeftClick = {
+                    onLeftBtnClick = {
                         navController.navigate("home")
                         //gameViewModel.onQuitGame()
                     },
@@ -490,7 +490,7 @@ fun GameViewMainPage(
             ) {
                 TopBar(
                     navController = navController,
-                    onLeftClick = { navController.navigate("home") },
+                    onLeftBtnClick = { navController.navigate("home") },
                     leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
                     showTitle = false,
                     showRightButton = true,
