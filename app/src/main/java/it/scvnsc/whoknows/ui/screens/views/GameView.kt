@@ -2,10 +2,6 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +39,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -77,7 +72,6 @@ import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
 import it.scvnsc.whoknows.utils.isLandscape
-import kotlinx.coroutines.delay
 
 //TODO: inizializzare un timer dopo la chiamata API per le domande della durata di 5 secondi che modifica una variabile booleana da false a true (è possibile effettuare una nuova chiamata all'API delle domande)
 // initial = true, poi diventa false passano 5 secondi e ritorna true (_canMakeNewAPICalls: LiveData<Boolean>)
@@ -138,19 +132,16 @@ fun GameViewInGame(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                //TODO:: da rimuovere quella generica
-                // GameTopBar(navController, gameViewModel, settingsViewModel)
                 TopBar(
                     navController = navController,
-                    onClick = {
+                    onLeftClick = {
                         navController.navigate("home")
                         //gameViewModel.onQuitGame()
                     },
-                    navIcon = Icons.Default.Close,
+                    leftBtnIcon = Icons.Default.Close,
                     showTitle = true,
                     title = context.getString(R.string.app_name),
-                    settingsViewModel = settingsViewModel,
-                    gameViewModel = gameViewModel
+                    settingsViewModel = settingsViewModel
                 )
 
             }
@@ -216,99 +207,6 @@ fun GameBox(gameViewModel: GameViewModel) {
         QuestionBox(gameViewModel)
     }
 }
-
-/*
-@Composable
-fun GameTopBar(
-    navController: NavController,
-    gameViewModel: GameViewModel,
-    settingsViewModel: SettingsViewModel
-) {
-    val context = LocalContext.current
-
-    Row(
-        modifier = Modifier
-            .padding(top = 35.dp)
-            .fillMaxWidth()
-            .height(90.dp)
-            .border(1.dp, Color.Red),
-        verticalAlignment = Alignment.Top
-    ) {
-        //Quit game button
-        //TODO:: fare Quit Game button
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-                .border(1.dp, Color.Blue)
-        ) {
-            IconButton(
-                onClick = {
-                    //DA CAMBIARE
-                    navController.navigate("game")
-                },
-                colors = IconButtonDefaults.iconButtonColors(DarkYellow),
-                modifier = Modifier
-                    .align(Alignment.Center)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-
-        //App title
-        Box(
-            modifier = Modifier
-                .weight(0.6F)
-                .fillMaxSize()
-                .border(1.dp, Color.Blue)
-        ) {
-            Text(
-                text = context.getString(R.string.app_name),
-                style = topBarTextStyle,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-        }
-
-        //Theme (dark/light switch button)
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-                .border(1.dp, Color.Magenta)
-        ) {
-            with(settingsViewModel) {
-                IconButton(
-                    onClick = { toggleDarkTheme() },
-                    colors = IconButtonDefaults.iconButtonColors(DarkYellow),
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                ) {
-                    if (isDarkTheme.value == true) {
-                        Icon(
-                            Icons.Filled.DarkMode,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(
-                            Icons.Filled.WbSunny,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-*/
 
 @Composable
 fun GameTimer(gameViewModel: GameViewModel) {
@@ -597,15 +495,13 @@ fun GameViewMainPage(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                //TODO:: da rimuovere quella generica
-                // MainPageTopBar(navController, settingsViewModel)
                 TopBar(
                     navController = navController,
-                    onClick = { navController.navigate("home") },
-                    navIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                    onLeftClick = { navController.navigate("home") },
+                    leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
                     showTitle = false,
-                    settingsViewModel = settingsViewModel,
-                    gameViewModel = null
+                    showRightButton = true,
+                    settingsViewModel = settingsViewModel
                 )
             }
 
@@ -770,77 +666,6 @@ fun MainPageButtons(
         }
     }
 }
-
-/*
-@Composable
-fun MainPageTopBar(navController: NavController, settingsViewModel: SettingsViewModel) {
-    //Top app bar
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.Top
-    ) {
-        //Go back button
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-        ) {
-            IconButton(
-                onClick = { navController.navigate("home") },
-                colors = IconButtonDefaults.iconButtonColors(DarkYellow),
-                modifier = Modifier
-                    .align(Alignment.Center)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-
-        Spacer(
-            modifier = Modifier
-                .weight(0.6F)
-                .fillMaxSize()
-        )
-
-        //Theme (dark/light switch button)
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-        ) {
-            with(settingsViewModel) {
-                IconButton(
-                    onClick = { toggleDarkTheme() },
-                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
-                        it.scvnsc.whoknows.ui.theme.DarkYellow
-                    ),
-                    modifier = androidx.compose.ui.Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
-                ) {
-                    if (isDarkTheme.value == true) {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.DarkMode,
-                            contentDescription = null,
-                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.WbSunny,
-                            contentDescription = null,
-                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
- */
-
 
 @Composable
 fun DifficultySelectionDialog(
