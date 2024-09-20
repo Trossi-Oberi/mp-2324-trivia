@@ -36,9 +36,11 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -75,6 +78,8 @@ import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
 import it.scvnsc.whoknows.utils.isLandscape
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 //TODO: inizializzare un timer dopo la chiamata API per le domande della durata di 5 secondi che modifica una variabile booleana da false a true (è possibile effettuare una nuova chiamata all'API delle domande)
 // initial = true, poi diventa false passano 5 secondi e ritorna true (_canMakeNewAPICalls: LiveData<Boolean>)
@@ -396,6 +401,7 @@ fun ShowQuestion(gameViewModel: GameViewModel) {
 fun ShowAnswers(gvm: GameViewModel) {
     val question = gvm.questionForUser.observeAsState().value
     val answers = gvm.shuffledAnswers.observeAsState().value
+    val givenAnswer = gvm.userAnswer.observeAsState().value
 
     Column(
         verticalArrangement = Arrangement.spacedBy(game_buttons_spacing),
@@ -407,26 +413,10 @@ fun ShowAnswers(gvm: GameViewModel) {
         for (ans in answers!!) {
             AnswerButton(
                 answerText = ans,
-                //isCorrect = question?.correct_answer == ans,
+                isCorrect = question?.correct_answer == ans,
+                isSelected = givenAnswer == ans,
                 gvm = gvm
             )
-//            Button(
-//                onClick = {
-//                    gvm.onAnswerClicked(ans)
-//                },
-//                elevation = ButtonDefaults.buttonElevation(5.dp, 0.dp, 0.dp, 0.dp, 20.dp),
-//                shape = RoundedCornerShape(game_buttons_shape),
-//                modifier = Modifier
-//                    //.padding(start = 20.dp, end = 20.dp)
-//                    .fillMaxWidth()
-//                    .height(game_buttons_height)
-//            ) {
-//                Text(
-//                    text = ans,
-//                    style = gameButtonsTextStyle,
-//                    textAlign = TextAlign.Center
-//                )
-//            }
         }
     }
 }
@@ -434,17 +424,15 @@ fun ShowAnswers(gvm: GameViewModel) {
 @Composable
 fun AnswerButton(
     answerText: String,
-    //isCorrect: Boolean,
+    isCorrect: Boolean,
+    isSelected: Boolean,
     gvm: GameViewModel
 ) {
-    val isCorrect = gvm.isAnswerCorrect.observeAsState().value
-    val isClicked = gvm.isAnswerSelected.observeAsState().value
-
     //TODO: Vedere se si può fare qualcosa di più carino animando invece di cambiare direttamente colore
     val backgroundColor = when {
-        !isClicked!! && !isCorrect!! -> MaterialTheme.colorScheme.primary
-        isClicked && !isCorrect!! -> Color.Red
-        else -> Color.Green
+        isSelected && isCorrect -> Color.Green
+        isSelected && !isCorrect -> Color.Red
+        else -> MaterialTheme.colorScheme.primary
     }
 
     Log.d("Debug", "I am button $answerText, isCorrect: $isCorrect")
@@ -459,7 +447,9 @@ fun AnswerButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor
         ),
-        onClick = { gvm.onAnswerClicked(answerText) },
+        onClick = {
+            gvm.onAnswerClicked(answerText)
+        }
     ) {
         Text(
             text = answerText,
