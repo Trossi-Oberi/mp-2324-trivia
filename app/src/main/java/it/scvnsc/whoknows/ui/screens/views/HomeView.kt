@@ -2,8 +2,6 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +19,6 @@ import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,14 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,6 +36,7 @@ import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
+import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
@@ -54,7 +47,6 @@ import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.isLandscape
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeView(
     navController: NavHostController,
@@ -63,7 +55,6 @@ fun HomeView(
 
     //determino orientamento schermo
     val isLandscape = isLandscape()
-    val context = LocalContext.current
 
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
@@ -89,19 +80,18 @@ fun HomeView(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ){
-                            //TODO:: sto creando un component generico per la TopBar
-                            // HomeViewTopBar(settingsViewModel)
                             TopBar(
                                 showTitle = false,
+                                showRightButton = true,
                                 showThemeChange = true,
-                                settingsViewModel = settingsViewModel,
-                                gameViewModel = null
+                                settingsViewModel = settingsViewModel
                             )
                         }
 
                         Box (
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxSize()
+                                .padding(bottom = bottom_bar_padding)
                         ){
                             HomeViewButtons(navController)
                         }
@@ -121,7 +111,7 @@ fun HomeViewButtons(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 40.dp, bottom = 100.dp)
+            .padding(top = 40.dp)
     ) {
         //Titolo applicazione
         AppTitle(context)
@@ -227,54 +217,6 @@ fun HomeViewButtons(navController: NavHostController) {
         }
     }
 }
-
-/*
-@Composable
-fun HomeViewTopBar(settingsViewModel: SettingsViewModel) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.Absolute.Right
-    ) {
-        Spacer(
-            modifier = Modifier
-                .weight(0.8F)
-                .fillMaxSize()
-        )
-
-        //Theme (dark/light switch button)
-        Box(
-            modifier = Modifier
-                .weight(0.2F)
-                .fillMaxSize()
-        ) {
-            with(settingsViewModel) {
-                IconButton(
-                    onClick = { toggleDarkTheme() },
-                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(it.scvnsc.whoknows.ui.theme.DarkYellow),
-                    modifier = androidx.compose.ui.Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
-                ) {
-                    if (isDarkTheme.value == true) {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.DarkMode,
-                            contentDescription = null,
-                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.WbSunny,
-                            contentDescription = null,
-                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
- */
 
 @Composable
 fun AppTitle(context: Context) {
