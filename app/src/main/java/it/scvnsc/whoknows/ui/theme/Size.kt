@@ -53,3 +53,4 @@ val top_bar_padding = 35.dp
 val bottom_bar_padding = 50.dp
 val default_elevation = 10.dp
 val pressed_elevation = 30.dp
+val disabled_elevation = 10.dp
