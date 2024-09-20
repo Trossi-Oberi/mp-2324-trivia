@@ -19,8 +19,18 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     private val _retrievedGames = MutableLiveData<List<Game>>()
     val retrievedGames: MutableLiveData<List<Game>> get() = _retrievedGames
 
+    private val _deletedGamesCount = MutableLiveData<Int>()
+    val deletedGamesCount: MutableLiveData<Int> get() = _deletedGamesCount
+
     private suspend fun getGames() {
         viewModelScope.launch {
+            _retrievedGames.postValue(gameRepository.getAllGames())
+        }
+    }
+
+    private suspend fun deleteAllGames(){
+        viewModelScope.launch {
+            _deletedGamesCount.postValue(gameRepository.deleteAllGames())
             _retrievedGames.postValue(gameRepository.getAllGames())
         }
     }
@@ -31,6 +41,12 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteGames(){
+        viewModelScope.launch {
+            deleteAllGames()
+        }
+    }
+
     init {
         val gameDAO = DatabaseWK.getInstance(application).gameDAO()
         val questionDAO = DatabaseWK.getInstance(application).questionDAO()
@@ -38,8 +54,6 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
         gameRepository = GameRepository(gameDAO)
         questionRepository = QuestionRepository(questionDAO)
         gameQuestionRepository = GameQuestionRepository(gameQuestionDAO)
-
     }
-
 
 }
