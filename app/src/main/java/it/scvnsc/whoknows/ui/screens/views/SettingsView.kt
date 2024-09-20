@@ -9,32 +9,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
-import it.scvnsc.whoknows.ui.theme.topBarTextStyle
+import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
+import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.isLandscape
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 //TODO : credits, sounds, theme
 fun SettingsView(
@@ -66,10 +59,12 @@ fun SettingsView(
                                 .fillMaxWidth()
                         ) {
                             TopBar(
-                                showTitle = true,
-                                showThemeChange = false,
                                 navController = navController,
-                                onClick = { navController.navigate("home") }
+                                onLeftClick = { navController.navigate("home") },
+                                leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                                showTitle = true,
+                                title = context.getString(R.string.app_name),
+                                showThemeChange = false
                             )
                         }
 
@@ -77,6 +72,7 @@ fun SettingsView(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(bottom = bottom_bar_padding)
                         ) {
                             SettingsButtons()
                         }
@@ -93,13 +89,16 @@ fun SettingsButtons() {
     val context = LocalContext.current
 
     Column(
-        //TODO:: da inserire tutte le impostazioni
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            color = Color.Green,
-            text = "Benvenuto nelle impostazioni!"
+            color = MaterialTheme.colorScheme.primary,
+            text = "Benvenuto nelle impostazioni!",
+            style = buttonsTextStyle
         )
     }
-
 
 }
