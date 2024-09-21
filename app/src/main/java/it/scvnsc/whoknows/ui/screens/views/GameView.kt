@@ -2,6 +2,8 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,11 +55,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
+import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.default_elevation
 import it.scvnsc.whoknows.ui.theme.disabled_elevation
@@ -73,8 +77,10 @@ import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
 import it.scvnsc.whoknows.ui.theme.medium_padding
+import it.scvnsc.whoknows.ui.theme.padding_difficulty
 import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
+import it.scvnsc.whoknows.ui.theme.star_icon_size
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
@@ -136,6 +142,7 @@ fun GameViewInGame(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(bottom = bottom_bar_padding)
         ) {
             Box(
                 modifier = Modifier
@@ -155,11 +162,12 @@ fun GameViewInGame(
 
             }
 
-            Spacer(modifier = Modifier.size(medium_padding))
+            Spacer(modifier = Modifier.size(small_padding))
 
             Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
             ) {
                 if (showLoading == true) {
                     LoadingScreen()
@@ -173,10 +181,17 @@ fun GameViewInGame(
 
 @Composable
 fun LoadingScreen() {
-    CircularProgressIndicator(
-        modifier = Modifier.size(120.dp),
-        strokeWidth = 7.dp
-    )
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+    ){
+        CircularProgressIndicator(
+            modifier = Modifier.size(120.dp),
+            strokeWidth = 7.dp
+        )
+    }
+
 }
 
 @Composable
@@ -214,16 +229,11 @@ fun GameBox(gameViewModel: GameViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(10.dp))
 
-        //Categoria
-        //TODO:: da sistemare
-        //ShowCategory(gameViewModel)
-
-        //Difficoltà
         ShowDifficulty(gameViewModel)
 
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(10.dp))
 
         QuestionBox(gameViewModel)
     }
@@ -324,7 +334,7 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
-            .padding(start = 80.dp, end = 80.dp)
+            .padding(start = padding_difficulty, end = padding_difficulty)
             .fillMaxWidth(),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
@@ -336,7 +346,7 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
                         tint = MaterialTheme.colorScheme.onPrimary,
                         contentDescription = null,
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(star_icon_size)
                             .fillMaxSize()
                     )
                 }
@@ -349,7 +359,7 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
                                 tint = MaterialTheme.colorScheme.onPrimary,
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .size(50.dp)
+                                    .size(star_icon_size)
                                     .fillMaxSize()
                             )
                         }
@@ -365,7 +375,7 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
                                 tint = MaterialTheme.colorScheme.onPrimary,
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .size(50.dp)
+                                    .size(star_icon_size)
                                     .fillMaxSize()
                             )
                         }
@@ -384,30 +394,44 @@ fun ShowCategory(gameViewModel: GameViewModel) {
 
 @Composable
 fun QuestionBox(gameViewModel: GameViewModel) {
-
-    Box(
+    Column (
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(start = 20.dp, end = 20.dp)
-    ) {
-        //Domanda nella UI
-        ShowQuestion(gameViewModel)
+    ){
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            //Domanda nella UI
+            ShowQuestion(gameViewModel)
+        }
 
-        //Possibili risposte nella UI
-        ShowAnswers(gameViewModel)
+        Spacer(modifier = Modifier.size(30.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ){
+            //Possibili risposte nella UI
+            ShowAnswers(gameViewModel)
+        }
     }
-
 }
 
 @Composable
 fun ShowQuestion(gameViewModel: GameViewModel) {
     Log.d("Debug", "Question for user: ${gameViewModel.questionForUser.observeAsState().value}")
-
-    Text(
-        text = gameViewModel.questionForUser.observeAsState().value?.question ?: "",
-        style = gameQuestionTextStyle,
-        textAlign = TextAlign.Center
-    )
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = gameViewModel.questionForUser.observeAsState().value?.question ?: "",
+            style = gameQuestionTextStyle
+        )
+    }
 }
 
 @Composable
@@ -421,7 +445,6 @@ fun ShowAnswers(gvm: GameViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = game_buttons_padding_top)
     ) {
         for (ans in answers!!) {
             Log.d("Debug", "Answer: $ans")
@@ -455,7 +478,6 @@ fun AnswerButton(
         elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
         shape = RoundedCornerShape(game_buttons_shape),
         modifier = Modifier
-            //.padding(start = 20.dp, end = 20.dp)
             .fillMaxWidth()
             .height(game_buttons_height),
         colors = ButtonDefaults.buttonColors(
@@ -467,8 +489,16 @@ fun AnswerButton(
     ) {
         Text(
             text = answerText,
-            style = gameButtonsTextStyle,
-            textAlign = TextAlign.Center
+            style = gameButtonsTextStyle.copy(
+                fontSize = when {
+                    answerText.length <= 20 -> 18.sp
+                    answerText.length <= 40 -> 16.sp
+                    answerText.length <= 60 -> 14.sp
+                    else -> 12.sp
+                }
+            ),
+            textAlign = TextAlign.Center,
+            maxLines = 2
         )
     }
 }
