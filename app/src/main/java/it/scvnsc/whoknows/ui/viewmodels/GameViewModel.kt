@@ -80,6 +80,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private var gameTimer = 0
     private val _elapsedTime = MutableLiveData<String>()
     val elapsedTime: LiveData<String> = _elapsedTime
+    private val _isGameTimerInterrupted = MutableLiveData<Boolean>()
+    val isGameTimerInterrupted: LiveData<Boolean> = _isGameTimerInterrupted
+
+    //Timer per nuova richiesta API
+    private var apiTimer = 0
+    private var canMakeApiCall = true //inizializzato a true
 
     //Punteggio della partita
     private val _score = MutableLiveData<Int>()
@@ -138,7 +144,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (givenAnswer == questionForUser.value?.correct_answer) {
             updateScore()
             playSound(R.raw.correct_answer)
-            _questionForUser.value = nextQuestion()
+            makeAPICall()
+
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
@@ -161,6 +168,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //In ogni caso salvo la partita
             saveGameAndQuestions(playedGame, askedQuestions)
             _isPlaying.postValue(false)
+        }
+    }
+
+    private fun makeAPICall() {
+        viewModelScope.launch {
+            if (canMakeApiCall){
+                _isGameTimerInterrupted.postValue(false)
+                _questionForUser.value = nextQuestion()
+            }else{
+                _isGameTimerInterrupted.postValue(true)
+                delay(1000L)
+                makeAPICall()
+            }
         }
     }
 
@@ -198,6 +218,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //Resetto il timer di gioco e il token per le domande
         _elapsedTime.postValue("")
         questionRepository.resetSessionToken()
+        _isGameTimerInterrupted.postValue(false)
 
         //Resetto la lista delle domande poste all'utente
         askedQuestions.clear()
@@ -208,8 +229,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //Fetcho la nuova domanda
         _questionForUser.postValue(nextQuestion())
 
+        //Start API Timer
+        apiCountdownTimer()
+
         //Start timer della partita
         startTimer()
+
         Log.d("Debug", "Question for user: ${_questionForUser.value}")
     }
 
@@ -229,9 +254,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             convertMixed(_selectedCategory.value.toString()),
             convertMixed(_selectedDifficulty.value.toString().lowercase())
         )
+        apiCountdownTimer()
         askedQuestions.add(newQuestion)
         _shuffledAnswers.postValue(shuffleAnswers(newQuestion))
         return newQuestion
+    }
+
+    //Funzione che viene chiamata quando viene fatta una nuova richiesta API, setta il booleano a false e dopo 5 secondi lo setta di nuovo a true
+    private fun apiCountdownTimer() {
+        viewModelScope.launch {
+            canMakeApiCall = false
+            delay(5500L)
+            canMakeApiCall = true
+        }
     }
 
     //Funzione che mescola le possibili risposte alla domanda (altrimenti la risposta corretta sarebbe sempre la prima)
@@ -245,16 +280,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Inizializza il timer di gioco
     private fun startTimer() {
-        _isGameFinished.value =
-            false //per forza cosi', se utilizzo postValue non si aggiorna il timer
+        _isGameFinished.value = false //per forza cosi', se utilizzo postValue non si aggiorna il timer
         viewModelScope.launch {
             gameTimer = 0
             while (_isGameFinished.value == false) {
-                val formattedTime =
-                    String.format(Locale.getDefault(), "%02d:%02d", gameTimer / 60, gameTimer % 60)
-                _elapsedTime.postValue(formattedTime)
-                delay(1000L)
-                gameTimer++
+                if (_isGameTimerInterrupted.value == false){
+                    val formattedTime =
+                        String.format(Locale.getDefault(), "%02d:%02d", gameTimer / 60, gameTimer % 60)
+                    _elapsedTime.postValue(formattedTime)
+                    delay(1000L)
+                    gameTimer++
+                }else{
+                    delay(1000)
+                }
             }
         }
     }

@@ -427,6 +427,7 @@ fun AnswerButton(
     isSelected: Boolean,
     gvm: GameViewModel
 ) {
+    //TODO: Capire bug con risposte solo vero/falso, rimane selezionato il pulsante
     val backgroundColor = when {
         isSelected && isCorrect -> Color.Green
         isSelected && !isCorrect -> Color.Red
