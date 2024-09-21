@@ -34,8 +34,8 @@ val game_buttons_height = 70.dp
 //SettingsView
 //TODO::
 
-//YourGamesView
-//TODO::
+//StatsView
+val row_button_height = 80.dp
 
 //Font
 val fontSizeSmall = 12.sp

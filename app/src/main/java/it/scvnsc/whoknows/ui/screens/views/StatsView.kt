@@ -3,6 +3,7 @@ package it.scvnsc.whoknows.ui.screens.views
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,11 +11,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +37,11 @@ import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.data.model.Game
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
+import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
+import it.scvnsc.whoknows.ui.theme.rowButtonTextStyle
+import it.scvnsc.whoknows.ui.theme.row_button_height
+import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
 import it.scvnsc.whoknows.utils.isLandscape
@@ -64,7 +71,7 @@ fun StatsView(
             toastMessage.value = "Games history deleted"
 
             //il processo di cancellazione è terminato
-            statsViewModel.gameDeletionComplete.value = false
+            statsViewModel.setGameDeletionComplete(false)
         }
     }
 
@@ -125,7 +132,7 @@ fun StatsView(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
-                            StatsPage(games)
+                            StatsPage(games, statsViewModel)
                         }
                     }
                 }
@@ -135,92 +142,56 @@ fun StatsView(
 }
 
 @Composable
-fun StatsPage(games: List<Game>?) {
-    //Colonna portante che racchiude tutta la schermata
-    Column(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column {
+fun StatsPage(games: List<Game>?, statsViewModel: StatsViewModel) {
+    val showGameDetails = rememberSaveable { mutableStateOf(false) }
+    val selectedGame = statsViewModel.selectedGame.observeAsState().value
+
+    if (!showGameDetails.value) {
+        //Colonna portante che racchiude tutta la schermata
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = bottom_bar_padding)
+        ) {
             //HEADER
-            StatsHeader()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(row_button_height)
+            ) {
+                StatsHeader()
+            }
+
+            //Al suo interno usa una LazyColumn per mostrare i game
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(1.dp, Color.Red)
+            ) {
+                ShowGames(games, showGameDetails, statsViewModel)
+            }
         }
-        //Al suo interno usa una LazyColumn per mostrare i game
-        ShowGames(games)
+    } else {
+        if (selectedGame != null) {
+            GameDetails(selectedGame, showGameDetails)
+        }
     }
+
+
 }
 
 @Composable
-fun ShowGames(games: List<Game>?) {
+fun ShowGames(games: List<Game>?, showGameDetails: MutableState<Boolean>, statsViewModel: StatsViewModel) {
     if (games != null) {
         LazyColumn {
             items(games) { game ->
-                StatsRow(game)
+                StatsRow(game, showGameDetails, statsViewModel)
             }
         }
     }
 }
-
-@Composable
-fun StatsRow(game: Game) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(80.dp)
-            .fillMaxWidth()
-            .border(3.dp, Color.Magenta)
-
-    ) {
-        //BOX SCORE
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .fillMaxSize()
-                .weight(0.33F)
-                .border(3.dp, Color.Red)
-
-        ) {
-            Text(
-                text = "${game.score}",
-                style = buttonsTextStyle,
-
-                )
-        }
-
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .fillMaxSize()
-                .weight(0.33F)
-                .border(3.dp, Color.Red)
-        ) {
-            Text(
-                text = game.difficulty,
-                style = buttonsTextStyle,
-            )
-        }
-
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .fillMaxSize()
-                .weight(0.33F)
-                .border(3.dp, Color.Red)
-        ) {
-            Text(
-                text = game.date,
-                style = buttonsTextStyle,
-            )
-        }
-    }
-}
-
 
 @Composable
 fun StatsHeader() {
@@ -273,3 +244,108 @@ fun StatsHeader() {
         }
     }
 }
+
+@Composable
+fun StatsRow(game: Game, showGameDetails: MutableState<Boolean>, statsViewModel: StatsViewModel) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .height(row_button_height)
+            .clickable {
+                showGameDetails.value = true
+                statsViewModel.setSelectedGame(game)
+            }
+            .fillMaxWidth()
+    ) {
+        //BOX SCORE
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .fillMaxSize()
+                .weight(0.33F)
+
+        ) {
+            Text(
+                text = "${game.score}",
+                style = rowButtonTextStyle
+            )
+        }
+
+        //BOX DIFFICULTY
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .fillMaxSize()
+                .weight(0.33F)
+
+        ) {
+            Text(
+                text = game.difficulty,
+                style = rowButtonTextStyle
+            )
+        }
+
+        //BOX DATE
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .fillMaxSize()
+                .weight(0.33F)
+        ) {
+            Text(
+                text = game.date,
+                style = rowButtonTextStyle
+            )
+        }
+    }
+}
+
+@Composable
+fun GameDetails(game: Game, showGameDetails: MutableState<Boolean>) {
+    //Colonna portante che racchiude tutta la schermata dei dettagli del gioco
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = bottom_bar_padding)
+            .border(1.dp, Color.Red)
+    ) {
+        //HEADER
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(row_button_height)
+                .border(1.dp, Color.Red)
+        ) {
+            Text(
+                text = "Dettagli di gioco",
+                style = buttonsTextStyle
+            )
+        }
+
+        //Pulsante Go Back
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(row_button_height)
+                .padding(small_padding)
+        ) {
+            Button(
+                onClick = { showGameDetails.value = false },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(row_button_height),
+            ) {
+                Text("Torna indietro")
+            }
+        }
+    }
+}
+
