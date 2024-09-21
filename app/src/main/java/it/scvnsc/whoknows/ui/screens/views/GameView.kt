@@ -98,7 +98,6 @@ fun GameView(
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
-            //TODO: capire come implementare il logo come immagine nella home e nelle schermate
             content = {
                 with(gameViewModel) {
 
@@ -428,7 +427,6 @@ fun AnswerButton(
     isSelected: Boolean,
     gvm: GameViewModel
 ) {
-    //TODO: Vedere se si può fare qualcosa di più carino animando invece di cambiare direttamente colore
     val backgroundColor = when {
         isSelected && isCorrect -> Color.Green
         isSelected && !isCorrect -> Color.Red

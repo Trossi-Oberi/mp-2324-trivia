@@ -65,11 +65,6 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         Log.d("Debug", "Category ID: $categoryID")
         Log.d("Debug", "Difficulty: $difficulty")
 
-        /*//TODO: Togliere
-        lastQuestionID = questionDAO.getLastID() ?: 0
-        Log.d("Debug", "Last Question ID in QuestionRepository: $lastQuestionID")*/
-
-        //TODO: Dovrebbe esser fatto in dispatchers.io
         val questionResponse: QuestionResponse
         withContext(Dispatchers.IO) {
             questionResponse = apiService.getQuestions(

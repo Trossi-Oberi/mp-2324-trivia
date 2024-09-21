@@ -1,11 +1,13 @@
 package it.scvnsc.whoknows.ui.viewmodels
 
 import android.app.Application
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.data.db.DatabaseWK
 import it.scvnsc.whoknows.data.model.Game
 import it.scvnsc.whoknows.data.model.Question
@@ -28,21 +30,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val DEFAULT_CATEGORY = "mixed"
     private val DEFAULT_DIFFICULTY = "mixed"
 
-    //TODO: Get last game ID altrimenti conflitto
-    private var gameID = 1
-
-
-    //Mostra all'utente la lista delle possibili difficolta'
-    private val _showDifficultySelection = MutableLiveData(false)
-    //val showDifficultySelection: LiveData<Boolean> get() = _showDifficultySelection
-
     //Difficolta' selezionata dall'utente
-    private val _selectedDifficulty =
-        MutableLiveData(DEFAULT_DIFFICULTY) //valore di default = MIXED
+    private val _selectedDifficulty = MutableLiveData(DEFAULT_DIFFICULTY)
     val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
 
     //Categoria selezionata dall'utente
-    private val _selectedCategory = MutableLiveData(DEFAULT_CATEGORY) //valore di default = MIXED
+    private val _selectedCategory = MutableLiveData(DEFAULT_CATEGORY)
     val selectedCategory: LiveData<String> get() = _selectedCategory
 
     fun getCategories(): List<String> {
@@ -52,14 +45,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return availableCategories
     }
 
-    //Numero arbitrario (costante) di domande da prendere dall'API alla prima fetch
-    private val START_AMOUNT = 20
+    //Numero arbitrario (costante) di domande da prendere dall'API
+    private val AMOUNT = 1
 
-    //Numero arbitrario di domande da prendere dall'API una volta esaurite le prime 20
-    private val SMALL_AMOUNT = 10
-
-    private var freshQuestions = mutableListOf<Question>() //Domande prese dall'API
-    private var askedQuestions = mutableListOf<Question>() //Domande poste all'utente
+    //Domande poste all'utente
+    private var askedQuestions = mutableListOf<Question>()
 
     //Domanda posta all'utente e possibili risposte (in ordine casuale, altrimenti la risposta corretta sarebbe sempre la prima)
     private val _questionForUser = MutableLiveData<Question>()
@@ -78,6 +68,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Memorizza la risposta clickata dall'utente
     private val _userAnswer = MutableLiveData<String>()
     val userAnswer: LiveData<String> get() = _userAnswer
+
+    //MediaPlayer per riproduzione suono in base alla risposta selezionata
+    private var mediaPlayer: MediaPlayer? = null
 
     //Controlla se il nuovo punteggio e' un record
     private val _isRecord = MutableLiveData(false)
@@ -114,17 +107,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setDifficulty(difficulty: String) {
-        if (difficulty != _selectedDifficulty.value) {
-            freshQuestions.clear()
-        }
         _selectedDifficulty.postValue(difficulty)
     }
 
     fun setCategory(categoryName: String) {
-        if (categoryName != _selectedCategory.value) {
-            freshQuestions.clear()
-        }
-        _selectedCategory.value = categoryName
+        _selectedCategory.postValue(categoryName)
     }
 
     fun onStartClicked() {
@@ -150,11 +137,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //Risposta corretta -> Fetch della prossima domanda, aggiornamento dello score
         if (givenAnswer == questionForUser.value?.correct_answer) {
             updateScore()
+            playSound(R.raw.correct_answer)
             _questionForUser.value = nextQuestion()
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
-
+            playSound(R.raw.wrong_answer)
             //Salvataggio game nel DB
             Log.d("Debug", "Game ended with score: ${_score.value}")
             val playedGame = Game(
@@ -165,7 +153,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             )
             Log.d("Debug", "New game instance created with ID: ${playedGame.id}")
-            gameID++
 
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
@@ -177,7 +164,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun saveGameAndQuestions(playedGame: Game, askedQuestions: MutableList<Question>) {
+    private fun playSound(answerSound: Int) {
+        mediaPlayer?.release()
+        mediaPlayer = MediaPlayer.create(getApplication(), answerSound)
+        mediaPlayer?.start()
+        mediaPlayer?.setOnCompletionListener {
+            mediaPlayer?.release()
+            mediaPlayer = null
+        }
+    }
+
+    private suspend fun saveGameAndQuestions(
+        playedGame: Game,
+        askedQuestions: MutableList<Question>
+    ) {
         val newGameID = gameRepository.saveGame(playedGame)
         playedGame.id = newGameID
         Log.d("Debug", "Game saved with ID: ${playedGame.id}")
@@ -225,7 +225,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Funzione che ottiene la nuova domanda da presentare all'utente (l'API fornisce le domande in ordine casuale)
     private suspend fun nextQuestion(): Question {
         val newQuestion = questionRepository.retrieveNewQuestion(
-            1,
+            AMOUNT,
             convertMixed(_selectedCategory.value.toString()),
             convertMixed(_selectedDifficulty.value.toString().lowercase())
         )

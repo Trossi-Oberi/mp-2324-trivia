@@ -21,13 +21,14 @@ import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
 
 class MainActivity : ComponentActivity() {
+
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            WhoKnowsTheme() {
-                Scaffold() {
+            WhoKnowsTheme {
+                Scaffold {
                     NavControlHost()
                 }
             }
