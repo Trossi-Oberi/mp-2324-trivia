@@ -18,7 +18,8 @@ data class Question(
     @ColumnInfo(name = "correctAnswer") val correct_answer: String,
     @ColumnInfo(name = "incorrectAnswer") val incorrect_answers: List<String>,
     @ColumnInfo(name = "categoryId") val categoryId: String,
-    @ColumnInfo(name = "date") val date: String
+    @ColumnInfo(name = "date") val date: String,
+    @ColumnInfo(name = "givenAnswer") var givenAnswer: String
 ) :Serializable{
     @SuppressLint("SimpleDateFormat")
     constructor(
@@ -30,5 +31,5 @@ data class Question(
         incorrect_answers: List<String>,
         categoryId: String
     ) : this(0,type, difficulty, category, question, correct_answer, incorrect_answers, categoryId,
-        date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()))
+        date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()), "")
 }
