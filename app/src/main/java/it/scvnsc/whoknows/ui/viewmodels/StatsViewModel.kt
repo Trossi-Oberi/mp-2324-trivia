@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import it.scvnsc.whoknows.data.db.DatabaseWK
 import it.scvnsc.whoknows.data.model.Game
+import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.repository.GameQuestionRepository
 import it.scvnsc.whoknows.repository.GameRepository
 import it.scvnsc.whoknows.repository.QuestionRepository
@@ -25,6 +26,9 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedGame = MutableLiveData<Game>()
     val selectedGame: LiveData<Game> get() = _selectedGame
 
+    private val _selectedGameQuestions = MutableLiveData<List<Question>>()
+    val selectedGameQuestions: LiveData<List<Question>> get() = _selectedGameQuestions
+
     //Booleano che indica quando la cancellazione delle partite passate e' completata
     private val _gameDeletionComplete = MutableLiveData(false)
     val gameDeletionComplete: LiveData<Boolean> get() = _gameDeletionComplete
@@ -36,7 +40,6 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     fun setSelectedGame(game: Game){
         _selectedGame.value = game
     }
-
 
     private suspend fun getGames() {
         viewModelScope.launch {

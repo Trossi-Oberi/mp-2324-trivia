@@ -168,6 +168,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             )
             Log.d("Debug", "New game instance created with ID: ${playedGame.id}")
 
+            //TODO:: DA SISTEMARE!!!
+            questionForUser.value?.givenAnswer = givenAnswer
+
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
             //TODO: Osservare isRecord per mostrare la notifica del record
@@ -198,6 +201,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         gameQuestionRepository.saveGameAndQuestions(playedGame, askedQuestions)
     }
 
+    //TODO:::
     private suspend fun checkGameRecord(playedGame: Game) {
         val maxScore = gameRepository.getMaxScore() ?: 0
         Log.d("Debug", "Max score: $maxScore")
@@ -237,7 +241,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return ""
     }
 
-    //TODO: L'API prende una domanda alla volta
     //Funzione che ottiene la nuova domanda da presentare all'utente (l'API fornisce le domande in ordine casuale)
     private suspend fun nextQuestion(): Question {
         val newQuestion = questionRepository.retrieveNewQuestion(
