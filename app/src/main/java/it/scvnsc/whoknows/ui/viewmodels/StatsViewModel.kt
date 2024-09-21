@@ -12,12 +12,18 @@ import it.scvnsc.whoknows.repository.QuestionRepository
 import kotlinx.coroutines.launch
 
 class StatsViewModel(application: Application) : AndroidViewModel(application) {
+
+
     private val gameRepository: GameRepository
     private val questionRepository: QuestionRepository
     private val gameQuestionRepository: GameQuestionRepository
 
     private val _retrievedGames = MutableLiveData<List<Game>>()
     val retrievedGames: MutableLiveData<List<Game>> get() = _retrievedGames
+
+    //Booleano che indica quando la cancellazione delle partite passate e' completata
+    private val _gameDeletionComplete = MutableLiveData<Boolean>()
+    val gameDeletionComplete: MutableLiveData<Boolean> get() = _gameDeletionComplete
 
     private val _deletedGamesCount = MutableLiveData<Int>()
     val deletedGamesCount: MutableLiveData<Int> get() = _deletedGamesCount
@@ -30,7 +36,9 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun deleteAllGames(){
         viewModelScope.launch {
-            _deletedGamesCount.postValue(gameRepository.deleteAllGames())
+            //_deletedGamesCount.postValue(gameRepository.deleteAllGames())
+            gameRepository.deleteAllGames()
+            _gameDeletionComplete.postValue(true)
             _retrievedGames.postValue(gameRepository.getAllGames())
         }
     }
