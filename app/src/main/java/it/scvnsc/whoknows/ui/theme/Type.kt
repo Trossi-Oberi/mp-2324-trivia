@@ -56,7 +56,11 @@ val gameScoreTextStyle = TextStyle(
 //TODO::
 
 //YourGames elements
-//TODO::
+val rowButtonTextStyle = TextStyle(
+    fontSize = fontSizeUpperNormal,
+    fontWeight = FontWeight.Normal,
+    fontFamily = customTextFont
+)
 
 //Custom typography
 val customTypography = Typography(

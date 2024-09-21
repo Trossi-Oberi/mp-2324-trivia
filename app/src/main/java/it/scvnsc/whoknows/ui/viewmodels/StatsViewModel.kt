@@ -2,6 +2,7 @@ package it.scvnsc.whoknows.ui.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import it.scvnsc.whoknows.data.db.DatabaseWK
@@ -19,14 +20,23 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     private val gameQuestionRepository: GameQuestionRepository
 
     private val _retrievedGames = MutableLiveData<List<Game>>()
-    val retrievedGames: MutableLiveData<List<Game>> get() = _retrievedGames
+    val retrievedGames: LiveData<List<Game>> get() = _retrievedGames
+
+    private val _selectedGame = MutableLiveData<Game>()
+    val selectedGame: LiveData<Game> get() = _selectedGame
 
     //Booleano che indica quando la cancellazione delle partite passate e' completata
-    private val _gameDeletionComplete = MutableLiveData<Boolean>()
-    val gameDeletionComplete: MutableLiveData<Boolean> get() = _gameDeletionComplete
+    private val _gameDeletionComplete = MutableLiveData(false)
+    val gameDeletionComplete: LiveData<Boolean> get() = _gameDeletionComplete
 
-    private val _deletedGamesCount = MutableLiveData<Int>()
-    val deletedGamesCount: MutableLiveData<Int> get() = _deletedGamesCount
+    fun setGameDeletionComplete(value: Boolean){
+        _gameDeletionComplete.value = value
+    }
+
+    fun setSelectedGame(game: Game){
+        _selectedGame.value = game
+    }
+
 
     private suspend fun getGames() {
         viewModelScope.launch {
@@ -36,7 +46,6 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun deleteAllGames(){
         viewModelScope.launch {
-            //_deletedGamesCount.postValue(gameRepository.deleteAllGames())
             gameRepository.deleteAllGames()
             _gameDeletionComplete.postValue(true)
             _retrievedGames.postValue(gameRepository.getAllGames())
