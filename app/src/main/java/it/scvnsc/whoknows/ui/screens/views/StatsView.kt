@@ -1,7 +1,6 @@
 package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,14 +19,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
@@ -53,14 +53,34 @@ fun StatsView(
     //determino orientamento schermo
     val isLandscape = isLandscape()
 
-    val deletedGamesCount = statsViewModel.deletedGamesCount.observeAsState().value
+    //Implemento uno stato per il messaggio del toast
+    val toastMessage = rememberSaveable { mutableStateOf("") }
 
-    //TODO: Il codice qui sotto funziona, sostituire "Game history cleared" con stringa a piacere se si vuole dire quanti game sono stati cancellati
-    // ricordarsi di sistemare anche StatsViewModel (decommentare linee di codice)
-    statsViewModel.gameDeletionComplete.observe(LocalLifecycleOwner.current){ shouldShowNotification ->
-        if (shouldShowNotification == true){
-            Toast.makeText(context, "Game history cleared", Toast.LENGTH_SHORT).show()
+    //Osservo i game che il viewmodel prende dal DAO
+    val games = statsViewModel.retrievedGames.observeAsState().value
+
+    statsViewModel.gameDeletionComplete.observe(LocalLifecycleOwner.current) { isCompleted ->
+        if (isCompleted) {
+            toastMessage.value = "Games history deleted"
+
+            //il processo di cancellazione è terminato
             statsViewModel.gameDeletionComplete.value = false
+        }
+    }
+
+    //Inizializzo il viewmodel
+    with(statsViewModel) {
+        retrieveGamesOnStart()
+    }
+
+
+    //Mostro il toast solo se il messaggio non e' vuoto
+    LaunchedEffect(key1 = toastMessage.value) {
+        if (toastMessage.value.isNotEmpty()) {
+            Toast.makeText(context, toastMessage.value, Toast.LENGTH_SHORT).show()
+
+            //Dopo aver mostrato il toast resetto il contenuto del messaggio
+            toastMessage.value = ""
         }
     }
 
@@ -77,27 +97,6 @@ fun StatsView(
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-
-                        //TODO:: known issue: Toast shows at StatsView launch
-                        //Osservo il cambiamento nel numero di giochi (se cancellati per esempio)
-                        /*LaunchedEffect(key1 = deletedGamesCount) {
-                            Toast.makeText(
-                                context,
-                                if (deletedGamesCount == 0) "No games deleted" else if (deletedGamesCount == 1) "Deleted $deletedGamesCount game" else "Deleted $deletedGamesCount games",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }*/
-
-                        /*LaunchedEffect(key1 = gameDeletionComplete) {
-                            Toast.makeText(
-                                context,
-                                if (gameDeletionComplete == true) "Game history cleared" else "Game history already empty",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }*/
-
-                        //Sol alternativa, dire semplicemente "Game history cleared" invece di contare il numero di game cancellati
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -111,7 +110,11 @@ fun StatsView(
                                 showRightButton = true,
                                 rightBtnIcon = Icons.Default.Delete,
                                 onRightBtnClick = {
-                                    statsViewModel.deleteGames()
+                                    if (games!!.isEmpty()) {
+                                        toastMessage.value = "No games to delete"
+                                    } else {
+                                        statsViewModel.deleteGames()
+                                    }
                                 },
                                 showThemeChange = false,
                                 settingsViewModel = settingsViewModel
@@ -122,7 +125,7 @@ fun StatsView(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
-                            StatsPage(statsViewModel)
+                            StatsPage(games)
                         }
                     }
                 }
@@ -132,15 +135,7 @@ fun StatsView(
 }
 
 @Composable
-fun StatsPage(statsViewModel: StatsViewModel) {
-    //Osservo i game che il viewmodel prende dal DAO
-    val games = statsViewModel.retrievedGames.observeAsState().value
-
-    //Inizializzo il viewmodel
-    with(statsViewModel) {
-        retrieveGamesOnStart()
-    }
-
+fun StatsPage(games: List<Game>?) {
     //Colonna portante che racchiude tutta la schermata
     Column(
         verticalArrangement = Arrangement.Top,
@@ -154,11 +149,6 @@ fun StatsPage(statsViewModel: StatsViewModel) {
         }
         //Al suo interno usa una LazyColumn per mostrare i game
         ShowGames(games)
-
-        /*CircularProgressIndicator(
-            modifier = Modifier.size(120.dp),
-            strokeWidth = 7.dp
-        )*/
     }
 }
 

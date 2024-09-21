@@ -22,11 +22,9 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     val retrievedGames: MutableLiveData<List<Game>> get() = _retrievedGames
 
     //Booleano che indica quando la cancellazione delle partite passate e' completata
-    private val _gameDeletionComplete = MutableLiveData<Boolean>()
+    private val _gameDeletionComplete = MutableLiveData(false)
     val gameDeletionComplete: MutableLiveData<Boolean> get() = _gameDeletionComplete
 
-    private val _deletedGamesCount = MutableLiveData<Int>()
-    val deletedGamesCount: MutableLiveData<Int> get() = _deletedGamesCount
 
     private suspend fun getGames() {
         viewModelScope.launch {
@@ -36,7 +34,6 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun deleteAllGames(){
         viewModelScope.launch {
-            //_deletedGamesCount.postValue(gameRepository.deleteAllGames())
             gameRepository.deleteAllGames()
             _gameDeletionComplete.postValue(true)
             _retrievedGames.postValue(gameRepository.getAllGames())
