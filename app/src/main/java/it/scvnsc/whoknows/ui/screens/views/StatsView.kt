@@ -78,26 +78,6 @@ fun StatsView(
                             .fillMaxSize()
                     ) {
 
-                        //TODO:: known issue: Toast shows at StatsView launch
-                        //Osservo il cambiamento nel numero di giochi (se cancellati per esempio)
-                        /*LaunchedEffect(key1 = deletedGamesCount) {
-                            Toast.makeText(
-                                context,
-                                if (deletedGamesCount == 0) "No games deleted" else if (deletedGamesCount == 1) "Deleted $deletedGamesCount game" else "Deleted $deletedGamesCount games",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }*/
-
-                        /*LaunchedEffect(key1 = gameDeletionComplete) {
-                            Toast.makeText(
-                                context,
-                                if (gameDeletionComplete == true) "Game history cleared" else "Game history already empty",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }*/
-
-                        //Sol alternativa, dire semplicemente "Game history cleared" invece di contare il numero di game cancellati
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -154,11 +134,6 @@ fun StatsPage(statsViewModel: StatsViewModel) {
         }
         //Al suo interno usa una LazyColumn per mostrare i game
         ShowGames(games)
-
-        /*CircularProgressIndicator(
-            modifier = Modifier.size(120.dp),
-            strokeWidth = 7.dp
-        )*/
     }
 }
 

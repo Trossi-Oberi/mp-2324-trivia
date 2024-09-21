@@ -15,6 +15,7 @@ import it.scvnsc.whoknows.repository.GameQuestionRepository
 import it.scvnsc.whoknows.repository.GameRepository
 import it.scvnsc.whoknows.repository.QuestionRepository
 import it.scvnsc.whoknows.utils.CategoryManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -84,8 +85,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val isGameTimerInterrupted: LiveData<Boolean> = _isGameTimerInterrupted
 
     //Timer per nuova richiesta API
-    private var apiTimer = 0
-    private var canMakeApiCall = true //inizializzato a true
+    /*private var apiTimer = 0
+    private var canMakeApiCall = true //inizializzato a true*/
+    private var apiTimerJob: Job? = null
 
     //Punteggio della partita
     private val _score = MutableLiveData<Int>()
@@ -144,12 +146,17 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (givenAnswer == questionForUser.value?.correct_answer) {
             updateScore()
             playSound(R.raw.correct_answer)
-            makeAPICall()
+            delay(500L)
+            _isGameTimerInterrupted.value=true
+            apiTimerJob?.join()
+            _questionForUser.value = nextQuestion()
+            _isGameTimerInterrupted.value=false
 
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
             playSound(R.raw.wrong_answer)
+            delay(500L)
             //Salvataggio game nel DB
             Log.d("Debug", "Game ended with score: ${_score.value}")
             val playedGame = Game(
@@ -168,19 +175,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //In ogni caso salvo la partita
             saveGameAndQuestions(playedGame, askedQuestions)
             _isPlaying.postValue(false)
-        }
-    }
-
-    private fun makeAPICall() {
-        viewModelScope.launch {
-            if (canMakeApiCall){
-                _isGameTimerInterrupted.postValue(false)
-                _questionForUser.value = nextQuestion()
-            }else{
-                _isGameTimerInterrupted.postValue(true)
-                delay(1000L)
-                makeAPICall()
-            }
         }
     }
 
@@ -229,9 +223,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //Fetcho la nuova domanda
         _questionForUser.postValue(nextQuestion())
 
-        //Start API Timer
-        apiCountdownTimer()
-
         //Start timer della partita
         startTimer()
 
@@ -262,11 +253,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Funzione che viene chiamata quando viene fatta una nuova richiesta API, setta il booleano a false e dopo 5 secondi lo setta di nuovo a true
     private fun apiCountdownTimer() {
-        viewModelScope.launch {
-            canMakeApiCall = false
-            delay(5500L)
-            canMakeApiCall = true
+        apiTimerJob?.cancel()
+        apiTimerJob = viewModelScope.launch {
+            delay(5200L)
         }
+        Log.d("Debug", "Fine del timer API")
     }
 
     //Funzione che mescola le possibili risposte alla domanda (altrimenti la risposta corretta sarebbe sempre la prima)

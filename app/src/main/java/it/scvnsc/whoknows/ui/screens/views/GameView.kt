@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -127,6 +128,7 @@ fun GameViewInGame(
     //determino orientamento schermo
     val isLandscape = isLandscape()
     val context = LocalContext.current
+    val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
 
     if (isLandscape) {
         //TODO:: da sistemare
@@ -159,10 +161,22 @@ fun GameViewInGame(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                GameBox(gameViewModel)
+                if (showLoading == true) {
+                    LoadingScreen()
+                } else {
+                    GameBox(gameViewModel)
+                }
             }
         }
     }
+}
+
+@Composable
+fun LoadingScreen() {
+    CircularProgressIndicator(
+        modifier = Modifier.size(120.dp),
+        strokeWidth = 7.dp
+    )
 }
 
 @Composable
@@ -410,6 +424,7 @@ fun ShowAnswers(gvm: GameViewModel) {
             .padding(top = game_buttons_padding_top)
     ) {
         for (ans in answers!!) {
+            Log.d("Debug", "Answer: $ans")
             AnswerButton(
                 answerText = ans,
                 isCorrect = question?.correct_answer == ans,
