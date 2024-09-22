@@ -17,7 +17,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 class QuestionRepository(private val questionDAO: QuestionDAO) {
     //Si occupa dell'interazione tra la tabella del DB questions e ViewModel del game
 
-    private var lastQuestionID: Int? = 0
     private var SESSION_TOKEN = ""
 
     companion object {
