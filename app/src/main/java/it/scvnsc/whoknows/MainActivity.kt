@@ -24,9 +24,9 @@ class MainActivity : ComponentActivity() {
 
     //TODO Complessivo:
     // -Schermata di quando si perde la partita con animazione che cade dall'alto e pulsanti New Game - Main Menu
-    // -Timer di 5 secondi per evitare crash
     // -Schermata impostazioni con pulsanti credits (link github), theme (light/dark), sound (on/off)
     // -Schermata partite passate migliorare grafica
+    // -Controlli landscape ed adattamento schermate
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {

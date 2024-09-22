@@ -27,9 +27,6 @@ import java.util.Locale
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
 
-    //TODO: Cambiare la logica di come vengono passati i parametri difficulty e category alla chiamata API
-    // (Ora difficulty e category vengono impostati nella scheda settings)
-
     private val DEFAULT_CATEGORY = "mixed"
     private val DEFAULT_DIFFICULTY = "mixed"
 
@@ -134,7 +131,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _userAnswer.postValue(givenAnswer)
             evaluateAnswer(givenAnswer)
-            Log.d("Debug", "On answer clicked fine esecuzione")
         }
     }
 
@@ -168,8 +164,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
-            stopTimer()
+
             playSound(R.raw.wrong_answer)
+            delay(500L)
+            stopTimer()
 
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
@@ -184,8 +182,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 Log.d("Debug", "Current question: ${_questionForUser.value}")
             }
 
-            delay(500L)
-
             //Salvataggio game nel DB
             Log.d("Debug", "Game ended with score: ${_score.value}")
             val playedGame = Game(
@@ -196,9 +192,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
             )
             Log.d("Debug", "New game instance created with ID: ${playedGame.id}")
-
-            //TODO:: da rimuovere????
-            //questionForUser.value?.givenAnswer = givenAnswer
 
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
@@ -245,7 +238,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //Resetto il timer di gioco e il token per le domande
         _elapsedTime.postValue("")
         questionRepository.resetSessionToken()
-        _isGameTimerInterrupted.postValue(false)
+        _isGameTimerInterrupted.value = false
 
         //Resetto la lista delle domande poste all'utente
         askedQuestions.clear()
@@ -272,6 +265,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Funzione che ottiene la nuova domanda da presentare all'utente (l'API fornisce le domande in ordine casuale)
     private suspend fun nextQuestion(): Question {
+
+        if (apiTimerJob != null) {
+            Log.d("Debug", "API timer non e' null")
+            _isGameTimerInterrupted.value=true
+            apiTimerJob?.join()
+            Log.d("Debug", "API timer joinato")
+        }
         val newQuestion = questionRepository.retrieveNewQuestion(
             convertMixed(_selectedCategory.value.toString()),
             convertMixed(_selectedDifficulty.value.toString().lowercase())
@@ -279,16 +279,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         apiCountdownTimer()
         askedQuestions.add(newQuestion)
         _shuffledAnswers.postValue(shuffleAnswers(newQuestion))
+        _isGameTimerInterrupted.value=false
         return newQuestion
     }
 
     //Funzione che viene chiamata quando viene fatta una nuova richiesta API, setta il booleano a false e dopo 5 secondi lo setta di nuovo a true
     private fun apiCountdownTimer() {
-        apiTimerJob?.cancel()
         apiTimerJob = viewModelScope.launch {
             delay(5200L)
         }
-        Log.d("Debug", "Fine del timer API")
     }
 
     //Funzione che mescola le possibili risposte alla domanda (altrimenti la risposta corretta sarebbe sempre la prima)

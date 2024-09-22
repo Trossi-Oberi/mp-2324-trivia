@@ -2,8 +2,9 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.border
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,11 +40,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,7 +55,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -70,13 +68,11 @@ import it.scvnsc.whoknows.ui.theme.gameQuestionTextStyle
 import it.scvnsc.whoknows.ui.theme.gameScoreTextStyle
 import it.scvnsc.whoknows.ui.theme.gameTimerTextStyle
 import it.scvnsc.whoknows.ui.theme.game_buttons_height
-import it.scvnsc.whoknows.ui.theme.game_buttons_padding_top
 import it.scvnsc.whoknows.ui.theme.game_buttons_shape
 import it.scvnsc.whoknows.ui.theme.game_buttons_spacing
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
-import it.scvnsc.whoknows.ui.theme.medium_padding
 import it.scvnsc.whoknows.ui.theme.padding_difficulty
 import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
@@ -85,14 +81,8 @@ import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
 import it.scvnsc.whoknows.utils.isLandscape
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
-//TODO: inizializzare un timer dopo la chiamata API per le domande della durata di 5 secondi che modifica una variabile booleana da false a true (è possibile effettuare una nuova chiamata all'API delle domande)
-// initial = true, poi diventa false passano 5 secondi e ritorna true (_canMakeNewAPICalls: LiveData<Boolean>)
-// se l'utente prova ad iniziare una nuova partita mentre la variabile è false allora mostra un'animazione di caricamento fino all'aggiornamento della variabile
-
-//TODO: se il giocatore perde la partita viene mostrato un dialog con due pulsanti: "Play again", "Change game settings"
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -111,6 +101,10 @@ fun GameView(
                     if (isPlaying.observeAsState().value == false && isGameOver.observeAsState().value == true) {
                         //TODO:: da terminare
                     }
+
+                    /*if (isGameTimerInterrupted.observeAsState().value==true){
+                        LoadingScreen()
+                    }*/
 
                     if (isPlaying.observeAsState().value == false) {
                         GameViewMainPage(navController, gameViewModel, settingsViewModel)
@@ -185,7 +179,7 @@ fun LoadingScreen() {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-    ){
+    ) {
         CircularProgressIndicator(
             modifier = Modifier.size(120.dp),
             strokeWidth = 7.dp
@@ -196,46 +190,89 @@ fun LoadingScreen() {
 
 @Composable
 fun GameBox(gameViewModel: GameViewModel) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Row(
+    val gameOver = gameViewModel.isGameOver.observeAsState().value
+
+    if (gameOver == true) {
+        GameOverScreen(gameOver)
+    } else {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
         ) {
-            //Game timer box
-            Box(
+            Row(
                 modifier = Modifier
-                    .weight(0.5f)
-                    .align(Alignment.CenterVertically)
-                    .padding(start = 10.dp, end = 10.dp)
                     .fillMaxWidth()
             ) {
-                //Timer nella UI
-                GameTimer(gameViewModel)
+                //Game timer box
+                Box(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 10.dp, end = 10.dp)
+                        .fillMaxWidth()
+                ) {
+                    //Timer nella UI
+                    GameTimer(gameViewModel)
+                }
+
+                //Game score box
+                Box(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 10.dp)
+                ) {
+                    //Punteggio nella UI
+                    GameScore(gameViewModel)
+                }
             }
 
-            //Game score box
-            Box(
+            Spacer(modifier = Modifier.size(10.dp))
+
+            ShowDifficulty(gameViewModel)
+
+            Spacer(modifier = Modifier.size(10.dp))
+
+            QuestionBox(gameViewModel)
+        }
+    }
+
+
+}
+
+@Composable
+fun GameOverScreen(isVisible: Boolean) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = isVisible,
+            enter = slideInVertically(
+                initialOffsetY = { -it }
+            ),
+            exit = slideOutVertically(
+                targetOffsetY = {
+                    -it
+                }
+            )
+        ) {
+            Column(
                 modifier = Modifier
-                    .weight(0.5f)
-                    .align(Alignment.CenterVertically)
-                    .padding(end = 10.dp)
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                //Punteggio nella UI
-                GameScore(gameViewModel)
+                Text(text = "Game Over!", fontSize = 32.sp)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { /* Nuovo gioco */ }) {
+                    Text(text = "Nuovo gioco")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { /* Menu principale */ }) {
+                    Text(text = "Menu principale")
+                }
             }
         }
-
-        Spacer(modifier = Modifier.size(10.dp))
-
-        ShowDifficulty(gameViewModel)
-
-        Spacer(modifier = Modifier.size(10.dp))
-
-        QuestionBox(gameViewModel)
     }
 }
 
@@ -394,15 +431,15 @@ fun ShowCategory(gameViewModel: GameViewModel) {
 
 @Composable
 fun QuestionBox(gameViewModel: GameViewModel) {
-    Column (
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(start = 20.dp, end = 20.dp)
-    ){
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-        ){
+        ) {
             //Domanda nella UI
             ShowQuestion(gameViewModel)
         }
@@ -412,7 +449,7 @@ fun QuestionBox(gameViewModel: GameViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-        ){
+        ) {
             //Possibili risposte nella UI
             ShowAnswers(gameViewModel)
         }
@@ -447,7 +484,6 @@ fun ShowAnswers(gvm: GameViewModel) {
             .fillMaxSize()
     ) {
         for (ans in answers!!) {
-            Log.d("Debug", "Answer: $ans")
             AnswerButton(
                 answerText = ans,
                 isCorrect = question?.correct_answer == ans,
@@ -465,7 +501,6 @@ fun AnswerButton(
     isSelected: Boolean,
     gvm: GameViewModel
 ) {
-    //TODO: Capire bug con risposte solo vero/falso, rimane selezionato il pulsante
     val backgroundColor = when {
         isSelected && isCorrect -> Color.Green
         isSelected && !isCorrect -> Color.Red
@@ -512,7 +547,7 @@ fun GameViewMainPage(
 ) {
     //determino orientamento schermo
     val isLandscape = isLandscape()
-
+    val showLoading  = gameViewModel.isGameTimerInterrupted.observeAsState().value
     if (isLandscape) {
         //TODO:: da sistemare
     } else {
@@ -528,26 +563,31 @@ fun GameViewMainPage(
                 )
 
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                TopBar(
-                    navController = navController,
-                    onLeftBtnClick = { navController.navigate("home") },
-                    leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                    showTitle = false,
-                    showRightButton = true,
-                    settingsViewModel = settingsViewModel
-                )
+            if (showLoading==true){
+                LoadingScreen()
+            }else{
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    TopBar(
+                        navController = navController,
+                        onLeftBtnClick = { navController.navigate("home") },
+                        leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                        showTitle = false,
+                        showRightButton = true,
+                        settingsViewModel = settingsViewModel
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    MainPageButtons(gameViewModel)
+                }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                MainPageButtons(gameViewModel)
-            }
         }
     }
 }
