@@ -47,7 +47,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     //Numero arbitrario (costante) di domande da prendere dall'API
-    private val AMOUNT = 1
+    //TODO:: DA RIMUOVERE
+    // private val AMOUNT = 1
 
     //Domande poste all'utente
     private var askedQuestions = mutableListOf<Question>()
@@ -248,7 +249,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Funzione che ottiene la nuova domanda da presentare all'utente (l'API fornisce le domande in ordine casuale)
     private suspend fun nextQuestion(): Question {
         val newQuestion = questionRepository.retrieveNewQuestion(
-            AMOUNT,
             convertMixed(_selectedCategory.value.toString()),
             convertMixed(_selectedDifficulty.value.toString().lowercase())
         )
