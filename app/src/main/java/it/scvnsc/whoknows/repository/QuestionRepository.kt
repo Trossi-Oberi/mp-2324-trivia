@@ -57,8 +57,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         apiService.resetToken(SESSION_TOKEN)
     }
 
-    //TODO: Rimuovere parametro amount, mettere fisso ad 1 (valore costante qui in QuestionRepository)
-    //Step 3: Recupera un (amount) di domande della categoria e della difficolta' scelte ogni volta che l'utente clicka Play o risponde correttamente a tutte le domande precedenti
+    //Step 3: Recupera una domanda della categoria e della difficolta' scelte ogni volta che l'utente clicka Play o risponde correttamente a tutte le domande precedenti
     suspend fun retrieveNewQuestion(categoryName: String, difficulty: String): Question {
 
         //Prendo le nuove domande dall'API
