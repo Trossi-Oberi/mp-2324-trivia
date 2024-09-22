@@ -85,15 +85,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val isGameTimerInterrupted: LiveData<Boolean> = _isGameTimerInterrupted
 
     //Timer per nuova richiesta API
-    /*private var apiTimer = 0
-    private var canMakeApiCall = true //inizializzato a true*/
     private var apiTimerJob: Job? = null
 
     //Punteggio della partita
     private val _score = MutableLiveData<Int>()
     val score: LiveData<Int> = _score
 
-    //Da cancellare (credo)
+    //TODO:: Da cancellare (credo)
     private val _gameError = MutableLiveData<String>()
     val gameError: LiveData<String> get() = _gameError
 
