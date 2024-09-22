@@ -63,8 +63,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val isPlaying: LiveData<Boolean> get() = _isPlaying
 
     //Controlla se la partita e' finita (diverso da isPlaying perche' se non sta giocando la partita potrebbe non essere mai iniziata)
-    private val _isGameFinished = MutableLiveData(false)
-    val isGameFinished: LiveData<Boolean> get() = _isGameFinished
+    private val _isGameOver = MutableLiveData(false)
+    val isGameOver: LiveData<Boolean> get() = _isGameOver
 
     //Memorizza la risposta clickata dall'utente
     private val _userAnswer = MutableLiveData<String>()
@@ -149,12 +149,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             playSound(R.raw.correct_answer)
 
             delay(500L)
-
             //Interrompo il timer per eseguire il job relativo alla richiesta API
             _isGameTimerInterrupted.value = true
             apiTimerJob?.join() //Aspetto che il job che attende massimo 5 secondi per evitare HTTP 429 (TooManyRequests) finisca
-            _questionForUser.value = nextQuestion() //Aggiorno la domanda con la prossima
+            _questionForUser.value = nextQuestion()
+            _userAnswer.value = ""
             _isGameTimerInterrupted.value = false //Riattivo il timer per continuare a giocare
+
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
@@ -279,10 +280,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Inizializza il timer di gioco
     private fun startTimer() {
-        _isGameFinished.value = false //per forza cosi', se utilizzo postValue non si aggiorna il timer
+        _isGameOver.value = false //per forza cosi', se utilizzo postValue non si aggiorna il timer
         viewModelScope.launch {
             gameTimer = 0
-            while (_isGameFinished.value == false) {
+            while (_isGameOver.value == false) {
                 if (_isGameTimerInterrupted.value == false){
                     val formattedTime =
                         String.format(Locale.getDefault(), "%02d:%02d", gameTimer / 60, gameTimer % 60)
@@ -298,7 +299,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Stoppa il timer di gioco
     private fun stopTimer() {
-        _isGameFinished.postValue(true)
+        _isGameOver.postValue(true)
     }
 
     //Aggiorna il punteggio
