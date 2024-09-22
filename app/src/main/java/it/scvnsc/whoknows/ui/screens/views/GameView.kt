@@ -108,7 +108,7 @@ fun GameView(
             content = {
                 with(gameViewModel) {
 
-                    if (isPlaying.observeAsState().value == false && isGameFinished.observeAsState().value == true) {
+                    if (isPlaying.observeAsState().value == false && isGameOver.observeAsState().value == true) {
                         //TODO:: da terminare
                     }
 
