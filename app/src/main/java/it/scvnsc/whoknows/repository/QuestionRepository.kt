@@ -95,7 +95,6 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         Log.d("Debug", "Fetched Question: $newQuestion")
         val newQuestionID: Long
 
-
         withContext(Dispatchers.IO) {
             newQuestionID = questionDAO.insert(newQuestion)
         }

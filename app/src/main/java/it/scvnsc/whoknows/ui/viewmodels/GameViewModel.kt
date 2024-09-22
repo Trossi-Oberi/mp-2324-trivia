@@ -144,27 +144,32 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun evaluateAnswer(givenAnswer: String) {
         //Risposta corretta -> Fetch della prossima domanda, aggiornamento dello score
         if (givenAnswer == questionForUser.value?.correct_answer) {
+            //Aggiorno il punteggio e riproduco il suono di risposta corretta
             updateScore()
             playSound(R.raw.correct_answer)
-            delay(500L)
-            _isGameTimerInterrupted.value=true
-            apiTimerJob?.join()
-            _questionForUser.value = nextQuestion()
-            _isGameTimerInterrupted.value=false
 
+            delay(500L)
+
+            //Interrompo il timer per eseguire il job relativo alla richiesta API
+            _isGameTimerInterrupted.value = true
+            apiTimerJob?.join() //Aspetto che il job che attende massimo 5 secondi per evitare HTTP 429 (TooManyRequests) finisca
+            _questionForUser.value = nextQuestion() //Aggiorno la domanda con la prossima
+            _isGameTimerInterrupted.value = false //Riattivo il timer per continuare a giocare
         } else {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
             playSound(R.raw.wrong_answer)
+
             delay(500L)
+
             //Salvataggio game nel DB
             Log.d("Debug", "Game ended with score: ${_score.value}")
             val playedGame = Game(
-                _score.value,
+                _score.value!!,
                 _selectedDifficulty.value!!,
                 _selectedCategory.value!!,
-                _elapsedTime.value,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                _elapsedTime.value!!,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
             )
             Log.d("Debug", "New game instance created with ID: ${playedGame.id}")
 
