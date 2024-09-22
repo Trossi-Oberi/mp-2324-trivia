@@ -15,9 +15,11 @@ import it.scvnsc.whoknows.repository.GameQuestionRepository
 import it.scvnsc.whoknows.repository.GameRepository
 import it.scvnsc.whoknows.repository.QuestionRepository
 import it.scvnsc.whoknows.utils.CategoryManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -63,7 +65,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _isGameOver = MutableLiveData(false)
     val isGameOver: LiveData<Boolean> get() = _isGameOver
 
-    //Memorizza la risposta clickata dall'utente
+    //Memorizza la risposta clickata dall'utente (serve per aggiornare l'interfaccia GameView con i colori verde se corretta e rosso se errata)
     private val _userAnswer = MutableLiveData<String>()
     val userAnswer: LiveData<String> get() = _userAnswer
 
@@ -143,6 +145,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             updateScore()
             playSound(R.raw.correct_answer)
 
+            //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
+            _questionForUser.value?.givenAnswer = givenAnswer
+            withContext(Dispatchers.IO) {
+//                val currentQuestion = questionRepository.getCurrentQuestion()
+//                currentQuestion?.givenAnswer = givenAnswer
+                questionRepository.updateLastQuestion(
+                    _questionForUser.value!!.id,
+                    givenAnswer
+                )
+
+                Log.d("Debug", "Current question: ${_questionForUser.value}")
+            }
+
             delay(500L)
             //Interrompo il timer per eseguire il job relativo alla richiesta API
             _isGameTimerInterrupted.value = true
@@ -155,6 +170,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             stopTimer()
             playSound(R.raw.wrong_answer)
+
+            //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
+            _questionForUser.value?.givenAnswer = givenAnswer
+            withContext(Dispatchers.IO) {
+//                val currentQuestion = questionRepository.getCurrentQuestion()
+//                currentQuestion?.givenAnswer = givenAnswer
+                questionRepository.updateLastQuestion(
+                    _questionForUser.value!!.id,
+                    givenAnswer
+                )
+
+                Log.d("Debug", "Current question: ${_questionForUser.value}")
+            }
 
             delay(500L)
 
@@ -169,8 +197,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             )
             Log.d("Debug", "New game instance created with ID: ${playedGame.id}")
 
-            //TODO:: DA SISTEMARE!!!
-            questionForUser.value?.givenAnswer = givenAnswer
+            //TODO:: da rimuovere????
+            //questionForUser.value?.givenAnswer = givenAnswer
 
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
@@ -278,13 +306,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             gameTimer = 0
             while (_isGameOver.value == false) {
-                if (_isGameTimerInterrupted.value == false){
+                if (_isGameTimerInterrupted.value == false) {
                     val formattedTime =
-                        String.format(Locale.getDefault(), "%02d:%02d", gameTimer / 60, gameTimer % 60)
+                        String.format(
+                            Locale.getDefault(),
+                            "%02d:%02d",
+                            gameTimer / 60,
+                            gameTimer % 60
+                        )
                     _elapsedTime.postValue(formattedTime)
                     delay(1000L)
                     gameTimer++
-                }else{
+                } else {
                     delay(1000)
                 }
             }

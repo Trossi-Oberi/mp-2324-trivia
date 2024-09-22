@@ -100,5 +100,9 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
 
         return newFetchedQuestion
     }
+
+    suspend fun updateLastQuestion(questionID: Long, givenAnswer: String) {
+        return questionDAO.updateLastQuestion(questionID.toInt(), givenAnswer)
+    }
 }
 

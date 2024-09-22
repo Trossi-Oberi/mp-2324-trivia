@@ -14,8 +14,6 @@ interface QuestionDAO {
     suspend fun insert(question: Question): Long
     @Insert
     suspend fun insertQuestions(questions: List<Question>)
-    @Update
-    suspend fun update(question: Question)
     @Delete
     suspend fun delete(question: Question)
 
@@ -30,6 +28,14 @@ interface QuestionDAO {
 
     @Query("SELECT MAX(id) FROM questions")
     suspend fun getLastID(): Int?
+
+    // Voglio solo l'ultima domanda inserita nel DB
+    @Query("SELECT * FROM questions ORDER BY id DESC LIMIT 1")
+    suspend fun getLastInsertedQuestion(): Question?
+
+    // Voglio aggiornare una domanda specifica basandomi sul suo id
+    @Query("UPDATE questions SET givenAnswer = :givenAnswer WHERE id = :questionId")
+    suspend fun updateLastQuestion(questionId: Int, givenAnswer: String)
 
 
 }
