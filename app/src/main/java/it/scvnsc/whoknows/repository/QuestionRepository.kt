@@ -20,6 +20,11 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
     private var lastQuestionID: Int? = 0
     private var SESSION_TOKEN = ""
 
+    companion object {
+        //Numero arbitrario (costante) di domande da prendere dall'API
+        private const val AMOUNT = 1
+    }
+
     //Si occupa anche di fare la chiamata API per recuperare le domande
     val gson = GsonBuilder()
         .registerTypeAdapter(Question::class.java, QuestionDeserializer())
@@ -54,7 +59,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
 
     //TODO: Rimuovere parametro amount, mettere fisso ad 1 (valore costante qui in QuestionRepository)
     //Step 3: Recupera un (amount) di domande della categoria e della difficolta' scelte ogni volta che l'utente clicka Play o risponde correttamente a tutte le domande precedenti
-    suspend fun retrieveNewQuestion(amount: Int, categoryName: String, difficulty: String): Question {
+    suspend fun retrieveNewQuestion(categoryName: String, difficulty: String): Question {
 
         //Prendo le nuove domande dall'API
         var categoryID: String? = ""
@@ -68,7 +73,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         val questionResponse: QuestionResponse
         withContext(Dispatchers.IO) {
             questionResponse = apiService.getQuestions(
-                amount,
+                AMOUNT,
                 categoryID,
                 difficulty,
                 SESSION_TOKEN
@@ -79,33 +84,27 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             if (questionResponse.response_code == 4) {
                 withContext(Dispatchers.IO) {
                     resetSessionToken()
-                    retrieveNewQuestion(amount, categoryName, difficulty)
+                    retrieveNewQuestion(categoryName, difficulty)
                 }
-            }
-
-            if(questionResponse.response_code == 5) {
-                //TODO:: gestione del TooManyRequests HTTP error 429
-                Log.d("Debug", "TooManyRequests")
             }
         }
 
         //TODO: Fetched questions ora e' una question sola -> Oggetto Question invece che List
-        val fetchedQuestions = questionResponse.results
-        val newQuestion = fetchedQuestions[0]
-        Log.d("Debug", "Fetched Question: $newQuestion")
+        val newFetchedQuestion = questionResponse.results[0]
+
+//        val fetchedQuestions = questionResponse.results
+//        val newQuestion = fetchedQuestions[0]
+        Log.d("Debug", "Fetched Question: $newFetchedQuestion")
         val newQuestionID: Long
 
         withContext(Dispatchers.IO) {
-            newQuestionID = questionDAO.insert(newQuestion)
+            newQuestionID = questionDAO.insert(newFetchedQuestion)
         }
 
-        newQuestion.id = newQuestionID
-        Log.d("Debug", "New Question ID: ${newQuestion.id}")
+        newFetchedQuestion.id = newQuestionID
+        Log.d("Debug", "New Question ID: ${newFetchedQuestion.id}")
 
-        return newQuestion
-        //Faccio una query al DB per prendere le domande e al ViewModel returno una MutableList<Question>
-
+        return newFetchedQuestion
     }
-
 }
 
