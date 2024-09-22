@@ -91,9 +91,6 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
 
         //TODO: Fetched questions ora e' una question sola -> Oggetto Question invece che List
         val newFetchedQuestion = questionResponse.results[0]
-
-//        val fetchedQuestions = questionResponse.results
-//        val newQuestion = fetchedQuestions[0]
         Log.d("Debug", "Fetched Question: $newFetchedQuestion")
         val newQuestionID: Long
 
