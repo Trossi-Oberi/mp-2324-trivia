@@ -46,10 +46,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return availableCategories
     }
 
-    //Numero arbitrario (costante) di domande da prendere dall'API
-    //TODO:: DA RIMUOVERE
-    // private val AMOUNT = 1
-
     //Domande poste all'utente
     private var askedQuestions = mutableListOf<Question>()
 
