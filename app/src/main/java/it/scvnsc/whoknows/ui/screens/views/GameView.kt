@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
@@ -87,7 +88,7 @@ import kotlinx.coroutines.delay
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun GameView(
-    navController: NavController,
+    navController: NavHostController,
     gameViewModel: GameViewModel,
     settingsViewModel: SettingsViewModel
 ) {
@@ -98,13 +99,10 @@ fun GameView(
             content = {
                 with(gameViewModel) {
 
-                    if (isPlaying.observeAsState().value == false && isGameOver.observeAsState().value == true) {
-                        //TODO:: da terminare
-                    }
-
-                    /*if (isGameTimerInterrupted.observeAsState().value==true){
-                        LoadingScreen()
+                    /*if (isPlaying.observeAsState().value == false && isGameOver.observeAsState().value == true) {
+                        GameOverScreen()
                     }*/
+
 
                     if (isPlaying.observeAsState().value == false) {
                         GameViewMainPage(navController, gameViewModel, settingsViewModel)
@@ -121,7 +119,7 @@ fun GameView(
 
 @Composable
 fun GameViewInGame(
-    navController: NavController,
+    navController: NavHostController,
     gameViewModel: GameViewModel,
     settingsViewModel: SettingsViewModel
 ) {
@@ -166,7 +164,7 @@ fun GameViewInGame(
                 if (showLoading == true) {
                     LoadingScreen()
                 } else {
-                    GameBox(gameViewModel)
+                    GameBox(gameViewModel, navController)
                 }
             }
         }
@@ -189,12 +187,25 @@ fun LoadingScreen() {
 }
 
 @Composable
-fun GameBox(gameViewModel: GameViewModel) {
+fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
     val gameOver = gameViewModel.isGameOver.observeAsState().value
 
-    if (gameOver == true) {
-        GameOverScreen(gameOver)
-    } else {
+    AnimatedVisibility(
+        visible = gameOver == true,
+        enter = slideInVertically(
+            initialOffsetY = { -it }
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = {
+                -it
+            }
+        )
+    ) {
+        //TODO:: da sistemare
+        GameOverScreen(gameViewModel, navController)
+    }
+
+    AnimatedVisibility(visible = gameOver==false) {
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
@@ -238,43 +249,48 @@ fun GameBox(gameViewModel: GameViewModel) {
         }
     }
 
-
 }
 
+
 @Composable
-fun GameOverScreen(isVisible: Boolean) {
+fun GameOverScreen(gvm: GameViewModel, navController: NavHostController) {
     Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedVisibility(
-            visible = isVisible,
-            enter = slideInVertically(
-                initialOffsetY = { -it }
-            ),
-            exit = slideOutVertically(
-                targetOffsetY = {
-                    -it
-                }
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(text = "Game Over!", fontSize = 32.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { /* Nuovo gioco */ }) {
-                    Text(text = "Nuovo gioco")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { /* Menu principale */ }) {
-                    Text(text = "Menu principale")
-                }
+            //3 Bottoni: Main menu, Game menu, Play again
+            Text(text = "Game Over!", fontSize = 32.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {
+            /* Nuovo gioco */
+                gvm.onStartClicked()
+            }) {
+                Text(text = "Nuovo gioco")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {
+                /* naviga sul menu principale */
+                gvm.setIsPlaying(false)
+                navController.navigate("home")
+            }) {
+                Text(text = "Menu principale")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {
+            /*setta isPlaying off e rimane su gameView*/
+                gvm.setIsPlaying(false)
+                gvm.setGameOver(false)
+            }) {
+                Text(text = "Game menu")
             }
         }
     }
 }
+
 
 @Composable
 fun GameTimer(gameViewModel: GameViewModel) {
@@ -541,13 +557,13 @@ fun AnswerButton(
 
 @Composable
 fun GameViewMainPage(
-    navController: NavController,
+    navController: NavHostController,
     gameViewModel: GameViewModel,
     settingsViewModel: SettingsViewModel
 ) {
     //determino orientamento schermo
     val isLandscape = isLandscape()
-    val showLoading  = gameViewModel.isGameTimerInterrupted.observeAsState().value
+    val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
     if (isLandscape) {
         //TODO:: da sistemare
     } else {
@@ -563,9 +579,9 @@ fun GameViewMainPage(
                 )
 
         ) {
-            if (showLoading==true){
+            if (showLoading == true) {
                 LoadingScreen()
-            }else{
+            } else {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

@@ -27,6 +27,8 @@ class MainActivity : ComponentActivity() {
     // -Schermata impostazioni con pulsanti credits (link github), theme (light/dark), sound (on/off)
     // -Schermata partite passate migliorare grafica
     // -Controlli landscape ed adattamento schermate
+    // -Schermata record
+    // -Controllo della connessione internet
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {

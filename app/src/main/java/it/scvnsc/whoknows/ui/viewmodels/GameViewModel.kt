@@ -116,11 +116,22 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _selectedCategory.postValue(categoryName)
     }
 
+    fun setIsPlaying(isPlaying: Boolean) {
+        _isPlaying.postValue(isPlaying)
+    }
+
+    fun setGameOver(isGameOver: Boolean) {
+        _isGameOver.value = isGameOver
+    }
+
     fun onStartClicked() {
         viewModelScope.launch {
             try {
+                _isGameOver.value=false
+                _isGameTimerInterrupted.value=true
                 startGame()
-                _isPlaying.postValue(true)
+                _isPlaying.value=true
+                _isGameTimerInterrupted.value=false
             } catch (e: Exception) {
                 _gameError.postValue("Errore durante l'avvio del gioco: ${e.message}")
             }
@@ -172,13 +183,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
             withContext(Dispatchers.IO) {
-//                val currentQuestion = questionRepository.getCurrentQuestion()
-//                currentQuestion?.givenAnswer = givenAnswer
                 questionRepository.updateLastQuestion(
                     _questionForUser.value!!.id,
                     givenAnswer
                 )
-
                 Log.d("Debug", "Current question: ${_questionForUser.value}")
             }
 
@@ -191,7 +199,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 _elapsedTime.value!!,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
             )
-            Log.d("Debug", "New game instance created with ID: ${playedGame.id}")
 
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
@@ -199,7 +206,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             //In ogni caso salvo la partita
             saveGameAndQuestions(playedGame, askedQuestions)
-            _isPlaying.postValue(false)
+
+            //Devo settare isPlaying ad off solamente se l'utente clicka main menu o game menu
+            //Altrimenti isPlaying rimane true e isGameOver torna false, per iniziare una nuova partita
+            _isGameOver.postValue(true)
         }
     }
 
@@ -238,7 +248,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //Resetto il timer di gioco e il token per le domande
         _elapsedTime.postValue("")
         questionRepository.resetSessionToken()
-        _isGameTimerInterrupted.value = false
 
         //Resetto la lista delle domande poste all'utente
         askedQuestions.clear()
@@ -325,7 +334,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Stoppa il timer di gioco
     private fun stopTimer() {
-        _isGameOver.postValue(true)
+
     }
 
     //Aggiorna il punteggio
