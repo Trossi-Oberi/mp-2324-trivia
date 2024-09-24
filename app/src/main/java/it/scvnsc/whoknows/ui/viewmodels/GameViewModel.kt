@@ -39,8 +39,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val selectedCategory: LiveData<String> get() = _selectedCategory
 
     fun getCategories(): List<String> {
-        val availableCategories = CategoryManager.categories.keys.toMutableList()
-        availableCategories.add("mixed")
+        val availableCategories = mutableListOf("Mixed")
+        availableCategories.addAll(CategoryManager.categories.keys)
         availableCategories.toList()
         return availableCategories
     }
