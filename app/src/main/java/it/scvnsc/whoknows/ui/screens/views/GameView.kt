@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SportsScore
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,7 +56,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -82,8 +82,6 @@ import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
 import it.scvnsc.whoknows.utils.isLandscape
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -92,16 +90,24 @@ fun GameView(
     gameViewModel: GameViewModel,
     settingsViewModel: SettingsViewModel
 ) {
+
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
             content = {
                 with(gameViewModel) {
-
-                    /*if (isPlaying.observeAsState().value == false && isGameOver.observeAsState().value == true) {
-                        GameOverScreen()
-                    }*/
+//                    if (NetworkMonitorService.isOffline.observeAsState().value == true) {
+//                        NetworkErrorScreen()
+//                    } else {
+//                        if (isPlaying.observeAsState().value == false) {
+//                            GameViewMainPage(navController, gameViewModel, settingsViewModel)
+//                        }
+//
+//                        if (isPlaying.observeAsState().value == true) {
+//                            GameViewInGame(navController, gameViewModel, settingsViewModel)
+//                        }
+//                    }
 
 
                     if (isPlaying.observeAsState().value == false) {
@@ -114,6 +120,38 @@ fun GameView(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun NetworkErrorScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column (
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom_bar_padding),
+        ) {
+            Icon(
+                Icons.Filled.WifiOff,
+                contentDescription = null,
+                modifier = Modifier.size(50.dp)
+            )
+
+            Spacer(modifier = Modifier.size(small_padding))
+
+            Text(
+                text = "No internet connection",
+                style = MaterialTheme.typography.displayLarge,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -465,12 +503,6 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
             }
         }
     )
-}
-
-//TODO:: da completare
-@Composable
-fun ShowCategory(gameViewModel: GameViewModel) {
-    Text("Category: " + (gameViewModel.questionForUser.observeAsState().value?.category ?: ""))
 }
 
 @Composable
