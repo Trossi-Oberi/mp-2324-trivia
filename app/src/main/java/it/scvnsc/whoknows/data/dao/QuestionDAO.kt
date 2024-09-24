@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
 import it.scvnsc.whoknows.data.model.Question
 
 @Dao
@@ -23,6 +22,7 @@ interface QuestionDAO {
     //Room restituisce solo oggetti di tipo List, converto nella repository in MutableList
     suspend fun getLastQuestions(amount: Int): List<Question>
 
+    // Voglio tutte le domande inserite nel DB aventi quella lista di id
     @Query("SELECT * FROM questions WHERE id IN (:idList)")
     suspend fun getQuestionsByIDs(idList: List<Int>): List<Question>
 

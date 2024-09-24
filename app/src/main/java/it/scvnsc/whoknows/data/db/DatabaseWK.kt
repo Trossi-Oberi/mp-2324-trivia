@@ -13,7 +13,7 @@ import it.scvnsc.whoknows.data.model.GameQuestion
 import it.scvnsc.whoknows.data.model.Question
 import it.scvnsc.whoknows.utils.Converters
 
-@Database(entities = [Question::class, Game::class, GameQuestion::class], version = 1, exportSchema = false)
+@Database(entities = [Question::class, Game::class, GameQuestion::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class DatabaseWK : RoomDatabase() {
 
