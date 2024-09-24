@@ -16,9 +16,17 @@ import kotlinx.coroutines.launch
 class StatsViewModel(application: Application) : AndroidViewModel(application) {
 
 
+
     private val gameRepository: GameRepository
     private val questionRepository: QuestionRepository
     private val gameQuestionRepository: GameQuestionRepository
+
+    private val _gameQuestionsReady = MutableLiveData(false)
+    val gameQuestionsReady: LiveData<Boolean> get() = _gameQuestionsReady
+
+    fun setGameQuestionsReady(value: Boolean){
+        _gameQuestionsReady.value = value
+    }
 
     private val _retrievedGames = MutableLiveData<List<Game>>()
     val retrievedGames: LiveData<List<Game>> get() = _retrievedGames
@@ -28,6 +36,9 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedGameQuestions = MutableLiveData<List<Question>>()
     val selectedGameQuestions: LiveData<List<Question>> get() = _selectedGameQuestions
+
+    private val _selectedGameQuestionsIDs = MutableLiveData<List<Int>>()
+    val selectedGameQuestionsIDs: LiveData<List<Int>> get() = _selectedGameQuestionsIDs
 
     //Booleano che indica quando la cancellazione delle partite passate e' completata
     private val _gameDeletionComplete = MutableLiveData(false)
@@ -42,9 +53,7 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun getGames() {
-        viewModelScope.launch {
-            _retrievedGames.postValue(gameRepository.getAllGames())
-        }
+        _retrievedGames.postValue(gameRepository.getAllGames())
     }
 
     private suspend fun deleteAllGames(){
@@ -58,6 +67,26 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     fun retrieveGamesOnStart(){
         viewModelScope.launch {
             getGames()
+        }
+    }
+
+    private suspend fun getQuestions(){
+        viewModelScope.launch {
+            //pulisco la lista precedentemente creata
+            _selectedGameQuestions.value = emptyList()
+
+            //eseguo l'operazione di get delle domande
+            val questionIDs = gameQuestionRepository.getQuestionsIDs(_selectedGame.value!!)
+            //_selectedGameQuestionsIDs.postValue(gameQuestionRepository.getQuestionsIDs(_selectedGame.value!!))
+            _selectedGameQuestions.value = questionRepository.getQuestionsByIDs(questionIDs)
+
+            _gameQuestionsReady.value = true
+        }
+    }
+
+    fun retrieveSelectedGameQuestions(){
+        viewModelScope.launch {
+            getQuestions()
         }
     }
 
