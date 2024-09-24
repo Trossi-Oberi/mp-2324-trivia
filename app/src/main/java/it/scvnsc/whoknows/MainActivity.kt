@@ -25,12 +25,12 @@ import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
 class MainActivity : ComponentActivity() {
 
     //TODO Complessivo:
-    // -Schermata di quando si perde la partita con animazione che cade dall'alto e pulsanti New Game - Main Menu
+    // -Migliorie grafiche schermata game over
     // -Schermata impostazioni con pulsanti credits (link github), theme (light/dark), sound (on/off)
     // -Schermata partite passate migliorare grafica
     // -Controlli landscape ed adattamento schermate
     // -Schermata record
-    // -Controllo della connessione internet
+    // -Controllo della connessione internet - gestire caduta connessione nell'ApiService
     // -Aggiungere vite
     // -Fare che il punteggio dato dalla domanda varia a seconda della difficolta'
 
