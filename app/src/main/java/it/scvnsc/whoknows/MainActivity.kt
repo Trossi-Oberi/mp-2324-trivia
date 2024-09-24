@@ -29,6 +29,8 @@ class MainActivity : ComponentActivity() {
     // -Controlli landscape ed adattamento schermate
     // -Schermata record
     // -Controllo della connessione internet
+    // -Aggiungere vite
+    // -Fare che il punteggio dato dalla domanda varia a seconda della difficolta'
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {

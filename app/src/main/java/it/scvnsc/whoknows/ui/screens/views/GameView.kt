@@ -205,7 +205,7 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
         GameOverScreen(gameViewModel, navController)
     }
 
-    AnimatedVisibility(visible = gameOver==false) {
+    AnimatedVisibility(visible = gameOver == false) {
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
@@ -265,27 +265,55 @@ fun GameOverScreen(gvm: GameViewModel, navController: NavHostController) {
             //3 Bottoni: Main menu, Game menu, Play again
             Text(text = "Game Over!", fontSize = 32.sp)
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = {
-            /* Nuovo gioco */
-                gvm.onStartClicked()
-            }) {
-                Text(text = "Nuovo gioco")
+
+            //Main Menu button
+            Button(
+                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                shape = RoundedCornerShape(game_buttons_shape),
+                modifier = Modifier
+                    .width(250.dp)
+                    .height(game_buttons_height),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                onClick = {
+                    gvm.setIsPlaying(false)
+                    navController.navigate("home")
+                }) {
+                Text(text = "Main Menu")
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = {
-                /* naviga sul menu principale */
-                gvm.setIsPlaying(false)
-                navController.navigate("home")
-            }) {
-                Text(text = "Menu principale")
+
+            //Game Menu button
+            Button(
+                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                shape = RoundedCornerShape(game_buttons_shape),
+                modifier = Modifier
+                    .width(250.dp)
+                    .height(game_buttons_height),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                onClick = {
+                    /*setta isPlaying off e rimane su gameView*/
+                    gvm.setIsPlaying(false)
+                    gvm.clearUserAnswer()
+                    gvm.setGameOver(false)
+                }) {
+                Text(text = "Game Menu")
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = {
-            /*setta isPlaying off e rimane su gameView*/
-                gvm.setIsPlaying(false)
-                gvm.setGameOver(false)
-            }) {
-                Text(text = "Game menu")
+
+            //Play again button
+            Button(
+                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                shape = RoundedCornerShape(game_buttons_shape),
+                modifier = Modifier
+                    .width(250.dp)
+                    .height(game_buttons_height),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                onClick = {
+                    gvm.onStartClicked()
+                }) {
+                Text(text = "Play again")
             }
         }
     }
@@ -474,7 +502,7 @@ fun QuestionBox(gameViewModel: GameViewModel) {
 
 @Composable
 fun ShowQuestion(gameViewModel: GameViewModel) {
-    Log.d("Debug", "Question for user: ${gameViewModel.questionForUser.observeAsState().value}")
+    Log.d("Debug", "Question for user GV: ${gameViewModel.questionForUser.observeAsState().value}")
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier

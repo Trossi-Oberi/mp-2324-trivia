@@ -256,7 +256,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _score.postValue(0)
 
         //Fetcho la nuova domanda
-        _questionForUser.postValue(nextQuestion())
+        _questionForUser.value = nextQuestion()
 
         //Start timer della partita
         startTimer()
@@ -341,5 +341,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private fun updateScore() {
         //TODO: Idea: fare che easy vale 1 punto, medium vale 2 punti, hard vale 3 punti
         _score.postValue(_score.value!! + 1)
+    }
+
+    fun clearUserAnswer() {
+        _userAnswer.value=""
     }
 }
