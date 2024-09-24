@@ -9,8 +9,6 @@ import it.scvnsc.whoknows.data.network.QuestionResponse
 import it.scvnsc.whoknows.data.network.TokenResponse
 import it.scvnsc.whoknows.utils.CategoryManager
 import it.scvnsc.whoknows.utils.QuestionDeserializer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -67,33 +65,25 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
 
         Log.d("Debug", "Category ID: $categoryID")
         Log.d("Debug", "Difficulty: $difficulty")
+        val questionResponse: QuestionResponse = apiService.getQuestions(
+            AMOUNT,
+            categoryID,
+            difficulty,
+            SESSION_TOKEN
+        )
+        Log.d("Debug", "Question Response: $questionResponse")
 
-        val questionResponse: QuestionResponse
-        withContext(Dispatchers.IO) {
-            questionResponse = apiService.getQuestions(
-                AMOUNT,
-                categoryID,
-                difficulty,
-                SESSION_TOKEN
-            )
-            Log.d("Debug", "Question Response: $questionResponse")
-
-            //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token e rieseguo la query
-            if (questionResponse.response_code == 4) {
-                withContext(Dispatchers.IO) {
-                    resetSessionToken()
-                    retrieveNewQuestion(categoryName, difficulty)
-                }
-            }
+        //Response Code = 4 -> Token Empty, non ci sono altre nuove domande disponibili, resetto il token e rieseguo la query
+        if (questionResponse.response_code == 4) {
+            resetSessionToken()
+            retrieveNewQuestion(categoryName, difficulty)
         }
 
         val newFetchedQuestion = questionResponse.results[0]
         Log.d("Debug", "Fetched Question: $newFetchedQuestion")
         val newQuestionID: Long
 
-        withContext(Dispatchers.IO) {
-            newQuestionID = questionDAO.insert(newFetchedQuestion)
-        }
+        newQuestionID = questionDAO.insert(newFetchedQuestion)
 
         newFetchedQuestion.id = newQuestionID
         Log.d("Debug", "New Question ID: ${newFetchedQuestion.id}")
@@ -103,6 +93,10 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
 
     suspend fun updateLastQuestion(questionID: Long, givenAnswer: String) {
         return questionDAO.updateLastQuestion(questionID.toInt(), givenAnswer)
+    }
+
+    suspend fun getQuestionsByIDs(questionsIDs: List<Int>): List<Question> {
+        return questionDAO.getQuestionsByIDs(questionsIDs)
     }
 }
 
