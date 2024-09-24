@@ -15,11 +15,9 @@ import it.scvnsc.whoknows.repository.GameQuestionRepository
 import it.scvnsc.whoknows.repository.GameRepository
 import it.scvnsc.whoknows.repository.QuestionRepository
 import it.scvnsc.whoknows.utils.CategoryManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -127,11 +125,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     fun onStartClicked() {
         viewModelScope.launch {
             try {
-                _isGameOver.value=false
-                _isGameTimerInterrupted.value=true
+                _isGameOver.value = false
+                _isGameTimerInterrupted.value = true
                 startGame()
-                _isPlaying.value=true
-                _isGameTimerInterrupted.value=false
+                _isPlaying.value = true
+                _isGameTimerInterrupted.value = false
+
             } catch (e: Exception) {
                 _gameError.postValue("Errore durante l'avvio del gioco: ${e.message}")
             }
@@ -155,17 +154,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
 
-            //TODO: togliere Dispatchers.IO
-            withContext(Dispatchers.IO) {
-//                val currentQuestion = questionRepository.getCurrentQuestion()
-//                currentQuestion?.givenAnswer = givenAnswer
-                questionRepository.updateLastQuestion(
-                    _questionForUser.value!!.id,
-                    givenAnswer
-                )
+            questionRepository.updateLastQuestion(
+                _questionForUser.value!!.id,
+                givenAnswer
+            )
 
-                Log.d("Debug", "Current question: ${_questionForUser.value}")
-            }
+            Log.d("Debug", "Current question: ${_questionForUser.value}")
 
             delay(500L)
             //Interrompo il timer per eseguire il job relativo alla richiesta API
@@ -180,19 +174,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             playSound(R.raw.wrong_answer)
             delay(500L)
-            stopTimer()
 
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
 
-            //TODO: Anche qui togliere dispatcher
-            withContext(Dispatchers.IO) {
-                questionRepository.updateLastQuestion(
-                    _questionForUser.value!!.id,
-                    givenAnswer
-                )
-                Log.d("Debug", "Current question: ${_questionForUser.value}")
-            }
+            questionRepository.updateLastQuestion(
+                _questionForUser.value!!.id,
+                givenAnswer
+            )
+            Log.d("Debug", "Current question: ${_questionForUser.value}")
 
             //Salvataggio game nel DB
             Log.d("Debug", "Game ended with score: ${_score.value}")
@@ -281,7 +271,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         if (apiTimerJob != null) {
             Log.d("Debug", "API timer non e' null")
-            _isGameTimerInterrupted.value=true
+            _isGameTimerInterrupted.value = true
             apiTimerJob?.join()
             Log.d("Debug", "API timer joinato")
         }
@@ -292,7 +282,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         apiCountdownTimer()
         askedQuestions.add(newQuestion)
         _shuffledAnswers.value = shuffleAnswers(newQuestion)
-        _isGameTimerInterrupted.value=false
+        _isGameTimerInterrupted.value = false
         return newQuestion
     }
 
@@ -336,11 +326,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    //Stoppa il timer di gioco
-    private fun stopTimer() {
-
-    }
-
     //Aggiorna il punteggio
     private fun updateScore() {
         //TODO: Idea: fare che easy vale 1 punto, medium vale 2 punti, hard vale 3 punti
@@ -348,6 +333,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearUserAnswer() {
-        _userAnswer.value=""
+        _userAnswer.value = ""
     }
 }
