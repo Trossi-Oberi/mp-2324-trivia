@@ -3,7 +3,6 @@ package it.scvnsc.whoknows.repository
 import android.util.Log
 import it.scvnsc.whoknows.data.dao.GameQuestionDAO
 import it.scvnsc.whoknows.data.model.Game
-import it.scvnsc.whoknows.data.model.GameQuestion
 import it.scvnsc.whoknows.data.model.Question
 
 class GameQuestionRepository (private val gameQuestionDAO: GameQuestionDAO){

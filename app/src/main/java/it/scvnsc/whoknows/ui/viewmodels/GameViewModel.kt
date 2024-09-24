@@ -154,6 +154,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
+
+            //TODO: togliere Dispatchers.IO
             withContext(Dispatchers.IO) {
 //                val currentQuestion = questionRepository.getCurrentQuestion()
 //                currentQuestion?.givenAnswer = givenAnswer
@@ -182,6 +184,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
+
+            //TODO: Anche qui togliere dispatcher
             withContext(Dispatchers.IO) {
                 questionRepository.updateLastQuestion(
                     _questionForUser.value!!.id,
@@ -287,7 +291,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         )
         apiCountdownTimer()
         askedQuestions.add(newQuestion)
-        _shuffledAnswers.postValue(shuffleAnswers(newQuestion))
+        _shuffledAnswers.value = shuffleAnswers(newQuestion)
         _isGameTimerInterrupted.value=false
         return newQuestion
     }
