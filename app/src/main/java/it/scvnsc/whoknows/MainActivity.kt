@@ -2,6 +2,7 @@ package it.scvnsc.whoknows
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,6 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.views.GameView
 import it.scvnsc.whoknows.ui.screens.views.SettingsView
@@ -36,6 +38,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        //avvio il monitoraggio della rete
+        //NetworkMonitorService.startMonitoring(this)
+        //Log.d("NetworkState", "Network monitoring service started...")
+
         setContent {
             WhoKnowsTheme {
                 Scaffold {
@@ -44,6 +51,28 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    /*
+
+    //Viene chiamata durante la chiusura dell'applicazione
+    override fun onDestroy() {
+        super.onDestroy()
+
+        //Ferma il monitoraggio della rete
+        NetworkMonitorService.stopMonitoring(this)
+        Log.d("NetworkState", "Network monitoring service stopped...")
+    }
+
+    //Viene chiamata durante la chiusura forzata del processo (es. rotazione schermo)
+    override fun onStop() {
+        super.onStop()
+
+        //Ferma il monitoraggio della rete
+        NetworkMonitorService.stopMonitoring(this)
+        Log.d("NetworkState", "Network monitoring service stopped...")
+    }
+
+     */
 
 
     @Composable
