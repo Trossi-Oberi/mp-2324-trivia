@@ -1,6 +1,7 @@
 package it.scvnsc.whoknows.ui.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import it.scvnsc.whoknows.data.db.DatabaseWK
 import it.scvnsc.whoknows.data.model.Game
 import it.scvnsc.whoknows.data.model.Question
+import it.scvnsc.whoknows.data.network.NetworkResult
 import it.scvnsc.whoknows.repository.GameQuestionRepository
 import it.scvnsc.whoknows.repository.GameRepository
 import it.scvnsc.whoknows.repository.QuestionRepository
@@ -78,7 +80,19 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
             //eseguo l'operazione di get delle domande
             val questionIDs = gameQuestionRepository.getQuestionsIDs(_selectedGame.value!!)
             //_selectedGameQuestionsIDs.postValue(gameQuestionRepository.getQuestionsIDs(_selectedGame.value!!))
-            _selectedGameQuestions.value = questionRepository.getQuestionsByIDs(questionIDs)
+
+            //Provo ad ottenere le domande della partita selezionata tramite l'ID delle domande
+            when(val questions = questionRepository.getQuestionsByIDs(questionIDs)){
+                is NetworkResult.Success -> {
+                    _selectedGameQuestions.value = questions.data
+                }
+                is NetworkResult.Error -> {
+                    //non succede nulla
+                    return@launch
+                }
+            }
+
+            //_selectedGameQuestions.value = questionRepository.getQuestionsByIDs(questionIDs)
 
             _gameQuestionsReady.value = true
         }
@@ -103,6 +117,8 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
         gameRepository = GameRepository(gameDAO)
         questionRepository = QuestionRepository(questionDAO)
         gameQuestionRepository = GameQuestionRepository(gameQuestionDAO)
+        
+        Log.d("WhoKnows", "StatsViewModel initialized successfully")
     }
 
 }
