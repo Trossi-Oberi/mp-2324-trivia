@@ -21,19 +21,29 @@ class NetworkMonitorService : Service() {
         val isOffline: LiveData<Boolean> = _isOffline
 
         fun startMonitoring(context: Context) {
+            //controllo immediatamente lo stato della connessione all'avvio dell'applicazione
+            Log.d("NetworkMonitorService", "startMonitoring: checking connection...")
+            _isOffline.value = !isNetworkAvailable(context)
+            Log.d("NetworkMonitorService", "startMonitoring: isOffline: ${_isOffline.value}")
+
+            //Log.d("NetworkMonitorService", "startMonitoring")
             val intent = Intent(context, NetworkMonitorService::class.java)
             context.startService(intent)
-            
-            //controllo immediatamente lo stato della connessione all'avvio dell'applicazione
-            checkNetworkStatus(context)
         }
 
-        private fun checkNetworkStatus(context: Context) {
+        private fun isNetworkAvailable(context: Context): Boolean {
             val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val network = connectivityManager.activeNetwork
-            val capabilities = connectivityManager.getNetworkCapabilities(network)
-            val isConnected = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-            _isOffline.postValue(!isConnected)
+            val network = connectivityManager.activeNetwork ?: return false
+            val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+            val isConnected = activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            _isOffline.value = !isConnected
+            //Log.d("NetworkMonitorService", "isNetworkAvailable: $isConnected")
+
+            return when {
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                else -> false
+            }
         }
 
         fun stopMonitoring(context: Context) {
