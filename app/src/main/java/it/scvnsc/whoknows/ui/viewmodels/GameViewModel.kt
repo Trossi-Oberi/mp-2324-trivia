@@ -440,6 +440,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //In ogni caso salvo la partita
         saveGameAndQuestions(playedGame, askedQuestions)
 
+        askedQuestions.clear()
+
         //imposto isPlaying a false, in modo che torni alla schermata iniziale di gioco
         _isPlaying.value = false
 

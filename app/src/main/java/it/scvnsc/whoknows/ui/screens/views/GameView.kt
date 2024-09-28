@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import android.app.AlertDialog
 import android.content.Context
+import androidx.compose.runtime.LaunchedEffect
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -95,14 +96,21 @@ fun GameView(
     settingsViewModel: SettingsViewModel
 ) {
 
+    val isOffline = NetworkMonitorService.isOffline.observeAsState().value
+
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
             content = {
                 with(gameViewModel) {
-                    if (NetworkMonitorService.isOffline.observeAsState().value == true) {
-                        NetworkErrorScreen(navController)
+                    if (isOffline == true) {
+                        NetworkErrorScreen(navController, gameViewModel)
+
+                        //stoppo il timer se la connessione viene persa
+                        if(isPlaying.observeAsState().value == true){
+                            pauseTimer()
+                        }
                     } else {
                         if (isPlaying.observeAsState().value == false) {
                             GameViewMainPage(navController, gameViewModel, settingsViewModel)
@@ -112,22 +120,20 @@ fun GameView(
                             GameViewInGame(navController, gameViewModel, settingsViewModel)
                         }
                     }
-
-// TODO:: da rimuovere
-//                    if (isPlaying.observeAsState().value == false) {
-//                        GameViewMainPage(navController, gameViewModel, settingsViewModel)
-//                    }
-//                    if (isPlaying.observeAsState().value == true) {
-//                        GameViewInGame(navController, gameViewModel, settingsViewModel)
-//                    }
                 }
             }
         )
+
+        LaunchedEffect(key1 = NetworkMonitorService.isOffline.observeAsState().value) {
+            if(isOffline == false) {
+                gameViewModel.resumeTimer()
+            }
+        }
     }
 }
 
 @Composable
-fun NetworkErrorScreen(navController: NavHostController) {
+fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -157,20 +163,60 @@ fun NetworkErrorScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            Button(
-                onClick = {
-                    navController.navigate("home")
-                },
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(60.dp),
-            ) {
+            if(gameViewModel.isPlaying.observeAsState().value == true) {
                 Text(
-                    text = "Go back",
-                    style = buttonsTextStyle,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    text = "Please wait for the connection to be restored, or press the button below to exit and save the game.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center
                 )
+
+                Spacer(modifier = Modifier.size(40.dp))
+
+                Button(
+                    onClick = {
+                        //chiudo la partita e torno alla home
+                        gameViewModel.onQuitGameClicked()
+
+                        navController.navigate("home")
+                    },
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(60.dp),
+                ) {
+                    Text(
+                        text = "Quit game",
+                        style = buttonsTextStyle,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                Text(
+                    text = "Please wait for the connection to be restored to play a new game, or press the button below to go back to the main menu.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.size(40.dp))
+
+                Button(
+                    onClick = {
+                        //torno alla home
+                        navController.navigate("home")
+                    },
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(60.dp),
+                ) {
+                    Text(
+                        text = "Go back",
+                        style = buttonsTextStyle,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
