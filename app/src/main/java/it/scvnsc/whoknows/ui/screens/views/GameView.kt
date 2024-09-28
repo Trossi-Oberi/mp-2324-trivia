@@ -2,6 +2,7 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -57,7 +58,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import android.app.AlertDialog
+import android.content.Context
 import it.scvnsc.whoknows.R
+import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
@@ -97,26 +101,25 @@ fun GameView(
                 .fillMaxSize(),
             content = {
                 with(gameViewModel) {
-//                    if (NetworkMonitorService.isOffline.observeAsState().value == true) {
-//                        NetworkErrorScreen()
-//                    } else {
-//                        if (isPlaying.observeAsState().value == false) {
-//                            GameViewMainPage(navController, gameViewModel, settingsViewModel)
-//                        }
-//
-//                        if (isPlaying.observeAsState().value == true) {
-//                            GameViewInGame(navController, gameViewModel, settingsViewModel)
-//                        }
+                    if (NetworkMonitorService.isOffline.observeAsState().value == true) {
+                        NetworkErrorScreen(navController)
+                    } else {
+                        if (isPlaying.observeAsState().value == false) {
+                            GameViewMainPage(navController, gameViewModel, settingsViewModel)
+                        }
+
+                        if (isPlaying.observeAsState().value == true) {
+                            GameViewInGame(navController, gameViewModel, settingsViewModel)
+                        }
+                    }
+
+// TODO:: da rimuovere
+//                    if (isPlaying.observeAsState().value == false) {
+//                        GameViewMainPage(navController, gameViewModel, settingsViewModel)
 //                    }
-
-
-                    if (isPlaying.observeAsState().value == false) {
-                        GameViewMainPage(navController, gameViewModel, settingsViewModel)
-                    }
-
-                    if (isPlaying.observeAsState().value == true) {
-                        GameViewInGame(navController, gameViewModel, settingsViewModel)
-                    }
+//                    if (isPlaying.observeAsState().value == true) {
+//                        GameViewInGame(navController, gameViewModel, settingsViewModel)
+//                    }
                 }
             }
         )
@@ -124,13 +127,13 @@ fun GameView(
 }
 
 @Composable
-fun NetworkErrorScreen() {
+fun NetworkErrorScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column (
+        Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -151,6 +154,24 @@ fun NetworkErrorScreen() {
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center
             )
+
+            Spacer(modifier = Modifier.size(40.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate("home")
+                },
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(60.dp),
+            ) {
+                Text(
+                    text = "Go back",
+                    style = buttonsTextStyle,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
@@ -165,6 +186,7 @@ fun GameViewInGame(
     val isLandscape = isLandscape()
     val context = LocalContext.current
     val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
+    val isGameOver = gameViewModel.isGameOver.observeAsState().value
 
     if (isLandscape) {
         //TODO:: da sistemare
@@ -181,10 +203,17 @@ fun GameViewInGame(
                 TopBar(
                     navController = navController,
                     onLeftBtnClick = {
-                        navController.navigate("home")
-                        //gameViewModel.onQuitGame()
+                        if(isGameOver == false) {
+                            showExitConfirmationDialog(context, gameViewModel)
+                        } else {
+                            gameViewModel.setIsPlaying(false)
+                            gameViewModel.clearUserAnswer()
+                            gameViewModel.setGameOver(false)
+
+                            navController.navigate("game")
+                        }
                     },
-                    leftBtnIcon = Icons.Default.Close,
+                    leftBtnIcon = if(isGameOver == false) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
                     showTitle = true,
                     title = context.getString(R.string.app_name),
                     settingsViewModel = settingsViewModel
@@ -207,6 +236,25 @@ fun GameViewInGame(
             }
         }
     }
+}
+
+fun showExitConfirmationDialog(context: Context, gameViewModel: GameViewModel) {
+    //stoppo il timer durante la conferma di uscita
+    gameViewModel.pauseTimer()
+
+    AlertDialog.Builder(context)
+        .setTitle("Exit game")
+        .setMessage("Are you sure you want to exit the game?")
+        .setPositiveButton("Yes") { _, _ ->
+            Toast.makeText(context, "Game exited successfully", Toast.LENGTH_SHORT).show()
+            gameViewModel.onQuitGameClicked()
+        }
+        .setNegativeButton("No") { dialog, _ ->
+            //riavvio il timer se l'utente vuole proseguire con la partita
+            gameViewModel.resumeTimer()
+            dialog.dismiss()
+        }
+        .show()
 }
 
 @Composable
@@ -291,7 +339,7 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
 
 
 @Composable
-fun GameOverScreen(gvm: GameViewModel, navController: NavHostController) {
+fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -315,7 +363,10 @@ fun GameOverScreen(gvm: GameViewModel, navController: NavHostController) {
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 onClick = {
-                    gvm.setIsPlaying(false)
+                    gameViewModel.setIsPlaying(false)
+                    gameViewModel.clearUserAnswer()
+                    gameViewModel.setGameOver(false)
+
                     navController.navigate("home")
                 }) {
                 Text(text = "Main Menu")
@@ -332,9 +383,9 @@ fun GameOverScreen(gvm: GameViewModel, navController: NavHostController) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 onClick = {
                     /*setta isPlaying off e rimane su gameView*/
-                    gvm.setIsPlaying(false)
-                    gvm.clearUserAnswer()
-                    gvm.setGameOver(false)
+                    gameViewModel.setIsPlaying(false)
+                    gameViewModel.clearUserAnswer()
+                    gameViewModel.setGameOver(false)
                 }) {
                 Text(text = "Game Menu")
             }
@@ -349,7 +400,7 @@ fun GameOverScreen(gvm: GameViewModel, navController: NavHostController) {
                     .height(game_buttons_height),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 onClick = {
-                    gvm.onStartClicked()
+                    gameViewModel.onStartClicked()
                 }) {
                 Text(text = "Play again")
             }
@@ -534,7 +585,10 @@ fun QuestionBox(gameViewModel: GameViewModel) {
 
 @Composable
 fun ShowQuestion(gameViewModel: GameViewModel) {
-    Log.d("Debug", "Question for user GV: ${gameViewModel.questionForUser.observeAsState().value}")
+    Log.d("Debug", "++++++ Question ++++++\n")
+    gameViewModel.questionForUser.observeAsState().value?.let { Log.d("Debug", it.question) }
+    Log.d("Debug", "\n++++++ Question ++++++")
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -559,6 +613,8 @@ fun ShowAnswers(gvm: GameViewModel) {
         modifier = Modifier
             .fillMaxSize()
     ) {
+
+        Log.d("Debug", "++++++ Answers list ++++++\n")
         for (ans in answers!!) {
             AnswerButton(
                 answerText = ans,
@@ -567,6 +623,7 @@ fun ShowAnswers(gvm: GameViewModel) {
                 gvm = gvm
             )
         }
+        Log.d("Debug", "\n++++++ Answers list ++++++")
     }
 }
 
@@ -583,7 +640,8 @@ fun AnswerButton(
         else -> MaterialTheme.colorScheme.primary
     }
 
-    Log.d("Debug", "I am button $answerText, isCorrect: $isCorrect")
+
+    Log.d("Debug", "Answer: $answerText -> $isCorrect")
 
     Button(
         elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
