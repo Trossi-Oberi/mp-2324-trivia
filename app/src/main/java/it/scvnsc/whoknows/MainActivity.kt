@@ -4,11 +4,14 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,12 +20,18 @@ import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.views.GameView
 import it.scvnsc.whoknows.ui.screens.views.SettingsView
 import it.scvnsc.whoknows.ui.screens.views.StatsView
+import it.scvnsc.whoknows.ui.screens.views.showExitConfirmationDialog
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
 
 class MainActivity : ComponentActivity() {
+    private lateinit var gameViewModel: GameViewModel
+    private lateinit var navController: NavHostController
+    private lateinit var settingsViewModel: SettingsViewModel
+    private lateinit var statsViewModel: StatsViewModel
+
 
     //TODO Complessivo:
     // -Migliorie grafiche schermata game over
@@ -30,19 +39,38 @@ class MainActivity : ComponentActivity() {
     // -Schermata partite passate migliorare grafica
     // -Controlli landscape ed adattamento schermate
     // -Schermata record
-    // -Controllo della connessione internet - gestire caduta connessione nell'ApiService
     // -Aggiungere vite
-    // -Fare che il punteggio dato dalla domanda varia a seconda della difficolta'
+    // -Fare in modo che quando si perde la connessione ad internet la partità stoppa il timer e si può scegliere se chiudere la partita oppure aspettare
+    // -Inserire una notifica inviata a caso ogni tot tempo in cui si invita il giocatore a battere il proprio record personale
+
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        //avvio il monitoraggio della rete
-        //NetworkMonitorService.startMonitoring(this)
-        //Log.d("NetworkState", "Network monitoring service started...")
+        gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
+        //TODO: da sistemare
+        // Register the back press callback
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                Log.d("WhoKnows", "Back pressed")
+                if (navController.currentDestination?.route == "game" &&
+                    gameViewModel.isPlaying.value == true &&
+                    gameViewModel.isGameOver.value == false) {
+                    showExitConfirmationDialog(context = this@MainActivity, gameViewModel)
+                } else {
+                    finish()
+                }
+            }
+        })
+
+        //avvio il monitoraggio della rete
+        NetworkMonitorService.startMonitoring(this)
+        Log.d("WhoKnows", "Network monitoring service started...")
+
+        // Inizializzo l'app normalmente
         setContent {
             WhoKnowsTheme {
                 Scaffold {
@@ -52,7 +80,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /*
+    override fun onResume() {
+        super.onResume()
+
+        //avvio il monitoraggio della rete
+        NetworkMonitorService.startMonitoring(this)
+        Log.d("WhoKnows", "Network monitoring service started...")
+    }
+
 
     //Viene chiamata durante la chiusura dell'applicazione
     override fun onDestroy() {
@@ -60,7 +95,7 @@ class MainActivity : ComponentActivity() {
 
         //Ferma il monitoraggio della rete
         NetworkMonitorService.stopMonitoring(this)
-        Log.d("NetworkState", "Network monitoring service stopped...")
+        Log.d("WhoKnows", "Network monitoring service stopped...")
     }
 
     //Viene chiamata durante la chiusura forzata del processo (es. rotazione schermo)
@@ -69,18 +104,21 @@ class MainActivity : ComponentActivity() {
 
         //Ferma il monitoraggio della rete
         NetworkMonitorService.stopMonitoring(this)
-        Log.d("NetworkState", "Network monitoring service stopped...")
+        Log.d("WhoKnows", "Network monitoring service stopped...")
     }
-
-     */
 
 
     @Composable
     private fun NavControlHost() {
+        /*
         val navController = rememberNavController()
         val settingsViewModel: SettingsViewModel = viewModel<SettingsViewModel>()
         val gameViewModel: GameViewModel = viewModel<GameViewModel>()
         val statsViewModel: StatsViewModel = viewModel<StatsViewModel>()
+         */
+        navController = rememberNavController()
+        settingsViewModel = viewModel<SettingsViewModel>()
+        statsViewModel = viewModel<StatsViewModel>()
 
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
