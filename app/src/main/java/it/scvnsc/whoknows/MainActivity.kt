@@ -40,7 +40,6 @@ class MainActivity : ComponentActivity() {
     // -Controlli landscape ed adattamento schermate
     // -Schermata record
     // -Aggiungere vite
-    // -Fare in modo che quando si perde la connessione ad internet la partità stoppa il timer e si può scegliere se chiudere la partita oppure aspettare
     // -Inserire una notifica inviata a caso ogni tot tempo in cui si invita il giocatore a battere il proprio record personale
 
 
