@@ -195,6 +195,13 @@ fun GameViewInGame(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = bottom_bar_padding)
+                .paint(
+                    // Replace with your image id
+                    painterResource(
+                        id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                    ),
+                    contentScale = ContentScale.Crop
+                )
         ) {
             Box(
                 modifier = Modifier
@@ -206,11 +213,11 @@ fun GameViewInGame(
                         if(isGameOver == false) {
                             showExitConfirmationDialog(context, gameViewModel)
                         } else {
+                            navController.navigate("game")
+
                             gameViewModel.setIsPlaying(false)
                             gameViewModel.clearUserAnswer()
                             gameViewModel.setGameOver(false)
-
-                            navController.navigate("game")
                         }
                     },
                     leftBtnIcon = if(isGameOver == false) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
@@ -363,11 +370,11 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 onClick = {
+                    navController.navigate("home")
+
                     gameViewModel.setIsPlaying(false)
                     gameViewModel.clearUserAnswer()
                     gameViewModel.setGameOver(false)
-
-                    navController.navigate("home")
                 }) {
                 Text(text = "Main Menu")
             }
