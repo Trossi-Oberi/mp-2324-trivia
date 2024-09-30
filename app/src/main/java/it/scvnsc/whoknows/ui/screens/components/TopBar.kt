@@ -112,7 +112,7 @@ fun TopBar(
                 if (showThemeChange) {
                     with(settingsViewModel) {
                         IconButton(
-                            onClick = { this?.toggleDarkTheme() },
+                            onClick = { this?.toggleTheme() },
                             colors = IconButtonDefaults.iconButtonColors(DarkYellow),
                             modifier = Modifier
                                 .align(Alignment.Center)
