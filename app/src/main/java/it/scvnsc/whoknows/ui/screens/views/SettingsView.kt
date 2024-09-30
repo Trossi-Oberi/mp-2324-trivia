@@ -14,9 +14,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -24,11 +27,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import it.scvnsc.whoknows.R
@@ -55,6 +62,9 @@ fun SettingsView(
     val context = LocalContext.current
     val isLandscape = isLandscape()
 
+    val isDarkTheme by settingsViewModel.isDarkTheme.observeAsState(true)
+    val isSoundEnabled by settingsViewModel.isSoundEnabled.observeAsState(true)
+
     WhoKnowsTheme(
         darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true,
     ) {
@@ -69,6 +79,13 @@ fun SettingsView(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
+                            .paint(
+                                // Replace with your image id
+                                painterResource(
+                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                                ),
+                                contentScale = ContentScale.Crop
+                            )
                     ) {
                         //Top app bar
                         Box(
@@ -91,7 +108,12 @@ fun SettingsView(
                                 .fillMaxWidth()
                                 .padding(bottom = bottom_bar_padding)
                         ) {
-                            SettingsButtons()
+                            SettingsButtons(
+                                isDarkTheme,
+                                isSoundEnabled,
+                                onToggleTheme = { settingsViewModel.toggleTheme() },
+                                onToggleSound = { settingsViewModel.toggleSound() }
+                            )
                         }
 
                     }
@@ -102,35 +124,52 @@ fun SettingsView(
 }
 
 @Composable
-fun SettingsButtons() {
+fun SettingsButtons(isDarkTheme: Boolean, isSoundEnabled: Boolean, onToggleTheme: () -> Unit, onToggleSound: () -> Unit) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
 
     Column(
         modifier = Modifier
             .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         //Bottone Tema
         Button(
-            onClick = {},
+            onClick = onToggleTheme,
             elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             shape = RoundedCornerShape(home_buttons_shape),
             modifier = Modifier
                 .height(home_buttons_height)
                 .width(home_buttons_width)
         ) {
-            Text(
-                color = MaterialTheme.colorScheme.onPrimary,
-                text = "Toggle Theme",
-                style = buttonsTextStyle
-            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+
+            ) {
+                Text(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    text = "Toggle Theme ",
+                    style = buttonsTextStyle
+                )
+
+                Icon(
+                    if(isDarkTheme) Icons.Default.WbSunny else Icons.Default.DarkMode,
+                    contentDescription = null,
+                    modifier = Modifier.size(50.dp)
+                )
+
+            }
+
         }
 
         //Bottone Sound
         Button(
-            onClick = {},
+            onClick = onToggleSound,
             elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             shape = RoundedCornerShape(home_buttons_shape),
             modifier = Modifier
@@ -146,12 +185,12 @@ fun SettingsButtons() {
             ) {
                 Text(
                     color = MaterialTheme.colorScheme.onPrimary,
-                    text = "Toggle Sound",
+                    text = "Toggle Sound ",
                     style = buttonsTextStyle
                 )
 
                 Icon(
-                    Icons.AutoMirrored.Filled.VolumeUp,
+                    if(isSoundEnabled) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
                     contentDescription = null,
                     modifier = Modifier.size(50.dp)
                 )
