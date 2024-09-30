@@ -15,6 +15,10 @@ class GameRepository (private val gameDAO : GameDAO) {
         return gameDAO.getMaxScore()
     }
 
+    suspend fun getLastGame(): Game? {
+        return gameDAO.getLastGame()
+    }
+
 
     suspend fun getAllGames(): List<Game> {
         return gameDAO.retrieveAllGames()
