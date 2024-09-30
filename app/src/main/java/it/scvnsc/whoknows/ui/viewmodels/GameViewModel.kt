@@ -1,6 +1,7 @@
 package it.scvnsc.whoknows.ui.viewmodels
 
 import android.app.Application
+import android.content.Context
 import android.database.sqlite.SQLiteException
 import android.media.MediaPlayer
 import android.util.Log
@@ -24,7 +25,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -80,6 +80,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val elapsedTime: LiveData<String> = _elapsedTime
     private val _isGameTimerInterrupted = MutableLiveData<Boolean?>()
     val isGameTimerInterrupted: LiveData<Boolean?> = _isGameTimerInterrupted
+
+    private val _lastGame = MutableLiveData<Game>()
+    val lastGame: LiveData<Game> get() = _lastGame
 
     //Timer per nuova richiesta API
     private var apiTimerJob: Job? = null
@@ -170,6 +173,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (givenAnswer == questionForUser.value?.correct_answer) {
             //Aggiorno il punteggio e riproduco il suono di risposta corretta
             updateScore()
+
             playSound(R.raw.correct_answer)
 
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
@@ -226,7 +230,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
-            //TODO: Osservare isRecord per mostrare la notifica del record
+
 
             //In ogni caso salvo la partita
             saveGameAndQuestions(playedGame, askedQuestions)
@@ -234,10 +238,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //Devo settare isPlaying ad off solamente se l'utente clicka main menu o game menu
             //Altrimenti isPlaying rimane true e isGameOver torna false, per iniziare una nuova partita
             _isGameOver.postValue(true)
+
+            //salvo nella variabile lastGame l'ultima partita salvata
+            _lastGame.value = gameRepository.getLastGame()
         }
     }
 
     private fun playSound(answerSound: Int) {
+        val sharedPreferences = getApplication<Application>().getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", true)
+        Log.d("Debug", "isSoundEnabled: $isSoundEnabled")
+        if (!isSoundEnabled) return
+
         mediaPlayer?.release()
         mediaPlayer = MediaPlayer.create(getApplication(), answerSound)
         mediaPlayer?.start()
@@ -257,15 +269,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         gameQuestionRepository.saveGameAndQuestions(playedGame, askedQuestions)
     }
 
-    //TODO:::
     private suspend fun checkGameRecord(playedGame: Game) {
         val maxScore = gameRepository.getMaxScore() ?: 0
-        Log.d("Debug", "Max score: $maxScore")
-        Log.d("Debug", "Played game score: ${playedGame.score}")
-        val check = playedGame.score!! > maxScore
-        Log.d("Debug", "Check: $check")
-        _isRecord.value = check
-        Log.d("Debug", "Record: ${_isRecord.value}")
+        val isNewRecord = playedGame.score!! > maxScore
+
+        if(maxScore == 0) {
+            Log.d("Debug", "New record: ${playedGame.score}")
+        } else {
+            when(isNewRecord){
+                true -> Log.d("Debug", "New record: ${playedGame.score}")
+                false -> Log.d("Debug", "No new record")
+            }
+        }
+
+        _isRecord.value = isNewRecord
     }
 
     private suspend fun startGame() {
@@ -338,11 +355,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             _gameError.postValue("Error: ${e.message}")
             return null
         }
-
-//        val newQuestion = questionRepository.retrieveNewQuestion(
-//            convertMixed(_selectedCategory.value.toString()),
-//            convertMixed(_selectedDifficulty.value.toString().lowercase())
-//        )
 
         apiCountdownTimer()
         askedQuestions.add(newQuestion)
@@ -435,7 +447,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
         checkGameRecord(playedGame)
-        //TODO: Osservare isRecord per mostrare la notifica del record
 
         //In ogni caso salvo la partita
         saveGameAndQuestions(playedGame, askedQuestions)
@@ -447,6 +458,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         //resetto a null _isGameTimerInterrupted per evitare che mostri il loading screen nella gameView
         _isGameTimerInterrupted.value = null
+
+        //salvo nella variabile lastGame l'ultima partita salvata
+        _lastGame.value = gameRepository.getLastGame()
     }
 
     fun pauseTimer() {

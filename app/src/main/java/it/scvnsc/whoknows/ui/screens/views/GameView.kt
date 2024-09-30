@@ -393,6 +393,8 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
 
 @Composable
 fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostController) {
+    val isRecord = gameViewModel.isRecord.observeAsState().value
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -403,7 +405,19 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
         ) {
             //3 Bottoni: Main menu, Game menu, Play again
             Text(text = "Game Over!", fontSize = 32.sp)
+
             Spacer(modifier = Modifier.height(16.dp))
+
+            if(isRecord == true) {
+                Text(text = "New record!", fontSize = 24.sp)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Max score: ${gameViewModel.lastGame.value?.score}", fontSize = 24.sp)
+            } else {
+                Text(text = "Score: ${gameViewModel.lastGame.value?.score}", fontSize = 24.sp)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
 
             //Main Menu button
             Button(
