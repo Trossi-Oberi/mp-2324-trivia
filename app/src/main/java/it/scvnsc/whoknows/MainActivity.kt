@@ -35,12 +35,13 @@ class MainActivity : ComponentActivity() {
 
     //TODO Complessivo:
     // -Migliorie grafiche schermata game over
-    // -Schermata impostazioni con pulsanti credits (link github), theme (light/dark), sound (on/off)
     // -Schermata partite passate migliorare grafica
     // -Controlli landscape ed adattamento schermate
     // -Schermata record
     // -Aggiungere vite
     // -Inserire una notifica inviata a caso ogni tot tempo in cui si invita il giocatore a battere il proprio record personale
+    // - controllare funzionamento check record
+    // - sistemare salvataggio impostazioni (shared preferences)
 
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -48,10 +49,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
+        //gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
         //TODO: da sistemare
         // Register the back press callback
+        /*
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 Log.d("WhoKnows", "Back pressed")
@@ -64,6 +66,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         })
+        */
 
         //avvio il monitoraggio della rete
         NetworkMonitorService.startMonitoring(this)
@@ -117,6 +120,7 @@ class MainActivity : ComponentActivity() {
          */
         navController = rememberNavController()
         settingsViewModel = viewModel<SettingsViewModel>()
+        gameViewModel = viewModel<GameViewModel>()
         statsViewModel = viewModel<StatsViewModel>()
 
         NavHost(navController = navController, startDestination = "home") {
