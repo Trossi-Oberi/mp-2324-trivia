@@ -32,15 +32,16 @@ class MainActivity : ComponentActivity() {
     private lateinit var settingsViewModel: SettingsViewModel
     private lateinit var statsViewModel: StatsViewModel
 
-
     //TODO Complessivo:
-    // -Migliorie grafiche schermata game over
-    // -Schermata partite passate migliorare grafica
-    // -Controlli landscape ed adattamento schermate
-    // -Schermata record
-    // -Aggiungere vite
-    // -Inserire una notifica inviata a caso ogni tot tempo in cui si invita il giocatore a battere il proprio record personale
-    // - sistemare salvataggio impostazioni (shared preferences)
+    // sistemare salvataggio impostazioni (shared preferences) suono che non si disattiva
+    // sistemare bug retrieve categorie in game view se manca internet
+    // sistemare comportamento back button in game view (uscire da partita)
+    // sistemare bug scelta multipla della risposta alla domanda
+    // aggiungere musica di sottofondo partita
+    // migliorare schermata game over
+    // finire grafica schermata partite passate
+    // sistemare landscape
+    // aggiungere vite
 
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -69,6 +70,7 @@ class MainActivity : ComponentActivity() {
 
         //avvio il monitoraggio della rete
         NetworkMonitorService.startMonitoring(this)
+
         Log.d("WhoKnows", "Network monitoring service started...")
 
         // Inizializzo l'app normalmente
