@@ -32,7 +32,6 @@ class MainActivity : ComponentActivity() {
     private lateinit var statsViewModel: StatsViewModel
 
     //TODO Complessivo:
-    // sistemare salvataggio impostazioni (shared preferences) suono che non si disattiva
     // sistemare bug scelta multipla della risposta alla domanda
     // sistemare bug timer (esiste ma non sappiamo come si verifica :( )
     // aggiungere musica di sottofondo partita

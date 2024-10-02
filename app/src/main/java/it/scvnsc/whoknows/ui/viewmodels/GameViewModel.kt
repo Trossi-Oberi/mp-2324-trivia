@@ -237,10 +237,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun playSound(answerSound: Int) {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(
-            "app_preferences",
+            "app_prefs",
             Context.MODE_PRIVATE
         )
-        val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", true)
+        val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", false)
         Log.d("Debug", "isSoundEnabled: $isSoundEnabled")
         if (!isSoundEnabled) return
 
