@@ -310,6 +310,10 @@ fun showExitConfirmationDialog(context: Context, gameViewModel: GameViewModel) {
             gameViewModel.resumeTimer()
             dialog.dismiss()
         }
+        .setOnDismissListener {
+            //riavvio il timer se l'utente vuole proseguire con la partita
+            gameViewModel.resumeTimer()
+        }
         .show()
 }
 

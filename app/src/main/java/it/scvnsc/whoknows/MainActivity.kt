@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
     // sistemare bug retrieve categorie in game view se manca internet
     // sistemare comportamento back button in game view (uscire da partita)
     // sistemare bug scelta multipla della risposta alla domanda
+    // sistemare bug timer (esiste ma non sappiamo come si verifica :( )
     // aggiungere musica di sottofondo partita
     // migliorare schermata game over
     // finire grafica schermata partite passate
