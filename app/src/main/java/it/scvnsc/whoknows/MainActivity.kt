@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -35,7 +37,6 @@ class MainActivity : ComponentActivity() {
     //TODO Complessivo:
     // sistemare salvataggio impostazioni (shared preferences) suono che non si disattiva
     // sistemare bug retrieve categorie in game view se manca internet
-    // sistemare comportamento back button in game view (uscire da partita)
     // sistemare bug scelta multipla della risposta alla domanda
     // sistemare bug timer (esiste ma non sappiamo come si verifica :( )
     // aggiungere musica di sottofondo partita
@@ -49,25 +50,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        //gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
-
-        //TODO: da sistemare
-        // Register the back press callback
-        /*
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                Log.d("WhoKnows", "Back pressed")
-                if (navController.currentDestination?.route == "game" &&
-                    gameViewModel.isPlaying.value == true &&
-                    gameViewModel.isGameOver.value == false) {
-                    showExitConfirmationDialog(context = this@MainActivity, gameViewModel)
-                } else {
-                    finish()
-                }
-            }
-        })
-        */
 
         //avvio il monitoraggio della rete
         NetworkMonitorService.startMonitoring(this)
@@ -114,12 +96,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun NavControlHost() {
-        /*
-        val navController = rememberNavController()
-        val settingsViewModel: SettingsViewModel = viewModel<SettingsViewModel>()
-        val gameViewModel: GameViewModel = viewModel<GameViewModel>()
-        val statsViewModel: StatsViewModel = viewModel<StatsViewModel>()
-         */
         navController = rememberNavController()
         settingsViewModel = viewModel<SettingsViewModel>()
         gameViewModel = viewModel<GameViewModel>()
@@ -139,6 +115,20 @@ class MainActivity : ComponentActivity() {
             }
 
             composable("game") {
+                BackHandler {
+                    if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false) {
+                        // Aggiungi qui il comportamento specifico per la schermata di gioco
+                        showExitConfirmationDialog(this@MainActivity, gameViewModel)
+                    } else if (gameViewModel.isGameOver.value == true) {
+                        /*setta isPlaying off e rimane su gameView*/
+                        gameViewModel.setIsPlaying(false)
+                        gameViewModel.clearUserAnswer()
+                        gameViewModel.setGameOver(false)
+                    } else {
+                        navController.popBackStack()
+                    }
+                }
+
                 GameView(navController, gameViewModel, settingsViewModel)
             }
 
