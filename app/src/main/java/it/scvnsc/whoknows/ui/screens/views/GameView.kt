@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import android.app.AlertDialog
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.LaunchedEffect
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
@@ -733,6 +734,7 @@ fun AnswerButton(
         else -> MaterialTheme.colorScheme.primary
     }
 
+    val isAnswerSelected = gvm.isAnswerSelected.observeAsState().value
 
     Log.d("Debug", "Answer: $answerText -> $isCorrect")
 
@@ -746,7 +748,9 @@ fun AnswerButton(
             containerColor = backgroundColor
         ),
         onClick = {
-            gvm.onAnswerClicked(answerText)
+            if (isAnswerSelected == false){
+                gvm.onAnswerClicked(answerText)
+            }
         }
     ) {
         Text(

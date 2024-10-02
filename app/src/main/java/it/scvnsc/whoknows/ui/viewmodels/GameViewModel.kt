@@ -30,6 +30,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private val DEFAULT_CATEGORY = "mixed"
     private val DEFAULT_DIFFICULTY = "mixed"
+    private val WAIT_TIME = 500L
 
     //Difficolta' selezionata dall'utente
     private val _selectedDifficulty = MutableLiveData(DEFAULT_DIFFICULTY)
@@ -38,17 +39,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Categoria selezionata dall'utente
     private val _selectedCategory = MutableLiveData(DEFAULT_CATEGORY)
     val selectedCategory: LiveData<String> get() = _selectedCategory
-
-    //Lista delle categorie disponibili
-    private val _categories = MutableLiveData<List<String>>()
-    val categories: LiveData<List<String>> get() = _categories
-
-    /*fun getCategories(){
-        val availableCategories = mutableListOf("Mixed")
-        availableCategories.addAll(CategoryManager.categories.keys)
-        availableCategories.toList()
-        _categories.value = availableCategories
-    }*/
 
     fun getCategories(): List<String> {
         val availableCategories = mutableListOf("Mixed")
@@ -78,6 +68,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _userAnswer = MutableLiveData<String>()
     val userAnswer: LiveData<String> get() = _userAnswer
 
+    //Fa in modo che solo una risposta sia selezionabile
+    private val _isAnswerSelected = MutableLiveData(false)
+    val isAnswerSelected: LiveData<Boolean> get() = _isAnswerSelected
+
     //MediaPlayer per riproduzione suono in base alla risposta selezionata
     private var mediaPlayer: MediaPlayer? = null
 
@@ -101,10 +95,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Punteggio della partita
     private val _score = MutableLiveData<Int>()
     val score: LiveData<Int> = _score
-
-    //TODO:: Da cancellare (credo)
-    private val _gameError = MutableLiveData<String>()
-    val gameError: LiveData<String> get() = _gameError
 
     private val _isAPIError = MutableLiveData<Boolean>(false)
     val isAPIError: LiveData<Boolean> get() = _isAPIError
@@ -153,6 +143,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onAnswerClicked(givenAnswer: String) {
+        _isAnswerSelected.value = true
         viewModelScope.launch {
             _userAnswer.postValue(givenAnswer)
             evaluateAnswer(givenAnswer)
@@ -175,8 +166,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 givenAnswer
             )
 
-
-            delay(500L)
+            delay(WAIT_TIME)
             //Interrompo il timer per eseguire il job relativo alla richiesta API
             _isGameTimerInterrupted.value = true
             apiTimerJob?.join() //Aspetto che il job che attende massimo 5 secondi per evitare HTTP 429 (TooManyRequests) finisca
@@ -199,7 +189,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
 
             playSound(R.raw.wrong_answer)
-            delay(500L)
+            delay(WAIT_TIME)
 
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
@@ -218,10 +208,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 _elapsedTime.value!!,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
             )
-
             //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
             checkGameRecord(playedGame)
-
 
             //In ogni caso salvo la partita
             saveGameAndQuestions(playedGame, askedQuestions)
@@ -233,6 +221,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //salvo nella variabile lastGame l'ultima partita salvata
             _lastGame.value = gameRepository.getLastGame()
         }
+        _isAnswerSelected.value = false
     }
 
     private fun playSound(answerSound: Int) {
@@ -303,8 +292,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         Log.d("Debug", "Current question: ${_questionForUser.value}")
-
-
         //Start timer della partita
         startTimer()
     }
@@ -340,13 +327,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
                 is NetworkResult.Error -> {
                     Log.e("WhoKnows", "Error: ${result.exception.message}")
-                    _gameError.postValue("Error: ${result.exception.message}")
                     return null
                 }
             }
         } catch (e: SQLiteException) {
             Log.e("Database", "Error retrieving new question: ${e.message}")
-            _gameError.postValue("Error: ${e.message}")
             return null
         }
 
@@ -424,7 +409,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun onQuitGame() {
         //TODO:: da inserire suono chiusura partita
         //playSound(R.raw.wrong_answer)
-        delay(500L)
+        delay(WAIT_TIME)
 
         //imposto la risposta come non data
         _questionForUser.value?.givenAnswer = ""
@@ -476,7 +461,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 questionRepository.setupInteractionWithAPI()
                 _isApiSetupComplete.value = true
             } catch (e: Exception) {
-                _gameError.postValue("Error: ${e.message}")
                 _isAPIError.value = true
                 Log.e("Error", "API error: ${e.message}")
             }
