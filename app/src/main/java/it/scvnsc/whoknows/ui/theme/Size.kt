@@ -1,6 +1,5 @@
 package it.scvnsc.whoknows.ui.theme
 
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 

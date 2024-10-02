@@ -69,6 +69,7 @@ import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.default_elevation
 import it.scvnsc.whoknows.ui.theme.disabled_elevation
+import it.scvnsc.whoknows.ui.theme.fontSizeBig
 import it.scvnsc.whoknows.ui.theme.gameButtonsTextStyle
 import it.scvnsc.whoknows.ui.theme.gameQuestionTextStyle
 import it.scvnsc.whoknows.ui.theme.gameScoreTextStyle
@@ -79,9 +80,11 @@ import it.scvnsc.whoknows.ui.theme.game_buttons_spacing
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
+import it.scvnsc.whoknows.ui.theme.medium_spacing_height
 import it.scvnsc.whoknows.ui.theme.padding_difficulty
 import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
+import it.scvnsc.whoknows.ui.theme.small_spacing_height
 import it.scvnsc.whoknows.ui.theme.star_icon_size
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
@@ -108,7 +111,7 @@ fun GameView(
                         NetworkErrorScreen(navController, gameViewModel)
 
                         //stoppo il timer se la connessione viene persa
-                        if(isPlaying.observeAsState().value == true){
+                        if (isPlaying.observeAsState().value == true) {
                             pauseTimer()
                         }
                     } else {
@@ -125,7 +128,7 @@ fun GameView(
         )
 
         LaunchedEffect(key1 = NetworkMonitorService.isOffline.observeAsState().value) {
-            if(isOffline == false) {
+            if (isOffline == false) {
                 gameViewModel.resumeTimer()
             }
         }
@@ -163,7 +166,7 @@ fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameView
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            if(gameViewModel.isPlaying.observeAsState().value == true) {
+            if (gameViewModel.isPlaying.observeAsState().value == true) {
                 Text(
                     text = "Please wait for the connection to be restored, or press the button below to exit and save the game.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -256,7 +259,7 @@ fun GameViewInGame(
                 TopBar(
                     navController = navController,
                     onLeftBtnClick = {
-                        if(isGameOver == false) {
+                        if (isGameOver == false) {
                             showExitConfirmationDialog(context, gameViewModel)
                         } else {
                             navController.navigate("game")
@@ -266,7 +269,7 @@ fun GameViewInGame(
                             gameViewModel.setGameOver(false)
                         }
                     },
-                    leftBtnIcon = if(isGameOver == false) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
+                    leftBtnIcon = if (isGameOver == false) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
                     showTitle = true,
                     title = context.getString(R.string.app_name),
                     settingsViewModel = settingsViewModel
@@ -404,19 +407,35 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
             verticalArrangement = Arrangement.Center
         ) {
             //3 Bottoni: Main menu, Game menu, Play again
-            Text(text = "Game Over!", fontSize = 32.sp)
+            Text(text = "Game Over!", fontSize = fontSizeBig)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(medium_spacing_height))
 
-            if(isRecord == true) {
-                Text(text = "New record!", fontSize = 24.sp)
+            if (isRecord == true) {
+                Text(
+                    text = "🎉 New record! 🎉",
+                    fontSize = 36.sp,
+                    color = MaterialTheme.colorScheme.primary, // Gold color
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Max score: ${gameViewModel.lastGame.value?.score}", fontSize = 24.sp)
+
+                Text(
+                    text = "${gameViewModel.lastGame.value?.score}",
+                    fontSize = 55.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             } else {
-                Text(text = "Score: ${gameViewModel.lastGame.value?.score}", fontSize = 24.sp)
+                Text(
+                    text = "${gameViewModel.lastGame.value?.score}",
+                    fontSize = 55.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(50.dp))
 
 
             //Main Menu button

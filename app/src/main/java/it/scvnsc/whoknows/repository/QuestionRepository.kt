@@ -76,6 +76,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             NetworkResult.Success(response)
         } catch (e: Exception) {
             NetworkResult.Error(e)
+            Log.e("WhoKnows", "Error getting session token: $e")
             throw e
         }
     }
@@ -89,6 +90,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             NetworkResult.Success(Unit)
         } catch (e: Exception) {
             NetworkResult.Error(e)
+            Log.d("Debug", "Error resetting session token: $e")
             throw e
         }
     }
@@ -125,9 +127,11 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
 
             NetworkResult.Success(newFetchedQuestion)
         } catch (e: SQLiteException) {
+            Log.e("Database", "Error inserting new question in database: $e")
             NetworkResult.Error(e)
             throw e
         } catch (e: Exception) {
+            Log.e("WhoKnows", "Error retrieving new question: $e")
             NetworkResult.Error(e)
             throw e
         }
@@ -141,7 +145,6 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             Log.e("Database", "Error updating last question in database: $e")
             NetworkResult.Error(e)
         }
-        //return questionDAO.updateLastQuestion(questionID.toInt(), givenAnswer)
     }
 
     suspend fun getQuestionsByIDs(questionsIDs: List<Int>): NetworkResult<List<Question>> = withContext(Dispatchers.IO) {
@@ -152,8 +155,6 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             Log.e("Database", "Error retrieving questions by IDs", e)
             NetworkResult.Error(e)
         }
-
-        //return questionDAO.getQuestionsByIDs(questionsIDs)
     }
 }
 

@@ -40,7 +40,6 @@ class MainActivity : ComponentActivity() {
     // -Schermata record
     // -Aggiungere vite
     // -Inserire una notifica inviata a caso ogni tot tempo in cui si invita il giocatore a battere il proprio record personale
-    // - controllare funzionamento check record
     // - sistemare salvataggio impostazioni (shared preferences)
 
 
