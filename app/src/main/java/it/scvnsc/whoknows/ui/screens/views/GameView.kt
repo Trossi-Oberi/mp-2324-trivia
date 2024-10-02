@@ -116,6 +116,9 @@ fun GameView(
                         }
                     } else {
                         if (isPlaying.observeAsState().value == false) {
+                            if (isApiSetupComplete.observeAsState().value==false){
+                                setupAPI()
+                            }
                             GameViewMainPage(navController, gameViewModel, settingsViewModel)
                         }
 
@@ -821,6 +824,7 @@ fun MainPageButtons(
     gameViewModel: GameViewModel
 ) {
     val context = LocalContext.current
+    //val categories = gameViewModel.categories.observeAsState().value
 
     var showDifficultySelectionDialog by rememberSaveable { mutableStateOf(false) }
     var showCategorySelectionDialog by rememberSaveable { mutableStateOf(false) }
@@ -856,6 +860,7 @@ fun MainPageButtons(
                     showCategorySelectionDialog = false
                 },
                 categories = gameViewModel.getCategories(),
+                //categories = categories!!,
                 onCategorySelected = {
                     selectedCategory = it
                     gameViewModel.setCategory(it)

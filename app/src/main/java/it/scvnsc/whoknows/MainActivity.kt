@@ -4,14 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -36,7 +33,6 @@ class MainActivity : ComponentActivity() {
 
     //TODO Complessivo:
     // sistemare salvataggio impostazioni (shared preferences) suono che non si disattiva
-    // sistemare bug retrieve categorie in game view se manca internet
     // sistemare bug scelta multipla della risposta alla domanda
     // sistemare bug timer (esiste ma non sappiamo come si verifica :( )
     // aggiungere musica di sottofondo partita

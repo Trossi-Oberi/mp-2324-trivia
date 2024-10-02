@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import it.scvnsc.whoknows.PreferencesManager
+import it.scvnsc.whoknows.utils.PreferencesManager
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesManager = PreferencesManager(application)

@@ -39,6 +39,17 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedCategory = MutableLiveData(DEFAULT_CATEGORY)
     val selectedCategory: LiveData<String> get() = _selectedCategory
 
+    //Lista delle categorie disponibili
+    private val _categories = MutableLiveData<List<String>>()
+    val categories: LiveData<List<String>> get() = _categories
+
+    /*fun getCategories(){
+        val availableCategories = mutableListOf("Mixed")
+        availableCategories.addAll(CategoryManager.categories.keys)
+        availableCategories.toList()
+        _categories.value = availableCategories
+    }*/
+
     fun getCategories(): List<String> {
         val availableCategories = mutableListOf("Mixed")
         availableCategories.addAll(CategoryManager.categories.keys)
@@ -98,6 +109,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _isAPIError = MutableLiveData<Boolean>(false)
     val isAPIError: LiveData<Boolean> get() = _isAPIError
 
+    private val _isApiSetupComplete = MutableLiveData(false)
+    val isApiSetupComplete: LiveData<Boolean> get() = _isApiSetupComplete
+
     //Repositories
     private val questionRepository: QuestionRepository
     private val gameRepository: GameRepository
@@ -110,17 +124,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         questionRepository = QuestionRepository(questionDAO)
         gameRepository = GameRepository(gameDAO)
         gameQuestionRepository = GameQuestionRepository(gameQuestionDAO)
-        viewModelScope.launch {
-            //provo a fare il setup dell'api all'avvio del programma, se fallisce loggo un errore
-            try {
-                questionRepository.setupInteractionWithAPI()
-            } catch (e: Exception) {
-                _gameError.postValue("Error: ${e.message}")
-                _isAPIError.value = true
-                Log.e("Error", "API error: ${e.message}")
-            }
-        }
-        //Log.d("WhoKnows", "GameViewModel initialized successfully")
     }
 
     fun setDifficulty(difficulty: String) {
@@ -141,23 +144,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onStartClicked() {
         viewModelScope.launch {
-            try {
-                if(_isAPIError.value == true) {
-                    Log.e("Error", "API error: ${_isAPIError.value}")
-                    questionRepository.setupInteractionWithAPI()
-                    _isAPIError.value = false
-                    Log.d("Debug", "API error resolved: ${_isAPIError.value}")
-                }
-                _isGameOver.value = false
-                _isGameTimerInterrupted.value = true
-                startGame()
-                _isPlaying.value = true
-                _isGameTimerInterrupted.value = false
-
-            } catch (e: Exception) {
-                _gameError.postValue("Error: ${e.message}")
-                Log.e("Error", "Game error: ${e.message}")
-            }
+            _isGameOver.value = false
+            _isGameTimerInterrupted.value = true
+            startGame()
+            _isPlaying.value = true
+            _isGameTimerInterrupted.value = false
         }
     }
 
@@ -192,9 +183,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             //Fetcho la prossima domanda, se la richiesta API fallisce aspetto che torni la connessione e riproviamo
             _questionForUser.value = nextQuestion()
-            if(_questionForUser.value == null){
-                while(true) {
-                    if(NetworkMonitorService.isOffline.value == false){
+            if (_questionForUser.value == null) {
+                while (true) {
+                    if (NetworkMonitorService.isOffline.value == false) {
                         _questionForUser.value = nextQuestion()
                         break
                     }
@@ -245,7 +236,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun playSound(answerSound: Int) {
-        val sharedPreferences = getApplication<Application>().getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        val sharedPreferences = getApplication<Application>().getSharedPreferences(
+            "app_preferences",
+            Context.MODE_PRIVATE
+        )
         val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", true)
         Log.d("Debug", "isSoundEnabled: $isSoundEnabled")
         if (!isSoundEnabled) return
@@ -273,10 +267,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val maxScore = gameRepository.getMaxScore() ?: 0
         val isNewRecord = playedGame.score!! > maxScore
 
-        if(maxScore == 0) {
+        if (maxScore == 0) {
             Log.d("Debug", "New record: ${playedGame.score}")
         } else {
-            when(isNewRecord){
+            when (isNewRecord) {
                 true -> Log.d("Debug", "New record: ${playedGame.score}")
                 false -> Log.d("Debug", "No new record")
             }
@@ -300,9 +294,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _questionForUser.value = nextQuestion()
 
         //Se la richiesta API fallisce aspetto che torni la connessione e riproviamo
-        if(_questionForUser.value == null) {
-            while(true) {
-                if(NetworkMonitorService.isOffline.value == false){
+        if (_questionForUser.value == null) {
+            while (true) {
+                if (NetworkMonitorService.isOffline.value == false) {
                     _questionForUser.value = nextQuestion()
                     break
                 }
@@ -473,6 +467,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _isGameTimerInterrupted.value = false
         Log.d("Debug", "Timer resumed")
         // Logica per riprendere il timer
+    }
+
+    fun setupAPI() {
+        viewModelScope.launch {
+            //provo a fare il setup dell'api all'avvio del programma, se fallisce loggo un errore
+            try {
+                questionRepository.setupInteractionWithAPI()
+                _isApiSetupComplete.value = true
+            } catch (e: Exception) {
+                _gameError.postValue("Error: ${e.message}")
+                _isAPIError.value = true
+                Log.e("Error", "API error: ${e.message}")
+            }
+        }
+        //Log.d("WhoKnows", "GameViewModel initialized successfully")
     }
 
 }

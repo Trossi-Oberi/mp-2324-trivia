@@ -1,4 +1,4 @@
-package it.scvnsc.whoknows
+package it.scvnsc.whoknows.utils
 
 import android.content.Context
 import android.content.SharedPreferences
