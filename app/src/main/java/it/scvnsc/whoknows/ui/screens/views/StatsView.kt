@@ -194,7 +194,7 @@ fun StatsPage(games: List<Game>?, statsViewModel: StatsViewModel, settingsViewMo
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = bottom_bar_padding)
+                .padding(bottom = 10.dp)
         ) {
             //HEADER
             Box(
