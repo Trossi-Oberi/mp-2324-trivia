@@ -100,6 +100,15 @@ class MainActivity : ComponentActivity() {
             }
 
             composable("stats") {
+                BackHandler {
+                    if(statsViewModel.showGameDetails.value == true){
+                        statsViewModel.setShowGameDetails(false)
+                        statsViewModel.setGameQuestionsReady(false)
+                    } else {
+                        navController.popBackStack()
+                    }
+                }
+
                 StatsView(navController, statsViewModel, settingsViewModel)
             }
 

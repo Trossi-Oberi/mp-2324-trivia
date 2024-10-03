@@ -17,14 +17,19 @@ import kotlinx.coroutines.launch
 
 class StatsViewModel(application: Application) : AndroidViewModel(application) {
 
-
-
     private val gameRepository: GameRepository
     private val questionRepository: QuestionRepository
     private val gameQuestionRepository: GameQuestionRepository
 
     private val _gameQuestionsReady = MutableLiveData(false)
     val gameQuestionsReady: LiveData<Boolean> get() = _gameQuestionsReady
+
+    private val _showGameDetails = MutableLiveData(false)
+    val showGameDetails: LiveData<Boolean> get() = _showGameDetails
+
+    fun setShowGameDetails(value: Boolean){
+        _showGameDetails.value = value
+    }
 
     fun setGameQuestionsReady(value: Boolean){
         _gameQuestionsReady.value = value
