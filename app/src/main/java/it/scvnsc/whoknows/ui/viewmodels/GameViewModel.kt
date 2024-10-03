@@ -30,6 +30,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private val DEFAULT_CATEGORY = "mixed"
     private val DEFAULT_DIFFICULTY = "mixed"
+    private val SCORE_EASY_DIFFICULTY = 1
+    private val SCORE_MEDIUM_DIFFICULTY = 2
+    private val SCORE_HARD_DIFFICULTY = 3
     private val WAIT_TIME = 500L
 
     //Difficolta' selezionata dall'utente
@@ -386,9 +389,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private fun updateScore() {
 
         val increment = when {
-            _questionForUser.value?.difficulty == "easy" -> 1
-            _questionForUser.value?.difficulty == "medium" -> 3
-            _questionForUser.value?.difficulty == "hard" -> 5
+            _questionForUser.value?.difficulty == "easy" -> SCORE_EASY_DIFFICULTY
+            _questionForUser.value?.difficulty == "medium" -> SCORE_MEDIUM_DIFFICULTY
+            _questionForUser.value?.difficulty == "hard" -> SCORE_HARD_DIFFICULTY
             else -> 1
         }
 
@@ -402,14 +405,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onQuitGameClicked() {
         viewModelScope.launch {
-            onQuitGame()
+            quitGame()
         }
     }
 
-    private suspend fun onQuitGame() {
+    private suspend fun quitGame() {
         //TODO:: da inserire suono chiusura partita
         //playSound(R.raw.wrong_answer)
-        delay(WAIT_TIME)
+        //delay(WAIT_TIME)
 
         //imposto la risposta come non data
         _questionForUser.value?.givenAnswer = ""
@@ -432,14 +435,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         askedQuestions.clear()
 
-        //imposto isPlaying a false, in modo che torni alla schermata iniziale di gioco
-        _isPlaying.value = false
-
-        //resetto a null _isGameTimerInterrupted per evitare che mostri il loading screen nella gameView
-        _isGameTimerInterrupted.value = null
-
         //salvo nella variabile lastGame l'ultima partita salvata
         _lastGame.value = gameRepository.getLastGame()
+
+        //imposto isPlaying a false, in modo che torni alla schermata iniziale di gioco
+        //_isPlaying.value = false
+
+        //imposto gameOver a true in modo da far comparire la schermata di gameOver
+        _isGameOver.value = true
+
     }
 
     fun pauseTimer() {

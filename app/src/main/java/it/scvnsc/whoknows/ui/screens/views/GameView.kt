@@ -66,11 +66,15 @@ import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
+import it.scvnsc.whoknows.ui.theme.big_spacing_height
 import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.default_elevation
 import it.scvnsc.whoknows.ui.theme.disabled_elevation
 import it.scvnsc.whoknows.ui.theme.fontSizeBig
+import it.scvnsc.whoknows.ui.theme.fontSizeNormal
+import it.scvnsc.whoknows.ui.theme.fontSizeUpperMedium
+import it.scvnsc.whoknows.ui.theme.fontSizeUpperNormal
 import it.scvnsc.whoknows.ui.theme.gameButtonsTextStyle
 import it.scvnsc.whoknows.ui.theme.gameQuestionTextStyle
 import it.scvnsc.whoknows.ui.theme.gameScoreTextStyle
@@ -117,7 +121,7 @@ fun GameView(
                         }
                     } else {
                         if (isPlaying.observeAsState().value == false) {
-                            if (isApiSetupComplete.observeAsState().value==false){
+                            if (isApiSetupComplete.observeAsState().value == false) {
                                 setupAPI()
                             }
                             GameViewMainPage(navController, gameViewModel, settingsViewModel)
@@ -267,7 +271,6 @@ fun GameViewInGame(
                             showExitConfirmationDialog(context, gameViewModel)
                         } else {
                             navController.navigate("game")
-
                             gameViewModel.setIsPlaying(false)
                             gameViewModel.clearUserAnswer()
                             gameViewModel.setGameOver(false)
@@ -306,8 +309,8 @@ fun showExitConfirmationDialog(context: Context, gameViewModel: GameViewModel) {
         .setTitle("Exit game")
         .setMessage("Are you sure you want to exit the game?")
         .setPositiveButton("Yes") { _, _ ->
-            Toast.makeText(context, "Game exited successfully", Toast.LENGTH_SHORT).show()
             gameViewModel.onQuitGameClicked()
+            Toast.makeText(context, "Game exited successfully", Toast.LENGTH_SHORT).show()
         }
         .setNegativeButton("No") { dialog, _ ->
             //riavvio il timer se l'utente vuole proseguire con la partita
@@ -413,31 +416,36 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
+
         ) {
             //3 Bottoni: Main menu, Game menu, Play again
-            Text(text = "Game Over!", fontSize = fontSizeBig)
+            Text(
+                text = "Game Over!",
+                fontSize = fontSizeBig,
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             Spacer(modifier = Modifier.height(medium_spacing_height))
 
             if (isRecord == true) {
                 Text(
                     text = "🎉 New record! 🎉",
-                    fontSize = 36.sp,
+                    fontSize = fontSizeUpperMedium,
                     color = MaterialTheme.colorScheme.primary, // Gold color
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "${gameViewModel.lastGame.value?.score}",
-                    fontSize = 55.sp,
+                    text = "Score: ${gameViewModel.lastGame.value?.score}",
+                    fontSize = fontSizeUpperMedium,
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             } else {
                 Text(
-                    text = "${gameViewModel.lastGame.value?.score}",
-                    fontSize = 55.sp,
+                    text = "Score: ${gameViewModel.lastGame.value?.score}",
+                    fontSize = fontSizeUpperMedium,
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -451,7 +459,7 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
                 elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
                 shape = RoundedCornerShape(game_buttons_shape),
                 modifier = Modifier
-                    .width(250.dp)
+                    .width(280.dp)
                     .height(game_buttons_height),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -463,7 +471,7 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
                     gameViewModel.clearUserAnswer()
                     gameViewModel.setGameOver(false)
                 }) {
-                Text(text = "Main Menu")
+                Text(text = "Main Menu", fontSize = fontSizeNormal)
             }
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -472,7 +480,7 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
                 elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
                 shape = RoundedCornerShape(game_buttons_shape),
                 modifier = Modifier
-                    .width(250.dp)
+                    .width(280.dp)
                     .height(game_buttons_height),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 onClick = {
@@ -481,7 +489,7 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
                     gameViewModel.clearUserAnswer()
                     gameViewModel.setGameOver(false)
                 }) {
-                Text(text = "Game Menu")
+                Text(text = "Game Menu", fontSize = fontSizeNormal)
             }
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -490,14 +498,15 @@ fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostControlle
                 elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
                 shape = RoundedCornerShape(game_buttons_shape),
                 modifier = Modifier
-                    .width(250.dp)
+                    .width(280.dp)
                     .height(game_buttons_height),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 onClick = {
                     gameViewModel.onStartClicked()
                 }) {
-                Text(text = "Play again")
+                Text(text = "Play again", fontSize = fontSizeNormal)
             }
+            Spacer(modifier = Modifier.height(90.dp))
         }
     }
 }
@@ -690,7 +699,8 @@ fun ShowQuestion(gameViewModel: GameViewModel) {
     ) {
         Text(
             text = gameViewModel.questionForUser.observeAsState().value?.question ?: "",
-            style = gameQuestionTextStyle
+            style = gameQuestionTextStyle,
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -748,7 +758,7 @@ fun AnswerButton(
             containerColor = backgroundColor
         ),
         onClick = {
-            if (isAnswerSelected == false){
+            if (isAnswerSelected == false) {
                 gvm.onAnswerClicked(answerText)
             }
         }

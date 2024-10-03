@@ -32,10 +32,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var statsViewModel: StatsViewModel
 
     //TODO Complessivo:
-    // sistemare bug scelta multipla della risposta alla domanda
-    // sistemare bug timer (esiste ma non sappiamo come si verifica :( )
+    // sistemare grafica In Game, appare una barra bianca in fondo allo schermo
     // aggiungere musica di sottofondo partita
-    // migliorare schermata game over
+    // migliorare schermata game over -> Migliorata, da approvare
     // finire grafica schermata partite passate
     // sistemare landscape
     // aggiungere vite
