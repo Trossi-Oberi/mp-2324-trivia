@@ -29,8 +29,8 @@ val game_buttons_padding_top = 80.dp
 val game_buttons_spacing = 30.dp
 val game_buttons_shape = 30.dp
 val game_buttons_height = 70.dp
-val padding_difficulty = 120.dp
-val star_icon_size = 35.dp
+val padding_difficulty = 20.dp
+val star_icon_size = 30.dp
 
 //SettingsView
 //TODO::

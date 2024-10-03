@@ -60,19 +60,22 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import android.app.AlertDialog
 import android.content.Context
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HeartBroken
+import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.LaunchedEffect
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
-import it.scvnsc.whoknows.ui.theme.big_spacing_height
 import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.default_elevation
 import it.scvnsc.whoknows.ui.theme.disabled_elevation
 import it.scvnsc.whoknows.ui.theme.fontSizeBig
 import it.scvnsc.whoknows.ui.theme.fontSizeNormal
+import it.scvnsc.whoknows.ui.theme.fontSizeSmall
 import it.scvnsc.whoknows.ui.theme.fontSizeUpperMedium
 import it.scvnsc.whoknows.ui.theme.fontSizeUpperNormal
 import it.scvnsc.whoknows.ui.theme.gameButtonsTextStyle
@@ -89,7 +92,6 @@ import it.scvnsc.whoknows.ui.theme.medium_spacing_height
 import it.scvnsc.whoknows.ui.theme.padding_difficulty
 import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
-import it.scvnsc.whoknows.ui.theme.small_spacing_height
 import it.scvnsc.whoknows.ui.theme.star_icon_size
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
@@ -373,7 +375,6 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
                         .weight(0.5f)
                         .align(Alignment.CenterVertically)
                         .padding(start = 10.dp, end = 10.dp)
-                        .fillMaxWidth()
                 ) {
                     //Timer nella UI
                     GameTimer(gameViewModel)
@@ -384,7 +385,7 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
                     modifier = Modifier
                         .weight(0.5f)
                         .align(Alignment.CenterVertically)
-                        .padding(end = 10.dp)
+                        .padding(start = 10.dp, end = 10.dp)
                 ) {
                     //Punteggio nella UI
                     GameScore(gameViewModel)
@@ -393,7 +394,30 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            ShowDifficulty(gameViewModel)
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+            ){
+                //Difficulty Box
+                Box(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 10.dp, end = 10.dp)
+                ){
+                    DifficultyBox(gameViewModel)
+                }
+
+                //Lives Box
+                Box(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 10.dp, end = 10.dp)
+                ){
+                    LivesBox(gameViewModel)
+                }
+            }
 
             Spacer(modifier = Modifier.size(10.dp))
 
@@ -547,7 +571,7 @@ fun GameTimer(gameViewModel: GameViewModel) {
                 )
             }
         },
-        colors = ButtonDefaults.buttonColors(
+        colors = ButtonColors(
             Color.Transparent,
             Color.Transparent,
             MaterialTheme.colorScheme.primary,
@@ -592,7 +616,7 @@ fun GameScore(gameViewModel: GameViewModel) {
                 )
             }
         },
-        colors = ButtonDefaults.buttonColors(
+        colors = ButtonColors(
             Color.Transparent,
             Color.Transparent,
             MaterialTheme.colorScheme.primary,
@@ -602,7 +626,7 @@ fun GameScore(gameViewModel: GameViewModel) {
 }
 
 @Composable
-fun ShowDifficulty(gameViewModel: GameViewModel) {
+fun DifficultyBox(gameViewModel: GameViewModel) {
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
@@ -610,46 +634,149 @@ fun ShowDifficulty(gameViewModel: GameViewModel) {
             .fillMaxWidth(),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
+        colors = ButtonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary),
         content = {
-            when (gameViewModel.questionForUser.observeAsState().value?.difficulty) {
-                "easy" -> {
-                    Icon(
-                        Icons.Default.Star,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(star_icon_size)
-                            .fillMaxSize()
-                    )
-                }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = "Difficulty:",
+                    fontSize = fontSizeUpperNormal,
+                    style = gameButtonsTextStyle,
+                    color = Color.White
+                )
+                when (gameViewModel.questionForUser.observeAsState().value?.difficulty) {
+                    "easy" -> {
+                        Icon(
+                            Icons.Default.Star,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(star_icon_size)
+                                .fillMaxSize()
+                        )
+                    }
 
-                "medium" -> {
-                    Row {
-                        for (i in 1..2) {
-                            Icon(
-                                Icons.Default.Star,
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(star_icon_size)
-                                    .fillMaxSize()
-                            )
+                    "medium" -> {
+                        Row (
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        ){
+                            for (i in 1..2) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(star_icon_size)
+                                        .fillMaxSize()
+                                )
+                            }
+                        }
+                    }
+
+                    "hard" -> {
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            for (i in 1..3) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(star_icon_size)
+                                        .fillMaxSize()
+                                )
+                            }
                         }
                     }
                 }
+            }
+        }
+    )
+}
 
-                "hard" -> {
+@Composable
+fun LivesBox(gameViewModel: GameViewModel) {
+    Button(
+        onClick = { /* do nothing */ },
+        modifier = Modifier
+            .padding(start = padding_difficulty, end = padding_difficulty)
+            .fillMaxWidth(),
+        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
+        enabled = false,
+        colors = ButtonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary),
+        content = {
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+            ){
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = "Lives:",
+                    fontSize = fontSizeUpperNormal,
+                    style = gameButtonsTextStyle,
+                    color = Color.White
+                )
+                when (gameViewModel.lives.observeAsState().value) {
 
-                    Row {
-                        for (i in 1..3) {
-                            Icon(
-                                Icons.Default.Star,
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(star_icon_size)
-                                    .fillMaxSize()
-                            )
+                    0 -> {
+                        Icon(
+                            Icons.Default.HeartBroken,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(star_icon_size)
+                                .fillMaxSize()
+                        )
+                    }
+
+                    1 -> {
+                        Icon(
+                            Icons.Default.Favorite,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(star_icon_size)
+                                .fillMaxSize()
+                        )
+                    }
+
+                    2 -> {
+                        Row (
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ){
+                            for (i in 1..2) {
+                                Icon(
+                                    Icons.Default.Favorite,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(star_icon_size)
+                                        .fillMaxSize()
+                                )
+                            }
+                        }
+                    }
+
+                    3 -> {
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            for (i in 1..3) {
+                                Icon(
+                                    Icons.Default.Favorite,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(star_icon_size)
+                                        .fillMaxSize()
+                                )
+                            }
                         }
                     }
                 }

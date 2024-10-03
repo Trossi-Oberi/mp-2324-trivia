@@ -34,6 +34,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val SCORE_MEDIUM_DIFFICULTY = 2
     private val SCORE_HARD_DIFFICULTY = 3
     private val WAIT_TIME = 500L
+    private val STARTING_LIVES = 3
 
     //Difficolta' selezionata dall'utente
     private val _selectedDifficulty = MutableLiveData(DEFAULT_DIFFICULTY)
@@ -99,6 +100,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _score = MutableLiveData<Int>()
     val score: LiveData<Int> = _score
 
+    //Vite dell'utente
+    private val _lives = MutableLiveData<Int>()
+    val lives: LiveData<Int> = _lives
+
     private val _isAPIError = MutableLiveData<Boolean>(false)
     val isAPIError: LiveData<Boolean> get() = _isAPIError
 
@@ -158,8 +163,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (givenAnswer == questionForUser.value?.correct_answer) {
             //Aggiorno il punteggio e riproduco il suono di risposta corretta
             updateScore()
-
             playSound(R.raw.correct_answer)
+            delay(WAIT_TIME)
 
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
@@ -168,63 +173,64 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 _questionForUser.value!!.id,
                 givenAnswer
             )
-
-            delay(WAIT_TIME)
-            //Interrompo il timer per eseguire il job relativo alla richiesta API
-            _isGameTimerInterrupted.value = true
-            apiTimerJob?.join() //Aspetto che il job che attende massimo 5 secondi per evitare HTTP 429 (TooManyRequests) finisca
-
-            //Fetcho la prossima domanda, se la richiesta API fallisce aspetto che torni la connessione e riproviamo
-            _questionForUser.value = nextQuestion()
-            if (_questionForUser.value == null) {
-                while (true) {
-                    if (NetworkMonitorService.isOffline.value == false) {
-                        _questionForUser.value = nextQuestion()
-                        break
-                    }
-                }
-            }
-
-            _userAnswer.value = ""
-            _isGameTimerInterrupted.value = false //Riattivo il timer per continuare a giocare
+            fetchNewQuestion()
 
         } else {
-            //Risposta sbagliata -> Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
-
+            //Risposta sbagliata -> -1 vita, prossima domanda
+            //Risposta sbagliata &&  Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
+            _lives.value = _lives.value!! - 1
+            Log.d("Debug", "Current lives: ${_lives.value}")
             playSound(R.raw.wrong_answer)
             delay(WAIT_TIME)
 
             //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
             _questionForUser.value?.givenAnswer = givenAnswer
+            questionRepository.updateLastQuestion(_questionForUser.value!!.id, givenAnswer)
 
-            questionRepository.updateLastQuestion(
-                _questionForUser.value!!.id,
-                givenAnswer
-            )
+            if (_lives.value == 0){
+                //Salvataggio game nel DB
+                Log.d("Debug", "Game ended with score: ${_score.value}")
+                val playedGame = Game(
+                    _score.value!!,
+                    _selectedDifficulty.value!!,
+                    _selectedCategory.value!!,
+                    _elapsedTime.value!!,
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
+                )
+                //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
+                checkGameRecord(playedGame)
 
-            //Salvataggio game nel DB
-            Log.d("Debug", "Game ended with score: ${_score.value}")
-            val playedGame = Game(
-                _score.value!!,
-                _selectedDifficulty.value!!,
-                _selectedCategory.value!!,
-                _elapsedTime.value!!,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
-            )
-            //Controllo se il nuovo punteggio e' un record e aggiorno isRecord di conseguenza
-            checkGameRecord(playedGame)
+                //In ogni caso salvo la partita
+                saveGameAndQuestions(playedGame, askedQuestions)
 
-            //In ogni caso salvo la partita
-            saveGameAndQuestions(playedGame, askedQuestions)
+                //Devo settare isPlaying ad off solamente se l'utente clicka main menu o game menu
+                //Altrimenti isPlaying rimane true e isGameOver torna false, per iniziare una nuova partita
+                _isGameOver.postValue(true)
 
-            //Devo settare isPlaying ad off solamente se l'utente clicka main menu o game menu
-            //Altrimenti isPlaying rimane true e isGameOver torna false, per iniziare una nuova partita
-            _isGameOver.postValue(true)
-
-            //salvo nella variabile lastGame l'ultima partita salvata
-            _lastGame.value = gameRepository.getLastGame()
+                //salvo nella variabile lastGame l'ultima partita salvata
+                _lastGame.value = gameRepository.getLastGame()
+            }else{
+                fetchNewQuestion()
+            }
         }
         _isAnswerSelected.value = false
+    }
+
+    private suspend fun fetchNewQuestion() {
+
+        //Fetcho la prossima domanda, se la richiesta API fallisce aspetto che torni la connessione e riproviamo
+        _questionForUser.value = nextQuestion()
+        if (_questionForUser.value == null) {
+            while (true) {
+                if (NetworkMonitorService.isOffline.value == false) {
+                    _questionForUser.value = nextQuestion()
+                    break
+                }
+            }
+        }
+        //Resetto la risposta data dall'utente e riattivo il timer per continuare a giocare
+        _userAnswer.value = ""
+        _isGameTimerInterrupted.value = false
     }
 
     private fun playSound(answerSound: Int) {
@@ -282,9 +288,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //Imposto punteggio a 0
         _score.postValue(0)
 
+        //Imposto le vite al valore di partenza
+        _lives.postValue(STARTING_LIVES)
+
         //Fetcho la nuova domanda
         _questionForUser.value = nextQuestion()
-
         //Se la richiesta API fallisce aspetto che torni la connessione e riproviamo
         if (_questionForUser.value == null) {
             while (true) {
@@ -394,9 +402,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             _questionForUser.value?.difficulty == "hard" -> SCORE_HARD_DIFFICULTY
             else -> 1
         }
-
         _score.postValue(_score.value!! + increment)
-
     }
 
     fun clearUserAnswer() {
