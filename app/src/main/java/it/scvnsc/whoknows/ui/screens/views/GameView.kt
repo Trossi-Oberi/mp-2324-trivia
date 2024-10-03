@@ -251,7 +251,6 @@ fun GameViewInGame(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = bottom_bar_padding)
                 .paint(
                     // Replace with your image id
                     painterResource(
