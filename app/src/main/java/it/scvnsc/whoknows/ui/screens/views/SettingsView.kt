@@ -18,8 +18,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,9 +47,7 @@ import it.scvnsc.whoknows.ui.theme.difficulty_buttons_height
 import it.scvnsc.whoknows.ui.theme.difficulty_buttons_height_landscape
 import it.scvnsc.whoknows.ui.theme.difficulty_buttons_width
 import it.scvnsc.whoknows.ui.theme.difficulty_buttons_width_landscape
-import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
-import it.scvnsc.whoknows.ui.theme.home_buttons_width
 import it.scvnsc.whoknows.ui.theme.icon_size_settings
 import it.scvnsc.whoknows.ui.theme.icon_size_settings_landscape
 import it.scvnsc.whoknows.ui.theme.pressed_elevation

@@ -18,7 +18,6 @@ val spacing_width = 16.dp
 val logo_height = 30.dp
 val logo_width = 100.dp
 val home_button_size = 150.dp
-val scale_height = 0.5f
 val home_buttons_padding = 150.dp
 val home_buttons_shape = 30.dp
 val home_buttons_width = 300.dp

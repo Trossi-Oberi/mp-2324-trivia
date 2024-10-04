@@ -7,9 +7,7 @@ import com.google.gson.JsonElement
 import it.scvnsc.whoknows.data.model.Question
 import java.lang.reflect.Type
 
-class QuestionDeserializer() : JsonDeserializer<Question> {
-
-
+class QuestionDeserializer : JsonDeserializer<Question> {
 
     override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Question {
         val jsonObject = json.asJsonObject

@@ -9,9 +9,4 @@ data class GameQuestion(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo val gameID: Long,
     @ColumnInfo val questionID: Long,
-){
-    constructor(
-        gameID: Long,
-        questionID: Long
-    ) : this(0, gameID, questionID)
-}
+)

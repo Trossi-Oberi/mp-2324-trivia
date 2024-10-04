@@ -88,16 +88,16 @@ dependencies {
     kapt(libs.androidx.room.compiler)
 
     //Extension of Material Icons
-    implementation("androidx.compose.material:material-icons-extended:1.7.1")
+    implementation(libs.androidx.material.icons.extended)
 
     //NavigationController
-    implementation("androidx.navigation:navigation-compose:2.8.0")
+    implementation(libs.androidx.navigation.compose)
 
     //ImageLoader
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("io.coil-kt:coil-svg:2.7.0")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
 
     //Splashscreen
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
 
 }

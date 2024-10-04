@@ -75,7 +75,6 @@ import it.scvnsc.whoknows.ui.theme.default_elevation
 import it.scvnsc.whoknows.ui.theme.disabled_elevation
 import it.scvnsc.whoknows.ui.theme.fontSizeBig
 import it.scvnsc.whoknows.ui.theme.fontSizeNormal
-import it.scvnsc.whoknows.ui.theme.fontSizeSmall
 import it.scvnsc.whoknows.ui.theme.fontSizeUpperMedium
 import it.scvnsc.whoknows.ui.theme.fontSizeUpperNormal
 import it.scvnsc.whoknows.ui.theme.gameButtonsTextStyle

@@ -104,9 +104,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _lives = MutableLiveData<Int>()
     val lives: LiveData<Int> = _lives
 
-    private val _isAPIError = MutableLiveData<Boolean>(false)
-    val isAPIError: LiveData<Boolean> get() = _isAPIError
-
     private val _isApiSetupComplete = MutableLiveData(false)
     val isApiSetupComplete: LiveData<Boolean> get() = _isApiSetupComplete
 
@@ -396,10 +393,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Aggiorna il punteggio
     private fun updateScore() {
 
-        val increment = when {
-            _questionForUser.value?.difficulty == "easy" -> SCORE_EASY_DIFFICULTY
-            _questionForUser.value?.difficulty == "medium" -> SCORE_MEDIUM_DIFFICULTY
-            _questionForUser.value?.difficulty == "hard" -> SCORE_HARD_DIFFICULTY
+        val increment = when (_questionForUser.value?.difficulty) {
+            "easy" -> SCORE_EASY_DIFFICULTY
+            "medium" -> SCORE_MEDIUM_DIFFICULTY
+            "hard" -> SCORE_HARD_DIFFICULTY
             else -> 1
         }
         _score.postValue(_score.value!! + increment)
@@ -467,8 +464,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 questionRepository.setupInteractionWithAPI()
                 _isApiSetupComplete.value = true
             } catch (e: Exception) {
-                _isAPIError.value = true
                 Log.e("Error", "API error: ${e.message}")
+                throw e
             }
         }
         //Log.d("WhoKnows", "GameViewModel initialized successfully")
