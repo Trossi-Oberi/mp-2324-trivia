@@ -416,10 +416,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun quitGame() {
-        //TODO:: da inserire suono chiusura partita
-        //playSound(R.raw.wrong_answer)
-        //delay(WAIT_TIME)
-
         //imposto la risposta come non data
         _questionForUser.value?.givenAnswer = ""
 

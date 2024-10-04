@@ -49,10 +49,8 @@ val gameScoreTextStyle = TextStyle(
 )
 
 //Answers text
-//TODO::
 
 //Score text
-//TODO::
 
 //YourGames elements
 val rowButtonTextStyle = TextStyle(

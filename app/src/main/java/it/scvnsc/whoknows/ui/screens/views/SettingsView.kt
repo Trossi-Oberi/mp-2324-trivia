@@ -53,7 +53,6 @@ import it.scvnsc.whoknows.utils.isLandscape
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-//TODO : credits, sounds, theme
 fun SettingsView(
     navController: NavHostController,
     settingsViewModel: SettingsViewModel

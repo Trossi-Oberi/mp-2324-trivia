@@ -355,7 +355,6 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
             }
         )
     ) {
-        //TODO:: da sistemare
         GameOverScreen(gameViewModel, navController)
     }
 
