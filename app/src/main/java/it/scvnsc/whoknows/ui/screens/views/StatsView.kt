@@ -653,7 +653,7 @@ fun QuestionsList(statsViewModel: StatsViewModel) {
     Box (
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp)
+            .padding(start = 20.dp, end = 20.dp, top = 10.dp)
     ){
 
         LazyColumn {
@@ -673,6 +673,9 @@ fun QuestionsList(statsViewModel: StatsViewModel) {
                                 text = question.question,
                                 modifier = Modifier.weight(1f)
                             )
+
+                            Spacer(modifier = Modifier.size(10.dp))
+
                             if (question.givenAnswer == question.correct_answer) {
                                 Icon(
                                     imageVector = Icons.Default.Check,

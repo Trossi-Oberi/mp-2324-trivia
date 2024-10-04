@@ -33,9 +33,7 @@ class MainActivity : ComponentActivity() {
 
     //TODO Complessivo:
     // aggiungere musica di sottofondo partita
-    // sistemare suono SharedPreferences
-    // migliorare schermata game over -> Migliorata, da approvare
-    // finire grafica schermata partite passate
+    // migliorare grafica schermata partite passate
     // sistemare landscape
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
