@@ -4,9 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class PreferencesManager(context: Context) {
-    //TODO: da sistemare il suono
-
-
     private val prefs: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
     var isDarkTheme: Boolean
