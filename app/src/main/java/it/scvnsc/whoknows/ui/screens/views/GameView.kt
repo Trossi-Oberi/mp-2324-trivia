@@ -987,7 +987,7 @@ fun MainPageButtons(
                 },
                 onDifficultySelected = {
                     selectedDifficulty = it
-                    gameViewModel.setDifficulty(it.lowercase())
+                    gameViewModel.setDifficulty(it)
                 },
                 gameViewModel = gameViewModel
             )
@@ -1137,18 +1137,15 @@ fun DifficultySelectionDialog(
                     .height(200.dp)
             ) {
                 for (diff in DifficultyType.entries) {
+                    Log.d("Debug", "Difficulty: $diff")
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .selectable(
-                                selected = (diff
-                                    .toString()
-                                    .lowercase() == gameViewModel.selectedDifficulty.value),
+                                selected = (diff.toString() == gameViewModel.selectedDifficulty.value),
                                 onClick = {
                                     onDifficultySelected(diff.toString())
-                                    radioSelected = diff
-                                        .toString()
-                                        .lowercase()
+                                    radioSelected = diff.toString()
                                 }
                             )
                             .padding(horizontal = 16.dp),
@@ -1157,13 +1154,13 @@ fun DifficultySelectionDialog(
                         RadioButton(
                             onClick = {
                                 onDifficultySelected(diff.toString())
-                                radioSelected = diff.toString().lowercase()
+                                radioSelected = diff.toString()
                                 Log.d(
                                     "Debug",
                                     "Selected category: ${diff.toString().lowercase()}"
                                 )
                             },
-                            selected = (diff.toString().lowercase() == radioSelected),
+                            selected = (diff.toString() == radioSelected),
                             enabled = true
                         )
 

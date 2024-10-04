@@ -28,8 +28,8 @@ import java.util.Locale
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val DEFAULT_CATEGORY = "mixed"
-    private val DEFAULT_DIFFICULTY = "mixed"
+    private val DEFAULT_CATEGORY = "Mixed"
+    private val DEFAULT_DIFFICULTY = "Mixed"
     private val SCORE_EASY_DIFFICULTY = 1
     private val SCORE_MEDIUM_DIFFICULTY = 2
     private val SCORE_HARD_DIFFICULTY = 3
@@ -309,7 +309,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Funzione che converte la stringa "mixed" in "" in modo da far funzionare la richiesta all'API
     private fun convertMixed(text: String): String {
-        if (text != "mixed") {
+        if (text != "Mixed") {
             return text
         }
         return ""
@@ -329,7 +329,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         try {
             when (val result = questionRepository.retrieveNewQuestion(
                 convertMixed(_selectedCategory.value.toString()),
-                convertMixed(_selectedDifficulty.value.toString().lowercase())
+                convertMixed(_selectedDifficulty.value.toString()).lowercase()
             )) {
                 is NetworkResult.Success -> {
                     //Log.d("Debug", "New question retrieved: ${result.data}")
