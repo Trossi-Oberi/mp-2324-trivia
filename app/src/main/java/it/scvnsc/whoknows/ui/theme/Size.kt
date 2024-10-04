@@ -23,6 +23,10 @@ val home_buttons_padding = 150.dp
 val home_buttons_shape = 30.dp
 val home_buttons_width = 300.dp
 val home_buttons_height = 150.dp
+val home_buttons_width_landscape = 230.dp
+val home_buttons_height_landscape = 140.dp
+
+
 
 //GameView
 val game_buttons_padding_top = 80.dp
@@ -34,6 +38,13 @@ val star_icon_size = 30.dp
 
 //SettingsView
 val difficulty_icon_size = 45.dp
+val difficulty_buttons_shape = 30.dp
+val difficulty_buttons_width = 300.dp
+val difficulty_buttons_height = 150.dp
+val difficulty_buttons_width_landscape = 230.dp
+val difficulty_buttons_height_landscape = 140.dp
+val icon_size_settings = 50.dp
+val icon_size_settings_landscape = 40.dp
 
 //StatsView
 val row_button_height = 80.dp
