@@ -48,6 +48,10 @@ val icon_size_settings_landscape = 40.dp
 
 //StatsView
 val row_button_height = 80.dp
+val header_height = 50.dp
+val header_height_landscape = 45.dp
+val gameheader_height_landscape = 75.dp
+val gameheader_height = 80.dp
 
 //Font
 val fontSizeSmall = 12.sp
