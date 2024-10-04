@@ -23,16 +23,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,9 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
@@ -55,13 +51,9 @@ import it.scvnsc.whoknows.ui.screens.components.TopBar
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.theme.bottom_bar_padding
 import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
-import it.scvnsc.whoknows.ui.theme.disabled_elevation
-import it.scvnsc.whoknows.ui.theme.fontSizeBig
+import it.scvnsc.whoknows.ui.theme.difficulty_icon_size
 import it.scvnsc.whoknows.ui.theme.fontSizeMedium
 import it.scvnsc.whoknows.ui.theme.fontSizeNormal
-import it.scvnsc.whoknows.ui.theme.fontSizeSmall
-import it.scvnsc.whoknows.ui.theme.fontSizeUpperMedium
-import it.scvnsc.whoknows.ui.theme.fontSizeUpperNormal
 import it.scvnsc.whoknows.ui.theme.medium_padding
 import it.scvnsc.whoknows.ui.theme.rowButtonTextStyle
 import it.scvnsc.whoknows.ui.theme.row_button_height
@@ -414,18 +406,18 @@ fun GameDetails(
             .padding(bottom = bottom_bar_padding)
     ) {
         //HEADER
-        Header()
+        GameDetailsHeader()
 
         //GAME DETAILS
         GameDetailsBox(game, settingsViewModel)
 
         //QUESTIONS BOX
-        QuestionsBox(game, statsViewModel)
+        QuestionsBox(statsViewModel)
     }
 }
 
 @Composable
-fun Header() {
+fun GameDetailsHeader() {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -455,6 +447,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
             modifier = Modifier
                 .fillMaxSize()
         ) {
+            //First row
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -488,6 +481,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                 }
             }
 
+            //Secondo row
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -497,6 +491,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
+                    //Date column
                     Box(
                         modifier = Modifier
                             .weight(0.5F)
@@ -511,62 +506,121 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                         )
                     }
 
+                    //Difficulty column
                     Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .weight(0.5F)
-                            .fillMaxWidth()
+                            .fillMaxSize()
                     ) {
                         when (game.difficulty) {
                             "easy" -> {
-                                Icon(
-                                    Icons.Default.Star,
-                                    tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(star_icon_size)
-                                        .fillMaxSize()
-                                )
+                                Column (
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        Icons.Default.Star,
+                                        tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(difficulty_icon_size)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(5.dp))
+
+                                    Text(
+                                        text = "Easy",
+                                        style = buttonsTextStyle,
+                                        fontSize = fontSizeMedium
+                                    )
+                                }
                             }
 
                             "medium" -> {
-                                Row {
-                                    for (i in 1..2) {
-                                        Icon(
-                                            Icons.Default.Star,
-                                            tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(star_icon_size)
-                                                .fillMaxSize()
-                                        )
+
+                                Column (
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+
+                                    Row {
+                                        for (i in 1..2) {
+                                            Icon(
+                                                Icons.Default.Star,
+                                                tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(difficulty_icon_size)
+                                                    .fillMaxSize()
+                                            )
+                                        }
                                     }
+
+                                    Spacer(modifier = Modifier.height(5.dp))
+
+                                    Text(
+                                        text = "Medium",
+                                        style = buttonsTextStyle,
+                                        fontSize = fontSizeMedium
+                                    )
                                 }
                             }
 
                             "hard" -> {
-                                Row {
-                                    for (i in 1..3) {
-                                        Icon(
-                                            Icons.Default.Star,
-                                            tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(star_icon_size)
-                                                .fillMaxSize()
-                                        )
+                                Column (
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+
+                                    Row {
+                                        for (i in 1..3) {
+                                            Icon(
+                                                Icons.Default.Star,
+                                                tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(difficulty_icon_size)
+                                                    .fillMaxSize()
+                                            )
+                                        }
                                     }
+
+                                    Spacer(modifier = Modifier.height(5.dp))
+
+                                    Text(
+                                        text = "Hard",
+                                        style = buttonsTextStyle,
+                                        fontSize = fontSizeMedium
+                                    )
                                 }
+
                             }
 
                             else -> {
-                                Icon(
-                                    Icons.Default.Close,
-                                    tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(star_icon_size)
-                                        .fillMaxSize()
-                                )
+                                Column (
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+
+                                    Icon(
+                                        Icons.Default.Shuffle,
+                                        tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(difficulty_icon_size)
+                                            .fillMaxSize()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(5.dp))
+
+                                    Text(
+                                        text = "Mixed",
+                                        style = buttonsTextStyle,
+                                        fontSize = fontSizeMedium
+                                    )
+
+                                }
                             }
                         }
                     }
@@ -578,7 +632,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
 }
 
 @Composable
-fun QuestionsBox(game: Game, statsViewModel: StatsViewModel) {
+fun QuestionsBox(statsViewModel: StatsViewModel) {
     Box(
         modifier = Modifier
             .fillMaxWidth()

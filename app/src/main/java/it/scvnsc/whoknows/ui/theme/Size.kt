@@ -33,7 +33,7 @@ val padding_difficulty = 20.dp
 val star_icon_size = 30.dp
 
 //SettingsView
-//TODO::
+val difficulty_icon_size = 45.dp
 
 //StatsView
 val row_button_height = 80.dp
