@@ -394,17 +394,17 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            Row (
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-            ){
+            ) {
                 //Difficulty Box
                 Box(
                     modifier = Modifier
                         .weight(0.5f)
                         .align(Alignment.CenterVertically)
                         .padding(start = 10.dp, end = 10.dp)
-                ){
+                ) {
                     DifficultyBox(gameViewModel)
                 }
 
@@ -414,7 +414,7 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
                         .weight(0.5f)
                         .align(Alignment.CenterVertically)
                         .padding(start = 10.dp, end = 10.dp)
-                ){
+                ) {
                     LivesBox(gameViewModel)
                 }
             }
@@ -634,7 +634,12 @@ fun DifficultyBox(gameViewModel: GameViewModel) {
             .fillMaxWidth(),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
-        colors = ButtonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary),
+        colors = ButtonColors(
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.primary
+        ),
         content = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -660,9 +665,9 @@ fun DifficultyBox(gameViewModel: GameViewModel) {
                     }
 
                     "medium" -> {
-                        Row (
+                        Row(
                             horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        ){
+                        ) {
                             for (i in 1..2) {
                                 Icon(
                                     Icons.Default.Star,
@@ -708,12 +713,17 @@ fun LivesBox(gameViewModel: GameViewModel) {
             .fillMaxWidth(),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
-        colors = ButtonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary),
+        colors = ButtonColors(
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.primary
+        ),
         content = {
-            Column (
+            Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(3.dp),
-            ){
+            ) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = "Lives:",
@@ -746,9 +756,9 @@ fun LivesBox(gameViewModel: GameViewModel) {
                     }
 
                     2 -> {
-                        Row (
+                        Row(
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ){
+                        ) {
                             for (i in 1..2) {
                                 Icon(
                                     Icons.Default.Favorite,
@@ -800,7 +810,7 @@ fun QuestionBox(gameViewModel: GameViewModel) {
             ShowQuestion(gameViewModel)
         }
 
-        Spacer(modifier = Modifier.size(30.dp))
+        //Spacer(modifier = Modifier.size(30.dp))
 
         Box(
             modifier = Modifier
@@ -842,6 +852,8 @@ fun ShowAnswers(gvm: GameViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
+            .border(3.dp, Color.Red)
+            .padding(top = 40.dp, bottom = 40.dp)
     ) {
 
         Log.d("Debug", "++++++ Answers list ++++++\n")
@@ -879,6 +891,7 @@ fun AnswerButton(
         shape = RoundedCornerShape(game_buttons_shape),
         modifier = Modifier
             .fillMaxWidth()
+            //.padding(bottom = game_buttons_spacing)
             .height(game_buttons_height),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor
