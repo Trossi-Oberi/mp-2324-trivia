@@ -34,6 +34,9 @@ val game_buttons_shape = 30.dp
 val game_buttons_height = 70.dp
 val padding_difficulty = 20.dp
 val star_icon_size = 30.dp
+val star_icon_size_landscape = 19.dp
+val heart_icon_size = 30.dp
+val heart_icon_size_landscape = 16.dp
 
 //SettingsView
 val difficulty_icon_size = 45.dp
@@ -65,7 +68,7 @@ val iconSize = 24.dp
 val lineHeight = 32.sp
 val top_bar_height = 90.dp
 val top_bar_padding = 35.dp
-val bottom_bar_padding = 50.dp
+val bottom_bar_padding = 20.dp
 val default_elevation = 10.dp
 val pressed_elevation = 30.dp
 val disabled_elevation = 10.dp

@@ -1,5 +1,6 @@
 package it.scvnsc.whoknows.ui.screens.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.theme.top_bar_height
 import it.scvnsc.whoknows.ui.theme.top_bar_padding
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
+import it.scvnsc.whoknows.utils.isLandscape
 
 @Composable
 fun TopBar(
@@ -41,9 +43,10 @@ fun TopBar(
     showThemeChange: Boolean = true,
     settingsViewModel: SettingsViewModel? = null
 ) {
+    val isLandscape = isLandscape()
     Row(
         modifier = Modifier
-            .padding(top = top_bar_padding)
+            .padding(top = if (isLandscape) 0.dp else top_bar_padding)
             .fillMaxWidth()
             .height(top_bar_height),
         verticalAlignment = Alignment.Top

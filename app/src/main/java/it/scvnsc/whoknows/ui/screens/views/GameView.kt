@@ -60,7 +60,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import android.app.AlertDialog
 import android.content.Context
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -87,6 +89,8 @@ import it.scvnsc.whoknows.ui.theme.gameTimerTextStyle
 import it.scvnsc.whoknows.ui.theme.game_buttons_height
 import it.scvnsc.whoknows.ui.theme.game_buttons_shape
 import it.scvnsc.whoknows.ui.theme.game_buttons_spacing
+import it.scvnsc.whoknows.ui.theme.heart_icon_size
+import it.scvnsc.whoknows.ui.theme.heart_icon_size_landscape
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
@@ -95,6 +99,7 @@ import it.scvnsc.whoknows.ui.theme.padding_difficulty
 import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.theme.star_icon_size
+import it.scvnsc.whoknows.ui.theme.star_icon_size_landscape
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
@@ -295,7 +300,8 @@ fun GameViewInGame(
                 .fillMaxSize()
                 .padding(
                     start = if (isLandscape) bottom_bar_padding else 0.dp,
-                    end = if (isLandscape) bottom_bar_padding else 0.dp
+                    end = if (isLandscape) bottom_bar_padding else 0.dp,
+                    bottom = 10.dp
                 )
         ) {
             if (showLoading == true) {
@@ -367,219 +373,170 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
     }
 
     AnimatedVisibility(visible = gameOver == false) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    start = if (isLandscape) bottom_bar_padding else 0.dp,
-                    end = if (isLandscape) bottom_bar_padding else 0.dp
-                )
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                //Game timer box
-                Box(
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .align(Alignment.CenterVertically)
-                        .padding(start = 10.dp, end = 10.dp)
-                ) {
-                    //Timer nella UI
-                    GameTimer(gameViewModel)
-                }
-
-                //Game score box
-                Box(
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .align(Alignment.CenterVertically)
-                        .padding(start = 10.dp, end = 10.dp)
-                ) {
-                    //Punteggio nella UI
-                    GameScore(gameViewModel)
-                }
-            }
-
-            Spacer(modifier = Modifier.size(10.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                //Difficulty Box
-                Box(
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .align(Alignment.CenterVertically)
-                        .padding(start = 10.dp, end = 10.dp)
-                ) {
-                    DifficultyBox(gameViewModel)
-                }
-
-                //Lives Box
-                Box(
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .align(Alignment.CenterVertically)
-                        .padding(start = 10.dp, end = 10.dp)
-                ) {
-                    LivesBox(gameViewModel)
-                }
-            }
-
-            Spacer(modifier = Modifier.size(10.dp))
-
-            QuestionBox(gameViewModel)
+        if (isLandscape) {
+            GameBoxLandscape(gameViewModel)
+        } else {
+            GameBoxPortrait(gameViewModel)
         }
+
     }
-
 }
-
 
 @Composable
-fun GameOverScreen(
-    gameViewModel: GameViewModel,
-    navController: NavHostController,
-) {
-    val isRecord = gameViewModel.isRecord.observeAsState().value
-    var isLandscape = isLandscape()
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
+fun GameBoxLandscape(gameViewModel: GameViewModel) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-
+                //.padding(start = bottom_bar_padding, end = bottom_bar_padding)
+                .fillMaxWidth()
         ) {
-            //3 Bottoni: Main menu, Game menu, Play again
-            Text(
-                text = "Game Over!",
-                fontSize = fontSizeBig,
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Spacer(modifier = Modifier.height(medium_spacing_height))
-
-            if (isRecord == true) {
-                Text(
-                    text = "🎉 New record! 🎉",
-                    fontSize = fontSizeUpperMedium,
-                    color = MaterialTheme.colorScheme.primary, // Gold color
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Score: ${gameViewModel.lastGame.value?.score}",
-                    fontSize = fontSizeUpperMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            } else {
-                Text(
-                    text = "Score: ${gameViewModel.lastGame.value?.score}",
-                    fontSize = fontSizeUpperMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-            Spacer(modifier = Modifier.height(50.dp))
-
-
-            //Main Menu button
-            Button(
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(game_buttons_shape),
+            //Game timer box
+            Box(
                 modifier = Modifier
-                    .width(280.dp)
-                    .height(game_buttons_height),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                onClick = {
-                    navController.navigate("home")
-
-                    gameViewModel.setIsPlaying(false)
-                    gameViewModel.clearUserAnswer()
-                    gameViewModel.setGameOver(false)
-                }) {
-                Text(text = "Main Menu", fontSize = fontSizeNormal)
+                    .weight(0.25f)
+                    .align(Alignment.Top)
+                //.padding(start = 10.dp, end = 10.dp)
+            ) {
+                //Timer nella UI
+                GameTimer(gameViewModel)
             }
-            Spacer(modifier = Modifier.height(16.dp))
 
-            //Game Menu button
-            Button(
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(game_buttons_shape),
+            //Game score box
+            Box(
                 modifier = Modifier
-                    .width(280.dp)
-                    .height(game_buttons_height),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                onClick = {
-                    /*setta isPlaying off e rimane su gameView*/
-                    gameViewModel.setIsPlaying(false)
-                    gameViewModel.clearUserAnswer()
-                    gameViewModel.setGameOver(false)
-                }) {
-                Text(text = "Game Menu", fontSize = fontSizeNormal)
+                    .weight(0.25f)
+                    .align(Alignment.Top)
+            ) {
+                //Punteggio nella UI
+                GameScore(gameViewModel)
             }
-            Spacer(modifier = Modifier.height(16.dp))
 
-            //Play again button
-            Button(
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(game_buttons_shape),
+            //Difficulty Box
+            Box(
                 modifier = Modifier
-                    .width(280.dp)
-                    .height(game_buttons_height),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                onClick = {
-                    gameViewModel.onStartClicked()
-                }) {
-                Text(text = "Play again", fontSize = fontSizeNormal)
+                    .weight(0.25f)
+                    .align(Alignment.Top)
+            ) {
+                DifficultyBox(gameViewModel)
             }
-            Spacer(modifier = Modifier.height(90.dp))
+
+            //Lives Box
+            Box(
+                modifier = Modifier
+                    .weight(0.25f)
+                    .align(Alignment.Top)
+            ) {
+                LivesBox(gameViewModel)
+            }
         }
+        Spacer(modifier = Modifier.size(3.dp))
+        QuestionBox(gameViewModel)
     }
 }
 
+@Composable
+fun GameBoxPortrait(gameViewModel: GameViewModel) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            //Game timer box
+            Box(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .align(Alignment.CenterVertically)
+            ) {
+                //Timer nella UI
+                GameTimer(gameViewModel)
+            }
+
+            //Game score box
+            Box(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .align(Alignment.CenterVertically)
+            ) {
+                //Punteggio nella UI
+                GameScore(gameViewModel)
+            }
+        }
+
+        Spacer(modifier = Modifier.size(10.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            //Difficulty Box
+            Box(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 10.dp, end = 10.dp)
+            ) {
+                DifficultyBox(gameViewModel)
+            }
+
+            //Lives Box
+            Box(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 10.dp, end = 10.dp)
+            ) {
+                LivesBox(gameViewModel)
+            }
+        }
+
+        Spacer(modifier = Modifier.size(20.dp))
+
+        QuestionBox(gameViewModel)
+    }
+}
 
 @Composable
 fun GameTimer(gameViewModel: GameViewModel) {
     val timer = gameViewModel.elapsedTime.observeAsState().value
-
+    val isLandscape = isLandscape()
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
+            .padding(start = 15.dp, end = 15.dp)
             .fillMaxWidth(),
         enabled = false,
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         shape = CircleShape,
         content = {
             Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(small_padding)
+                    .padding(all = if (isLandscape) 0.dp else small_padding)
             ) {
                 Icon(
                     Icons.Default.Timer,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(size = if (isLandscape) 40.dp else 50.dp)
                         .fillMaxSize()
                         .padding(end = 10.dp)
                 )
 
                 Text(
-                    "Time:\n$timer",
+                    text = if (isLandscape) "Time: $timer" else "Time:\n$timer",
                     color = MaterialTheme.colorScheme.onPrimary,
                     style = gameTimerTextStyle,
+                    fontSize = if (isLandscape) fontSizeNormal else fontSizeUpperNormal,
                     textAlign = TextAlign.Left,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -598,36 +555,40 @@ fun GameTimer(gameViewModel: GameViewModel) {
 @Composable
 fun GameScore(gameViewModel: GameViewModel) {
     val currentScore = gameViewModel.score.observeAsState().value
-
+    val isLandscape = isLandscape()
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
+            .padding(start = 15.dp, end = 15.dp)
             .fillMaxWidth(),
         enabled = false,
         shape = CircleShape,
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         content = {
             Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(small_padding)
+                    .padding(all = if (isLandscape) 0.dp else small_padding)
             ) {
                 Icon(
                     Icons.Default.SportsScore,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(size = if (isLandscape) 41.dp else 48.dp)
                         .fillMaxSize()
-                        .padding(end = 10.dp)
+                        .padding(end = if (isLandscape) 3.dp else 10.dp)
                 )
 
                 Text(
-                    "Score:\n$currentScore",
+                    text = if (isLandscape) "Score: $currentScore" else "Score:\n$currentScore",
                     color = MaterialTheme.colorScheme.onPrimary,
                     style = gameScoreTextStyle,
-                    textAlign = TextAlign.Right,
+                    fontSize = if (isLandscape) fontSizeNormal else fontSizeUpperNormal,
+                    textAlign = if (isLandscape) TextAlign.Left else TextAlign.Right,
                     modifier = Modifier
                         .fillMaxWidth()
+                        //.padding(start = if (isLandscape) 5.dp else 0.dp)
                 )
             }
         },
@@ -642,10 +603,13 @@ fun GameScore(gameViewModel: GameViewModel) {
 
 @Composable
 fun DifficultyBox(gameViewModel: GameViewModel) {
+
+    val isLandscape = isLandscape()
+
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
-            .padding(start = padding_difficulty, end = padding_difficulty)
+            .padding(start = 12.dp, end = 12.dp)
             .fillMaxWidth(),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
@@ -656,75 +620,115 @@ fun DifficultyBox(gameViewModel: GameViewModel) {
             MaterialTheme.colorScheme.primary
         ),
         content = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(3.dp),
-            ) {
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = "Difficulty:",
-                    fontSize = fontSizeUpperNormal,
-                    style = gameButtonsTextStyle,
-                    color = Color.White
-                )
-                when (gameViewModel.questionForUser.observeAsState().value?.difficulty) {
-                    "easy" -> {
-                        Icon(
-                            Icons.Default.Star,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(star_icon_size)
-                                .fillMaxSize()
-                        )
-                    }
-
-                    "medium" -> {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        ) {
-                            for (i in 1..2) {
-                                Icon(
-                                    Icons.Default.Star,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(star_icon_size)
-                                        .fillMaxSize()
-                                )
-                            }
-                        }
-                    }
-
-                    "hard" -> {
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            for (i in 1..3) {
-                                Icon(
-                                    Icons.Default.Star,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(star_icon_size)
-                                        .fillMaxSize()
-                                )
-                            }
-                        }
-                    }
-                }
+            if (isLandscape) {
+                //Landscape orientation -> Row
+                DifficultyBoxLandscape(gameViewModel)
+            } else {
+                DifficultyBoxPortrait(gameViewModel)
             }
+
         }
     )
 }
 
 @Composable
+fun DifficultyBoxPortrait(gameViewModel: GameViewModel) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Difficulty:",
+            fontSize = fontSizeUpperNormal,
+            style = gameButtonsTextStyle,
+            color = Color.White,
+        )
+        PrintDifficultyStars(gameViewModel)
+    }
+}
+
+@Composable
+fun PrintDifficultyStars(gameViewModel: GameViewModel) {
+    val isLandscape = isLandscape()
+
+    when (gameViewModel.questionForUser.observeAsState().value?.difficulty) {
+        "easy" -> {
+            Icon(
+                Icons.Default.Star,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(size = if (isLandscape) star_icon_size_landscape else star_icon_size)
+                    .fillMaxSize()
+            )
+        }
+
+        "medium" -> {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                for (i in 1..2) {
+                    Icon(
+                        Icons.Default.Star,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(size = if (isLandscape) star_icon_size_landscape else star_icon_size)
+                            .fillMaxSize()
+                    )
+                }
+            }
+        }
+
+        "hard" -> {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                for (i in 1..3) {
+                    Icon(
+                        Icons.Default.Star,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(size = if (isLandscape) star_icon_size_landscape else star_icon_size)
+                            .fillMaxSize()
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DifficultyBoxLandscape(gameViewModel: GameViewModel) {
+    Row(
+        modifier = Modifier
+            .height(41.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Difficulty:",
+            fontSize = fontSizeNormal,
+            style = gameButtonsTextStyle,
+            color = Color.White,
+            modifier = Modifier
+                .padding(end = 6.dp)
+        )
+        PrintDifficultyStars(gameViewModel)
+    }
+}
+
+@Composable
 fun LivesBox(gameViewModel: GameViewModel) {
+    val isLandscape = isLandscape()
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
-            .padding(start = padding_difficulty, end = padding_difficulty)
+            .padding(start = 15.dp, end = 15.dp)
             .fillMaxWidth(),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
@@ -735,80 +739,120 @@ fun LivesBox(gameViewModel: GameViewModel) {
             MaterialTheme.colorScheme.primary
         ),
         content = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(3.dp),
-            ) {
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = "Lives:",
-                    fontSize = fontSizeUpperNormal,
-                    style = gameButtonsTextStyle,
-                    color = Color.White
-                )
-                when (gameViewModel.lives.observeAsState().value) {
-
-                    0 -> {
-                        Icon(
-                            Icons.Default.HeartBroken,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(star_icon_size)
-                                .fillMaxSize()
-                        )
-                    }
-
-                    1 -> {
-                        Icon(
-                            Icons.Default.Favorite,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(star_icon_size)
-                                .fillMaxSize()
-                        )
-                    }
-
-                    2 -> {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            for (i in 1..2) {
-                                Icon(
-                                    Icons.Default.Favorite,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(star_icon_size)
-                                        .fillMaxSize()
-                                )
-                            }
-                        }
-                    }
-
-                    3 -> {
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            for (i in 1..3) {
-                                Icon(
-                                    Icons.Default.Favorite,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(star_icon_size)
-                                        .fillMaxSize()
-                                )
-                            }
-                        }
-                    }
-                }
+            if (isLandscape){
+                LivesBoxLandscape(gameViewModel)
+            }else{
+                LivesBoxPortrait(gameViewModel)
             }
+
         }
     )
 }
+
+@Composable
+fun LivesBoxLandscape(gameViewModel: GameViewModel) {
+    Row(
+        modifier = Modifier
+            .height(41.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Lives:",
+            fontSize = fontSizeNormal,
+            style = gameButtonsTextStyle,
+            color = Color.White,
+            modifier = Modifier
+                .padding(end = 6.dp)
+        )
+        PrintRemainingLives(gameViewModel)
+    }
+}
+
+@Composable
+fun PrintRemainingLives(gameViewModel: GameViewModel) {
+    val isLandscape = isLandscape()
+
+    when (gameViewModel.lives.observeAsState().value) {
+
+        0 -> {
+            Icon(
+                Icons.Default.HeartBroken,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(size = if (isLandscape) heart_icon_size_landscape else heart_icon_size)
+                    .fillMaxSize()
+            )
+        }
+
+        1 -> {
+            Icon(
+                Icons.Default.Favorite,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(size = if (isLandscape) heart_icon_size_landscape else heart_icon_size)
+                    .fillMaxSize()
+            )
+        }
+
+        2 -> {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                for (i in 1..2) {
+                    Icon(
+                        Icons.Default.Favorite,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(size = if (isLandscape) heart_icon_size_landscape else heart_icon_size)
+                            .fillMaxSize()
+                    )
+                }
+            }
+        }
+
+        3 -> {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                for (i in 1..3) {
+                    Icon(
+                        Icons.Default.Favorite,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(size = if (isLandscape) heart_icon_size_landscape else heart_icon_size)
+                            .fillMaxSize()
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LivesBoxPortrait(gameViewModel: GameViewModel) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Lives:",
+            fontSize = fontSizeUpperNormal,
+            style = gameButtonsTextStyle,
+            color = Color.White
+        )
+        PrintRemainingLives(gameViewModel)
+    }
+}
+
+
 
 @Composable
 fun QuestionBox(gameViewModel: GameViewModel) {
@@ -826,7 +870,8 @@ fun QuestionBox(gameViewModel: GameViewModel) {
             ShowQuestion(gameViewModel)
         }
 
-        //Spacer(modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier
+            .size(size = if (isLandscape) 8.dp else 0.dp))
 
         Box(
             modifier = Modifier
@@ -850,10 +895,18 @@ fun ShowAnswersLandscape(gvm: GameViewModel) {
     val answers = gvm.shuffledAnswers.observeAsState().value
     val givenAnswer = gvm.userAnswer.observeAsState().value
 
-    Column {
+    Column(
+        modifier = Modifier
+    ){
         LazyVerticalGrid(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top=8.dp,bottom = 10.dp),
             columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(16.dp)
+            contentPadding = PaddingValues(all = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(15.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+
         ) {
             items(answers ?: emptyList()) { answer ->
                 AnswerButton(
@@ -925,7 +978,7 @@ fun AnswerButton(
         isSelected && !isCorrect -> Color.Red
         else -> MaterialTheme.colorScheme.primary
     }
-
+    val isLandscape = isLandscape()
     val isAnswerSelected = gvm.isAnswerSelected.observeAsState().value
 
     Log.d("Debug", "Answer: $answerText -> $isCorrect")
@@ -935,7 +988,6 @@ fun AnswerButton(
         shape = RoundedCornerShape(game_buttons_shape),
         modifier = Modifier
             .fillMaxWidth()
-            //.padding(bottom = game_buttons_spacing)
             .height(game_buttons_height),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor
@@ -1311,6 +1363,116 @@ fun CategorySelectionDialog(
             }
         }
     )
+}
+
+@Composable
+fun GameOverScreen(
+    gameViewModel: GameViewModel,
+    navController: NavHostController,
+) {
+    val isRecord = gameViewModel.isRecord.observeAsState().value
+    var isLandscape = isLandscape()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+
+        ) {
+            //3 Bottoni: Main menu, Game menu, Play again
+            Text(
+                text = "Game Over!",
+                fontSize = fontSizeBig,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(medium_spacing_height))
+
+            if (isRecord == true) {
+                Text(
+                    text = "🎉 New record! 🎉",
+                    fontSize = fontSizeUpperMedium,
+                    color = MaterialTheme.colorScheme.primary, // Gold color
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Score: ${gameViewModel.lastGame.value?.score}",
+                    fontSize = fontSizeUpperMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            } else {
+                Text(
+                    text = "Score: ${gameViewModel.lastGame.value?.score}",
+                    fontSize = fontSizeUpperMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(50.dp))
+
+
+            //Main Menu button
+            Button(
+                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                shape = RoundedCornerShape(game_buttons_shape),
+                modifier = Modifier
+                    .width(280.dp)
+                    .height(game_buttons_height),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                onClick = {
+                    navController.navigate("home")
+
+                    gameViewModel.setIsPlaying(false)
+                    gameViewModel.clearUserAnswer()
+                    gameViewModel.setGameOver(false)
+                }) {
+                Text(text = "Main Menu", fontSize = fontSizeNormal)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Game Menu button
+            Button(
+                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                shape = RoundedCornerShape(game_buttons_shape),
+                modifier = Modifier
+                    .width(280.dp)
+                    .height(game_buttons_height),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                onClick = {
+                    /*setta isPlaying off e rimane su gameView*/
+                    gameViewModel.setIsPlaying(false)
+                    gameViewModel.clearUserAnswer()
+                    gameViewModel.setGameOver(false)
+                }) {
+                Text(text = "Game Menu", fontSize = fontSizeNormal)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Play again button
+            Button(
+                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                shape = RoundedCornerShape(game_buttons_shape),
+                modifier = Modifier
+                    .width(280.dp)
+                    .height(game_buttons_height),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                onClick = {
+                    gameViewModel.onStartClicked()
+                }) {
+                Text(text = "Play again", fontSize = fontSizeNormal)
+            }
+            Spacer(modifier = Modifier.height(90.dp))
+        }
+    }
 }
 
 
