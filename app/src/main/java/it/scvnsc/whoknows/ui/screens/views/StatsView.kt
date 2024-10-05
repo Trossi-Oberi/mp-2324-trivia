@@ -53,6 +53,7 @@ import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.difficulty_icon_size
 import it.scvnsc.whoknows.ui.theme.fontSizeMedium
 import it.scvnsc.whoknows.ui.theme.fontSizeNormal
+import it.scvnsc.whoknows.ui.theme.gameheader_height
 import it.scvnsc.whoknows.ui.theme.gameheader_height_landscape
 import it.scvnsc.whoknows.ui.theme.header_height
 import it.scvnsc.whoknows.ui.theme.header_height_landscape
@@ -115,116 +116,60 @@ fun StatsView(
             modifier = Modifier
                 .fillMaxSize(),
             content = {
-                if (isLandscape) {
-                    Column(
+                Column(
+                    modifier = Modifier
+                        .paint(
+                            // Replace with your image id
+                            painterResource(
+                                id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                            ),
+                            contentScale = ContentScale.Crop
+                        )
+                        .fillMaxSize()
+                ) {
+                    //TOP APP BAR
+                    Box(
                         modifier = Modifier
-                            .paint(
-                                // Replace with your image id
-                                painterResource(
-                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
-                                ),
-                                contentScale = ContentScale.Crop
+                            .fillMaxWidth()
+                            .padding(
+                                start = if (isLandscape) bottom_bar_padding else 0.dp,
+                                end = if (isLandscape) bottom_bar_padding else 0.dp
                             )
-                            .fillMaxSize()
                     ) {
-                        //TOP APP BAR
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = bottom_bar_padding, end = bottom_bar_padding)
-                        ) {
-                            TopBar(
-                                navController = navController,
-                                onLeftBtnClick = {
-                                    if(showGameDetails == true) {
-                                        statsViewModel.setShowGameDetails(false)
-                                        statsViewModel.setGameQuestionsReady(false)
-                                    } else {
-                                        navController.navigate("home")
-                                    }
-                                },
-                                leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                                showTitle = true,
-                                title = context.getString(R.string.app_name),
-                                showRightButton = !showGameDetails!!,
-                                rightBtnIcon = Icons.Default.Delete,
-                                onRightBtnClick = {
-                                    if (games!!.isEmpty()) {
-                                        toastMessage.value = "No games to delete"
-                                    } else {
-                                        statsViewModel.deleteGames()
-                                    }
-                                },
-                                showThemeChange = false,
-                                settingsViewModel = settingsViewModel
-                            )
-                        }
-
-
-                        //STATS PAGE
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            StatsPage(games, statsViewModel, settingsViewModel)
-                        }
+                        TopBar(
+                            navController = navController,
+                            onLeftBtnClick = {
+                                if (showGameDetails == true) {
+                                    statsViewModel.setShowGameDetails(false)
+                                    statsViewModel.setGameQuestionsReady(false)
+                                } else {
+                                    navController.navigate("home")
+                                }
+                            },
+                            leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                            showTitle = true,
+                            title = context.getString(R.string.app_name),
+                            showRightButton = !showGameDetails!!,
+                            rightBtnIcon = Icons.Default.Delete,
+                            onRightBtnClick = {
+                                if (games!!.isEmpty()) {
+                                    toastMessage.value = "No games to delete"
+                                } else {
+                                    statsViewModel.deleteGames()
+                                }
+                            },
+                            showThemeChange = false,
+                            settingsViewModel = settingsViewModel
+                        )
                     }
 
 
-
-
-                } else {
-                    Column(
+                    //STATS PAGE
+                    Box(
                         modifier = Modifier
-                            .paint(
-                                // Replace with your image id
-                                painterResource(
-                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
-                                ),
-                                contentScale = ContentScale.Crop
-                            )
-                            .fillMaxSize()
+                            .fillMaxWidth()
                     ) {
-                        //TOP APP BAR
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            TopBar(
-                                navController = navController,
-                                onLeftBtnClick = {
-                                    if(showGameDetails == true) {
-                                        statsViewModel.setShowGameDetails(false)
-                                        statsViewModel.setGameQuestionsReady(false)
-                                    } else {
-                                        navController.navigate("home")
-                                    }
-                                },
-                                leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                                showTitle = true,
-                                title = context.getString(R.string.app_name),
-                                showRightButton = !showGameDetails!!,
-                                rightBtnIcon = Icons.Default.Delete,
-                                onRightBtnClick = {
-                                    if (games!!.isEmpty()) {
-                                        toastMessage.value = "No games to delete"
-                                    } else {
-                                        statsViewModel.deleteGames()
-                                    }
-                                },
-                                showThemeChange = false,
-                                settingsViewModel = settingsViewModel
-                            )
-                        }
-
-
-                        //STATS PAGE
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            StatsPage(games, statsViewModel, settingsViewModel)
-                        }
+                        StatsPage(games, statsViewModel, settingsViewModel)
                     }
                 }
             }
@@ -233,83 +178,59 @@ fun StatsView(
 }
 
 @Composable
-fun StatsPage(games: List<Game>?, statsViewModel: StatsViewModel, settingsViewModel: SettingsViewModel) {
+fun StatsPage(
+    games: List<Game>?,
+    statsViewModel: StatsViewModel,
+    settingsViewModel: SettingsViewModel
+) {
     val gameQuestionReady = statsViewModel.gameQuestionsReady.observeAsState().value
     val selectedGame = statsViewModel.selectedGame.observeAsState().value
 
     val isLandscape = isLandscape()
 
-    if (isLandscape) {
-        if (statsViewModel.showGameDetails.value == false && gameQuestionReady == false) {
-            //Colonna portante che racchiude tutta la schermata
-            Column(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
+    if (statsViewModel.showGameDetails.value == false && gameQuestionReady == false) {
+        //Colonna portante che racchiude tutta la schermata
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = if (isLandscape) bottom_bar_padding else 0.dp,
+                    end = if (isLandscape) bottom_bar_padding else 0.dp,
+                    bottom = 10.dp
+                )
+        ) {
+            //HEADER
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = if (isLandscape) 10.dp else 8.dp,
+                        end = if (isLandscape) 10.dp else 8.dp
+                    )
+                    .background(
+                        if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .height(if (isLandscape) header_height_landscape else header_height)
+            ) {
+                StatsHeader(settingsViewModel)
+            }
+
+            //Al suo interno usa una LazyColumn per mostrare i game
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = bottom_bar_padding, end = bottom_bar_padding, bottom = 10.dp)
+                    .padding(if (isLandscape) 10.dp else 8.dp)
             ) {
-                //HEADER
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 10.dp, end = 10.dp)
-                        .background(if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary, RoundedCornerShape(8.dp))
-                        .height(header_height_landscape)
-                ) {
-                    StatsHeader(settingsViewModel)
-                }
-
-                //Al suo interno usa una LazyColumn per mostrare i game
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp)
-                ) {
-                    ShowGames(games, statsViewModel, settingsViewModel)
-                }
+                ShowGames(games, statsViewModel, settingsViewModel)
             }
-        } else if (statsViewModel.showGameDetails.value == true && gameQuestionReady == false){
-            LoadingScreen()
-        } else if (statsViewModel.showGameDetails.value == true && gameQuestionReady == true){
-            GameDetails(selectedGame!!, statsViewModel, settingsViewModel)
         }
-
-    } else {
-        if (statsViewModel.showGameDetails.value == false && gameQuestionReady == false) {
-            //Colonna portante che racchiude tutta la schermata
-            Column(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 10.dp)
-            ) {
-                //HEADER
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp, end = 8.dp)
-                        .background(if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary, RoundedCornerShape(8.dp))
-                        .height(header_height)
-                ) {
-                    StatsHeader(settingsViewModel)
-                }
-
-                //Al suo interno usa una LazyColumn per mostrare i game
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                ) {
-                    ShowGames(games, statsViewModel, settingsViewModel)
-                }
-            }
-        } else if (statsViewModel.showGameDetails.value == true && gameQuestionReady == false){
-            LoadingScreen()
-        } else if (statsViewModel.showGameDetails.value == true && gameQuestionReady == true){
-            GameDetails(selectedGame!!, statsViewModel, settingsViewModel)
-        }
+    } else if (statsViewModel.showGameDetails.value == true && gameQuestionReady == false) {
+        LoadingScreen()
+    } else if (statsViewModel.showGameDetails.value == true && gameQuestionReady == true) {
+        GameDetails(selectedGame!!, statsViewModel, settingsViewModel)
     }
 }
 
@@ -426,19 +347,20 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
                 "easy" -> {
                     Icon(
                         Icons.Default.Star,
-                        tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                        tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
                         contentDescription = null,
                         modifier = Modifier
                             .size(star_icon_size)
                             .fillMaxSize()
                     )
                 }
+
                 "medium" -> {
                     Row {
                         for (i in 1..2) {
                             Icon(
                                 Icons.Default.Star,
-                                tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(star_icon_size)
@@ -447,12 +369,13 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
                         }
                     }
                 }
+
                 "hard" -> {
                     Row {
                         for (i in 1..3) {
                             Icon(
                                 Icons.Default.Star,
-                                tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(star_icon_size)
@@ -461,6 +384,7 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
                         }
                     }
                 }
+
                 else -> {
                     Text(
                         text = "Mixed",
@@ -497,7 +421,7 @@ fun GameDetails(
 ) {
     val isLandscape = isLandscape()
 
-    if(isLandscape) {
+    if (isLandscape) {
         LazyColumn {
             item {
                 //HEADER
@@ -510,7 +434,6 @@ fun GameDetails(
                 QuestionsBox(statsViewModel)
             }
         }
-
 
     } else {
         //Colonna portante che racchiude tutta la schermata dei dettagli del gioco
@@ -537,37 +460,24 @@ fun GameDetails(
 fun GameDetailsHeader() {
     val isLandScape = isLandscape()
 
-    if(isLandScape) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(gameheader_height_landscape)
-                .padding(start = 300.dp, end = 300.dp, top = 20.dp, bottom = 10.dp)
-                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
-        ) {
-            Text(
-                text = "Game details",
-                style = buttonsTextStyle,
-                color = MaterialTheme.colorScheme.onPrimary
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(if (isLandScape) gameheader_height_landscape else gameheader_height)
+            .padding(
+                start = if (isLandScape) 300.dp else 50.dp,
+                end = if (isLandScape) 300.dp else 50.dp,
+                top = if (isLandScape) 20.dp else 0.dp,
+                bottom = 10.dp
             )
-        }
-
-    } else {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(row_button_height)
-                .padding(start = 50.dp, end = 50.dp, top = 20.dp, bottom = 10.dp)
-                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
-        ) {
-            Text(
-                text = "Game details",
-                style = buttonsTextStyle,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
+            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+    ) {
+        Text(
+            text = "Game details",
+            style = buttonsTextStyle,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
     }
 }
 
@@ -630,23 +540,23 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    if(isLandScape) {
-                        //Date column
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .weight(0.5F)
-                                .fillMaxSize()
-                        ) {
-                            Text(
-                                text = "Date:\n ${game.date}",
-                                style = buttonsTextStyle,
-                                textAlign = TextAlign.Center,
-                                maxLines = 3,
-                                fontSize = fontSizeMedium
-                            )
-                        }
+                    //Date column
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .weight(0.5F)
+                            .fillMaxSize()
+                    ) {
+                        Text(
+                            text = "Date:\n ${game.date}",
+                            style = buttonsTextStyle,
+                            textAlign = TextAlign.Center,
+                            maxLines = 3,
+                            fontSize = fontSizeMedium
+                        )
+                    }
 
+                    if (isLandScape) {
                         //Difficulty column
                         Box(
                             contentAlignment = Alignment.Center,
@@ -656,13 +566,13 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                         ) {
                             when (game.difficulty) {
                                 "easy" -> {
-                                    Row (
+                                    Row(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
                                             Icons.Default.Star,
-                                            tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                            tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
                                             contentDescription = null,
                                             modifier = Modifier
                                                 .size(difficulty_icon_size)
@@ -680,7 +590,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
 
                                 "medium" -> {
 
-                                    Row (
+                                    Row(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
@@ -709,7 +619,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                 }
 
                                 "hard" -> {
-                                    Row (
+                                    Row(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
@@ -739,7 +649,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                 }
 
                                 else -> {
-                                    Row (
+                                    Row(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
@@ -766,23 +676,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                         }
 
 
-
                     } else {  //NO LANDSCAPE
-                        //Date column
-                        Box(
-                            modifier = Modifier
-                                .weight(0.5F)
-                                .fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Date:\n ${game.date}",
-                                style = buttonsTextStyle,
-                                textAlign = TextAlign.Center,
-                                maxLines = 3,
-                                fontSize = fontSizeMedium
-                            )
-                        }
-
                         //Difficulty column
                         Box(
                             contentAlignment = Alignment.Center,
@@ -792,13 +686,13 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                         ) {
                             when (game.difficulty) {
                                 "easy" -> {
-                                    Column (
+                                    Column(
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Icon(
                                             Icons.Default.Star,
-                                            tint = if(settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                            tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
                                             contentDescription = null,
                                             modifier = Modifier
                                                 .size(difficulty_icon_size)
@@ -816,7 +710,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
 
                                 "medium" -> {
 
-                                    Column (
+                                    Column(
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
@@ -845,7 +739,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                 }
 
                                 "hard" -> {
-                                    Column (
+                                    Column(
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
@@ -875,7 +769,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                 }
 
                                 else -> {
-                                    Column (
+                                    Column(
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
@@ -896,7 +790,6 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                             style = buttonsTextStyle,
                                             fontSize = fontSizeMedium
                                         )
-
                                     }
                                 }
                             }
@@ -905,7 +798,6 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                 }
             }
         }
-
     }
 }
 
@@ -914,7 +806,7 @@ fun QuestionsBox(statsViewModel: StatsViewModel) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if(isLandscape()) 350.dp else 450.dp)
+            .height(if (isLandscape()) 350.dp else 450.dp)
     ) {
         Column {
             QuestionsHeader()
@@ -930,92 +822,48 @@ fun QuestionsBox(statsViewModel: StatsViewModel) {
 fun QuestionsList(statsViewModel: StatsViewModel) {
     val isLandScape = isLandscape()
 
-    if (isLandScape) {
-        Box (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 100.dp, end = 100.dp, top = 20.dp, bottom = 20.dp)
-        ){
-
-            LazyColumn {
-                with(statsViewModel) {
-                    items(selectedGameQuestions.value!!.size) { index ->
-                        val question = selectedGameQuestions.value!![index]
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = if (isLandScape) 100.dp else 20.dp,
+                end = if (isLandScape) 100.dp else 20.dp,
+                top = 20.dp,
+                bottom = if (isLandScape) 20.dp else 0.dp
+            )
+    ) {
+        LazyColumn {
+            with(statsViewModel) {
+                items(selectedGameQuestions.value!!.size) { index ->
+                    val question = selectedGameQuestions.value!![index]
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = question.question,
-                                    modifier = Modifier.weight(1f)
+                            Text(
+                                text = question.question,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            Spacer(modifier = Modifier.size(10.dp))
+
+                            if (question.givenAnswer == question.correct_answer) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Correct",
+                                    tint = Color.Green
                                 )
-
-                                Spacer(modifier = Modifier.size(10.dp))
-
-                                if (question.givenAnswer == question.correct_answer) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Correct",
-                                        tint = Color.Green
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Incorrect",
-                                        tint = Color.Red
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-        Box (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 20.dp, end = 20.dp, top = 10.dp)
-        ){
-
-            LazyColumn {
-                with(statsViewModel) {
-                    items(selectedGameQuestions.value!!.size) { index ->
-                        val question = selectedGameQuestions.value!![index]
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = question.question,
-                                    modifier = Modifier.weight(1f)
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Incorrect",
+                                    tint = Color.Red
                                 )
-
-                                Spacer(modifier = Modifier.size(10.dp))
-
-                                if (question.givenAnswer == question.correct_answer) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Correct",
-                                        tint = Color.Green
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Incorrect",
-                                        tint = Color.Red
-                                    )
-                                }
                             }
                         }
                     }
@@ -1023,45 +871,29 @@ fun QuestionsList(statsViewModel: StatsViewModel) {
             }
         }
     }
-
-
 }
 
 @Composable
 fun QuestionsHeader() {
     val isLandScape = isLandscape()
 
-    if (isLandScape) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(gameheader_height_landscape)
-                .padding(start = 300.dp, end = 300.dp, top = 20.dp, bottom = 10.dp)
-                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
-        ) {
-            Text(
-                text = "Questions",
-                style = buttonsTextStyle,
-                color = MaterialTheme.colorScheme.onPrimary
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(if (isLandScape) gameheader_height_landscape else gameheader_height)
+            .padding(
+                start = if (isLandScape) 300.dp else 50.dp,
+                end = if (isLandScape) 300.dp else 50.dp,
+                top = 20.dp,
+                bottom = 10.dp
             )
-        }
-    } else {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(row_button_height)
-                .padding(start = 50.dp, end = 50.dp, top = 20.dp, bottom = 10.dp)
-                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
-        ) {
-            Text(
-                text = "Questions",
-                style = buttonsTextStyle,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
+            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+    ) {
+        Text(
+            text = "Questions",
+            style = buttonsTextStyle,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
     }
-
-
 }
