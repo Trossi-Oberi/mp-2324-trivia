@@ -74,97 +74,48 @@ fun SettingsView(
             modifier = Modifier
                 .fillMaxSize(),
             content = {
-                if (isLandscape) {
-                    Column (
+                Column(
+                    modifier = Modifier
+                        .paint(
+                            // Replace with your image id
+                            painterResource(
+                                id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                            ),
+                            contentScale = ContentScale.Crop
+                        )
+                        .fillMaxSize()
+                ) {
+                    //Top app bar
+                    Box(
                         modifier = Modifier
-                            .paint(
-                                // Replace with your image id
-                                painterResource(
-                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
-                                ),
-                                contentScale = ContentScale.Crop
+                            .fillMaxWidth()
+                            .padding(
+                                start = if (isLandscape) bottom_bar_padding else 0.dp,
+                                end = if (isLandscape) bottom_bar_padding else 0.dp
                             )
-                            .fillMaxSize()
                     ) {
-                        //Top app bar
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = bottom_bar_padding, end = bottom_bar_padding)
-                        ) {
-                            TopBar(
-                                navController = navController,
-                                onLeftBtnClick = { navController.navigate("home") },
-                                leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                                showTitle = true,
-                                title = context.getString(R.string.app_name),
-                                showThemeChange = false
-                            )
-                        }
-
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(40.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                        ) {
-                            //Settings buttons
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = bottom_bar_padding, end = bottom_bar_padding)
-                            ) {
-                                SettingsButtons(
-                                    isDarkTheme,
-                                    isSoundEnabled,
-                                    onToggleTheme = { settingsViewModel.toggleTheme() },
-                                    onToggleSound = { settingsViewModel.toggleSound() }
-                                )
-                            }
-                        }
+                        TopBar(
+                            navController = navController,
+                            onLeftBtnClick = { navController.navigate("home") },
+                            leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                            showTitle = true,
+                            title = context.getString(R.string.app_name),
+                            showThemeChange = false
+                        )
                     }
-                } else {
-                    //Main column
-                    Column(
+
+                    //Settings buttons
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .paint(
-                                // Replace with your image id
-                                painterResource(
-                                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
-                                ),
-                                contentScale = ContentScale.Crop
-                            )
+                            .fillMaxWidth()
+                            .padding(start = bottom_bar_padding, end = bottom_bar_padding)
                     ) {
-                        //Top app bar
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            TopBar(
-                                navController = navController,
-                                onLeftBtnClick = { navController.navigate("home") },
-                                leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                                showTitle = true,
-                                title = context.getString(R.string.app_name),
-                                showThemeChange = false
-                            )
-                        }
-
-                        //Settings buttons
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = bottom_bar_padding)
-                        ) {
-                            SettingsButtons(
-                                isDarkTheme,
-                                isSoundEnabled,
-                                onToggleTheme = { settingsViewModel.toggleTheme() },
-                                onToggleSound = { settingsViewModel.toggleSound() }
-                            )
-                        }
-
+                        SettingsButtons(
+                            isDarkTheme,
+                            isSoundEnabled,
+                            onToggleTheme = { settingsViewModel.toggleTheme() },
+                            onToggleSound = { settingsViewModel.toggleSound() }
+                        )
                     }
                 }
             }
@@ -173,187 +124,114 @@ fun SettingsView(
 }
 
 @Composable
-fun SettingsButtons(isDarkTheme: Boolean, isSoundEnabled: Boolean, onToggleTheme: () -> Unit, onToggleSound: () -> Unit) {
+fun SettingsButtons(
+    isDarkTheme: Boolean,
+    isSoundEnabled: Boolean,
+    onToggleTheme: () -> Unit,
+    onToggleSound: () -> Unit
+) {
     val uriHandler = LocalUriHandler.current
     val isLandscape = isLandscape()
 
-    if (isLandscape) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            //Bottone Tema
-            Button(
-                onClick = onToggleTheme,
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(home_buttons_shape),
-                modifier = Modifier
-                    .height(difficulty_buttons_height_landscape)
-                    .width(difficulty_buttons_width_landscape)
+    val buttonModifier = Modifier
+        .height(if (isLandscape) difficulty_buttons_height_landscape else difficulty_buttons_height)
+        .width(if (isLandscape) difficulty_buttons_width_landscape else difficulty_buttons_width)
+
+    val iconSize = if (isLandscape) icon_size_settings_landscape else icon_size_settings
+
+    val buttonContent: @Composable (String, @Composable () -> Unit) -> Unit = { text, icon ->
+        if (isLandscape) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-
-                ) {
-                    Icon(
-                        if(isDarkTheme) Icons.Default.WbSunny else Icons.Default.DarkMode,
-                        contentDescription = null,
-                        modifier = Modifier.size(icon_size_settings_landscape)
-                    )
-
-                    Spacer(modifier = Modifier.size(10.dp))
-
-                    Text(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        text = "Toggle Theme ",
-                        style = buttonsTextStyle
-                    )
-                }
-
+                icon()
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    text = text,
+                    style = buttonsTextStyle
+                )
             }
-
-            //Bottone Sound
-            Button(
-                onClick = onToggleSound,
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(home_buttons_shape),
-                modifier = Modifier
-                    .height(difficulty_buttons_height_landscape)
-                    .width(difficulty_buttons_width_landscape)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-
-                ) {
-                    Icon(
-                        if(isSoundEnabled) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = null,
-                        modifier = Modifier.size(icon_size_settings_landscape)
-                    )
-
-                    Spacer(modifier = Modifier.size(10.dp))
-
-                    Text(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        text = "Toggle Sound ",
-                        style = buttonsTextStyle
-                    )
-                }
-            }
-
-            //Bottone Crediti (GitHub)
-            Button(
-                onClick = { uriHandler.openUri("https://github.com/Trossi-Oberi/mp-2324-trivia") },
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(home_buttons_shape),
-                modifier = Modifier
-                    .height(difficulty_buttons_height_landscape)
-                    .width(difficulty_buttons_width_landscape)
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     color = MaterialTheme.colorScheme.onPrimary,
-                    text = "Credits",
+                    text = text,
                     style = buttonsTextStyle
+                )
+                icon()
+            }
+        }
+    }
+
+    val buttonLayout: @Composable (@Composable () -> Unit) -> Unit = { content ->
+        if (isLandscape) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                content()
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                content()
+            }
+        }
+    }
+
+    buttonLayout {
+        Button(
+            onClick = onToggleTheme,
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+            shape = RoundedCornerShape(home_buttons_shape),
+            modifier = buttonModifier
+        ) {
+            buttonContent("Toggle Theme") {
+                Icon(
+                    if (isDarkTheme) Icons.Default.WbSunny else Icons.Default.DarkMode,
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize)
                 )
             }
         }
 
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Button(
+            onClick = onToggleSound,
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+            shape = RoundedCornerShape(home_buttons_shape),
+            modifier = buttonModifier
         ) {
-            //Bottone Tema
-            Button(
-                onClick = onToggleTheme,
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(home_buttons_shape),
-                modifier = Modifier
-                    .height(difficulty_buttons_height)
-                    .width(difficulty_buttons_width)
-            ) {
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-
-                ) {
-                    Text(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        text = "Toggle Theme ",
-                        style = buttonsTextStyle
-                    )
-
-                    Icon(
-                        if(isDarkTheme) Icons.Default.WbSunny else Icons.Default.DarkMode,
-                        contentDescription = null,
-                        modifier = Modifier.size(icon_size_settings)
-                    )
-
-                }
-
-            }
-
-            //Bottone Sound
-            Button(
-                onClick = onToggleSound,
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(home_buttons_shape),
-                modifier = Modifier
-                    .height(difficulty_buttons_height)
-                    .width(difficulty_buttons_width)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-
-                ) {
-                    Text(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        text = "Toggle Sound ",
-                        style = buttonsTextStyle
-                    )
-
-                    Icon(
-                        if(isSoundEnabled) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = null,
-                        modifier = Modifier.size(icon_size_settings)
-                    )
-
-                }
-
-            }
-
-            //Bottone Crediti (GitHub)
-            Button(
-                onClick = { uriHandler.openUri("https://github.com/Trossi-Oberi/mp-2324-trivia") },
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
-                shape = RoundedCornerShape(home_buttons_shape),
-                modifier = Modifier
-                    .height(difficulty_buttons_height)
-                    .width(difficulty_buttons_width)
-            ) {
-                Text(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    text = "Credits",
-                    style = buttonsTextStyle
+            buttonContent("Toggle Sound") {
+                Icon(
+                    if (isSoundEnabled) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize)
                 )
             }
+        }
+
+        Button(
+            onClick = { uriHandler.openUri("https://github.com/Trossi-Oberi/mp-2324-trivia") },
+            elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+            shape = RoundedCornerShape(home_buttons_shape),
+            modifier = buttonModifier
+        ) {
+            Text(
+                color = MaterialTheme.colorScheme.onPrimary,
+                text = "Credits",
+                style = buttonsTextStyle
+            )
         }
     }
 }
