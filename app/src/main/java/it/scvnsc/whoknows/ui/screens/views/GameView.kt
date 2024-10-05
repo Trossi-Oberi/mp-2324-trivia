@@ -60,7 +60,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import android.app.AlertDialog
 import android.content.Context
-import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material3.ButtonColors
@@ -246,60 +249,64 @@ fun GameViewInGame(
     val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
     val isGameOver = gameViewModel.isGameOver.observeAsState().value
 
-    if (isLandscape) {
-        //TODO:: da sistemare
-    } else {
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .paint(
+                painterResource(
+                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                ),
+                contentScale = ContentScale.Crop
+            )
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .paint(
-                    // Replace with your image id
-                    painterResource(
-                        id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
-                    ),
-                    contentScale = ContentScale.Crop
+                .fillMaxWidth()
+                .padding(
+                    start = if (isLandscape) bottom_bar_padding else 0.dp,
+                    end = if (isLandscape) bottom_bar_padding else 0.dp
                 )
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                TopBar(
-                    navController = navController,
-                    onLeftBtnClick = {
-                        if (isGameOver == false) {
-                            showExitConfirmationDialog(context, gameViewModel)
-                        } else {
-                            navController.navigate("game")
-                            gameViewModel.setIsPlaying(false)
-                            gameViewModel.clearUserAnswer()
-                            gameViewModel.setGameOver(false)
-                        }
-                    },
-                    leftBtnIcon = if (isGameOver == false) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
-                    showTitle = true,
-                    title = context.getString(R.string.app_name),
-                    settingsViewModel = settingsViewModel
+            TopBar(
+                navController = navController,
+                onLeftBtnClick = {
+                    if (isGameOver == false) {
+                        showExitConfirmationDialog(context, gameViewModel)
+                    } else {
+                        navController.navigate("game")
+                        gameViewModel.setIsPlaying(false)
+                        gameViewModel.clearUserAnswer()
+                        gameViewModel.setGameOver(false)
+                    }
+                },
+                leftBtnIcon = if (isGameOver == false) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
+                showTitle = true,
+                title = context.getString(R.string.app_name),
+                settingsViewModel = settingsViewModel
+            )
+
+        }
+
+        Spacer(modifier = Modifier.size(small_padding))
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = if (isLandscape) bottom_bar_padding else 0.dp,
+                    end = if (isLandscape) bottom_bar_padding else 0.dp
                 )
-
-            }
-
-            Spacer(modifier = Modifier.size(small_padding))
-
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                if (showLoading == true) {
-                    LoadingScreen()
-                } else {
-                    GameBox(gameViewModel, navController)
-                }
+        ) {
+            if (showLoading == true) {
+                LoadingScreen()
+            } else {
+                GameBox(gameViewModel, navController)
             }
         }
     }
 }
+
 
 fun showExitConfirmationDialog(context: Context, gameViewModel: GameViewModel) {
     //stoppo il timer durante la conferma di uscita
@@ -342,6 +349,7 @@ fun LoadingScreen() {
 @Composable
 fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
     val gameOver = gameViewModel.isGameOver.observeAsState().value
+    val isLandscape = isLandscape()
 
     AnimatedVisibility(
         visible = gameOver == true,
@@ -354,6 +362,7 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
             }
         )
     ) {
+        //TODO: Cambiare GameOverScreen quando e' landscape
         GameOverScreen(gameViewModel, navController)
     }
 
@@ -362,6 +371,10 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
                 .fillMaxSize()
+                .padding(
+                    start = if (isLandscape) bottom_bar_padding else 0.dp,
+                    end = if (isLandscape) bottom_bar_padding else 0.dp
+                )
         ) {
             Row(
                 modifier = Modifier
@@ -427,8 +440,12 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
 
 
 @Composable
-fun GameOverScreen(gameViewModel: GameViewModel, navController: NavHostController) {
+fun GameOverScreen(
+    gameViewModel: GameViewModel,
+    navController: NavHostController,
+) {
     val isRecord = gameViewModel.isRecord.observeAsState().value
+    var isLandscape = isLandscape()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -795,6 +812,7 @@ fun LivesBox(gameViewModel: GameViewModel) {
 
 @Composable
 fun QuestionBox(gameViewModel: GameViewModel) {
+    val isLandscape = isLandscape()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -815,7 +833,36 @@ fun QuestionBox(gameViewModel: GameViewModel) {
                 .fillMaxSize()
         ) {
             //Possibili risposte nella UI
-            ShowAnswers(gameViewModel)
+            if (isLandscape) {
+                ShowAnswersLandscape(gameViewModel)
+            } else {
+                ShowAnswersPortrait(gameViewModel)
+            }
+
+
+        }
+    }
+}
+
+@Composable
+fun ShowAnswersLandscape(gvm: GameViewModel) {
+    val question = gvm.questionForUser.observeAsState().value
+    val answers = gvm.shuffledAnswers.observeAsState().value
+    val givenAnswer = gvm.userAnswer.observeAsState().value
+
+    Column {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            items(answers ?: emptyList()) { answer ->
+                AnswerButton(
+                    answerText = answer,
+                    isCorrect = question?.correct_answer == answer,
+                    isSelected = givenAnswer == answer,
+                    gvm = gvm
+                )
+            }
         }
     }
 }
@@ -840,7 +887,7 @@ fun ShowQuestion(gameViewModel: GameViewModel) {
 }
 
 @Composable
-fun ShowAnswers(gvm: GameViewModel) {
+fun ShowAnswersPortrait(gvm: GameViewModel) {
     val question = gvm.questionForUser.observeAsState().value
     val answers = gvm.shuffledAnswers.observeAsState().value
     val givenAnswer = gvm.userAnswer.observeAsState().value
@@ -850,7 +897,6 @@ fun ShowAnswers(gvm: GameViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .border(3.dp, Color.Red)
             .padding(top = 40.dp, bottom = 40.dp)
     ) {
 
@@ -962,7 +1008,7 @@ fun GameViewMainPage(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    MainPageButtons(gameViewModel)
+                    GameMenuButtons(gameViewModel)
                 }
             }
 
@@ -971,7 +1017,7 @@ fun GameViewMainPage(
 }
 
 @Composable
-fun MainPageButtons(
+fun GameMenuButtons(
     gameViewModel: GameViewModel
 ) {
     val context = LocalContext.current
