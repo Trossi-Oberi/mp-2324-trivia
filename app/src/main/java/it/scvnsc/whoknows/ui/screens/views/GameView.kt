@@ -60,7 +60,19 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import android.app.AlertDialog
 import android.content.Context
+import androidx.collection.mutableIntSetOf
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -70,6 +82,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -114,12 +129,45 @@ fun GameView(
 ) {
 
     val isOffline = NetworkMonitorService.isOffline.observeAsState().value
+    val isPlaying = gameViewModel.isPlaying.observeAsState().value
+    val isApiSetupComplete = gameViewModel.isApiSetupComplete.observeAsState().value
+
 
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
             content = {
+                Crossfade(targetState = isOffline to isPlaying, label = "") { (offline, playing) ->
+                    when {
+                        // Mostra la schermata di errore di rete
+                        offline == true -> {
+                            NetworkErrorScreen(navController, gameViewModel)
+
+                            // Stop timer quando la connessione viene persa
+                            if (playing == true) {
+                                gameViewModel.pauseTimer()
+                            }
+                        }
+
+                        // Mostra la schermata principale (setup dell'API)
+                        playing == false && isApiSetupComplete == false -> {
+                            gameViewModel.setupAPI()
+                            GameViewMainPage(navController, gameViewModel, settingsViewModel)
+                        }
+
+                        // Mostra la schermata in-game quando si sta giocando
+                        playing == true -> {
+                            GameViewInGame(navController, gameViewModel, settingsViewModel)
+                        }
+
+                        else -> {
+                            // Mostra la schermata di attesa/preparazione se non sta giocando
+                            GameViewMainPage(navController, gameViewModel, settingsViewModel)
+                        }
+                    }
+                }
+                /*
                 with(gameViewModel) {
                     if (isOffline == true) {
                         NetworkErrorScreen(navController, gameViewModel)
@@ -141,6 +189,8 @@ fun GameView(
                         }
                     }
                 }
+
+                 */
             }
         )
 
@@ -304,10 +354,21 @@ fun GameViewInGame(
                     bottom = 10.dp
                 )
         ) {
-            if (showLoading == true) {
-                LoadingScreen()
-            } else {
-                GameBox(gameViewModel, navController)
+            Crossfade(targetState = showLoading, label = "") { showLoading ->
+                when (showLoading!!) {
+                    true -> {
+                        LoadingScreen()
+                    }
+
+                    false -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            GameBox(gameViewModel, navController)
+                        }
+                    }
+                }
             }
         }
     }
@@ -580,6 +641,8 @@ fun GameScore(gameViewModel: GameViewModel) {
                         .padding(end = if (isLandscape) 3.dp else 10.dp)
                 )
 
+                /*
+
                 Text(
                     text = if (isLandscape) "Score: $currentScore" else "Score:\n$currentScore",
                     color = MaterialTheme.colorScheme.onPrimary,
@@ -590,6 +653,46 @@ fun GameScore(gameViewModel: GameViewModel) {
                         .fillMaxWidth()
                         //.padding(start = if (isLandscape) 5.dp else 0.dp)
                 )
+
+
+                */
+
+                Column(
+                    horizontalAlignment = if (isLandscape) Alignment.Start else Alignment.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = if (isLandscape) "Score:" else "Score:",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = gameScoreTextStyle,
+                        fontSize = if (isLandscape) fontSizeNormal else fontSizeUpperNormal,
+                        textAlign = if (isLandscape) TextAlign.Left else TextAlign.Right,
+                    )
+
+                    AnimatedContent(
+                        targetState = currentScore,
+                        transitionSpec = {
+                            if (targetState!! > initialState!!) {
+                                slideInVertically { height -> height } + fadeIn() togetherWith
+                                        slideOutVertically { height -> -height } + fadeOut()
+                            } else {
+                                slideInVertically { height -> -height } + fadeIn() togetherWith
+                                        slideOutVertically { height -> height } + fadeOut()
+                            }.using(
+                                SizeTransform(clip = false)
+                            )
+                        },
+                        label = "animated score"
+                    ) { score ->
+                        Text(
+                            text = "$score",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = gameScoreTextStyle,
+                            fontSize = if (isLandscape) fontSizeNormal else fontSizeUpperNormal,
+                            textAlign = if (isLandscape) TextAlign.Left else TextAlign.Right,
+                        )
+                    }
+                }
             }
         },
         colors = ButtonColors(
@@ -739,9 +842,9 @@ fun LivesBox(gameViewModel: GameViewModel) {
             MaterialTheme.colorScheme.primary
         ),
         content = {
-            if (isLandscape){
+            if (isLandscape) {
                 LivesBoxLandscape(gameViewModel)
-            }else{
+            } else {
                 LivesBoxPortrait(gameViewModel)
             }
 
@@ -770,70 +873,58 @@ fun LivesBoxLandscape(gameViewModel: GameViewModel) {
     }
 }
 
+
 @Composable
 fun PrintRemainingLives(gameViewModel: GameViewModel) {
     val isLandscape = isLandscape()
+    val remainingLives = gameViewModel.lives.observeAsState().value ?: 0
 
-    when (gameViewModel.lives.observeAsState().value) {
+    // Funzione per mostrare un cuore con animazione quando si perde una vita
+    @Composable
+    fun AnimatedHeart(show: Boolean) {
+        val scale = animateFloatAsState(
+            targetValue = if (show) 1f else 0f,
+            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing), label = ""
+        )
+        val alpha = animateFloatAsState(
+            targetValue = if (show) 1f else 0f,
+            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing), label = ""
+        )
 
-        0 -> {
-            Icon(
-                Icons.Default.HeartBroken,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(size = if (isLandscape) heart_icon_size_landscape else heart_icon_size)
-                    .fillMaxSize()
-            )
-        }
+        Icon(
+            Icons.Default.Favorite,
+            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = alpha.value),
+            contentDescription = null,
+            modifier = Modifier
+                .size(if (isLandscape) heart_icon_size_landscape else heart_icon_size)
+                .scale(scale.value)
+                .alpha(alpha.value)
+        )
+    }
 
-        1 -> {
-            Icon(
-                Icons.Default.Favorite,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(size = if (isLandscape) heart_icon_size_landscape else heart_icon_size)
-                    .fillMaxSize()
-            )
-        }
-
-        2 -> {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                for (i in 1..2) {
-                    Icon(
-                        Icons.Default.Favorite,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(size = if (isLandscape) heart_icon_size_landscape else heart_icon_size)
-                            .fillMaxSize()
-                    )
-                }
-            }
-        }
-
-        3 -> {
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                for (i in 1..3) {
-                    Icon(
-                        Icons.Default.Favorite,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(size = if (isLandscape) heart_icon_size_landscape else heart_icon_size)
-                            .fillMaxSize()
-                    )
-                }
+    // Animazione cuore spezzato quando le vite sono 0
+    if (remainingLives == 0) {
+        Icon(
+            Icons.Default.HeartBroken,
+            tint = MaterialTheme.colorScheme.onPrimary,
+            contentDescription = null,
+            modifier = Modifier
+                .size(if (isLandscape) heart_icon_size_landscape else heart_icon_size)
+                .fillMaxSize()
+        )
+    } else {
+        // Animazione cuori rimanenti
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            for (i in 1..3) {
+                val isVisible = i <= remainingLives
+                AnimatedHeart(show = isVisible)
             }
         }
     }
 }
+
 
 @Composable
 fun LivesBoxPortrait(gameViewModel: GameViewModel) {
@@ -853,7 +944,6 @@ fun LivesBoxPortrait(gameViewModel: GameViewModel) {
 }
 
 
-
 @Composable
 fun QuestionBox(gameViewModel: GameViewModel) {
     val isLandscape = isLandscape()
@@ -870,8 +960,10 @@ fun QuestionBox(gameViewModel: GameViewModel) {
             ShowQuestion(gameViewModel)
         }
 
-        Spacer(modifier = Modifier
-            .size(size = if (isLandscape) 8.dp else 0.dp))
+        Spacer(
+            modifier = Modifier
+                .size(size = if (isLandscape) 8.dp else 0.dp)
+        )
 
         Box(
             modifier = Modifier
@@ -897,17 +989,17 @@ fun ShowAnswersLandscape(gvm: GameViewModel) {
 
     Column(
         modifier = Modifier
-    ){
+    ) {
         LazyVerticalGrid(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top=8.dp,bottom = 10.dp),
+                .padding(top = 8.dp, bottom = 10.dp),
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(all = 10.dp),
             verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
 
-        ) {
+            ) {
             items(answers ?: emptyList()) { answer ->
                 AnswerButton(
                     answerText = answer,
@@ -1039,31 +1131,73 @@ fun GameViewMainPage(
                 )
 
         ) {
-            if (showLoading == true) {
-                LoadingScreen()
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    TopBar(
-                        navController = navController,
-                        onLeftBtnClick = { navController.navigate("home") },
-                        leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                        showTitle = false,
-                        showRightButton = true,
-                        settingsViewModel = settingsViewModel
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    GameMenuButtons(gameViewModel)
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                TopBar(
+                    navController = navController,
+                    onLeftBtnClick = { navController.navigate("home") },
+                    leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                    showTitle = false,
+                    showRightButton = true,
+                    settingsViewModel = settingsViewModel
+                )
             }
 
+
+            Crossfade(targetState = showLoading, label = "") { showLoading ->
+                when (showLoading) {
+                    true -> LoadingScreen()
+                    false -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            GameMenuButtons(gameViewModel)
+                        }
+                    }
+
+                    null -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            GameMenuButtons(gameViewModel)
+                        }
+                    }
+
+
+                }
+
+                /*
+                if (showLoading == true) {
+                    LoadingScreen()
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        TopBar(
+                            navController = navController,
+                            onLeftBtnClick = { navController.navigate("home") },
+                            leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                            showTitle = false,
+                            showRightButton = true,
+                            settingsViewModel = settingsViewModel
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        GameMenuButtons(gameViewModel)
+                    }
+                }
+
+                 */
+            }
         }
     }
 }
@@ -1073,7 +1207,6 @@ fun GameMenuButtons(
     gameViewModel: GameViewModel
 ) {
     val context = LocalContext.current
-    //val categories = gameViewModel.categories.observeAsState().value
 
     var showDifficultySelectionDialog by rememberSaveable { mutableStateOf(false) }
     var showCategorySelectionDialog by rememberSaveable { mutableStateOf(false) }
@@ -1288,7 +1421,10 @@ fun DifficultySelectionDialog(
             Button(
                 onClick = onDismissRequest,
                 enabled = true,
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                elevation = ButtonDefaults.buttonElevation(
+                    default_elevation,
+                    pressed_elevation
+                ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Ok")
@@ -1356,7 +1492,10 @@ fun CategorySelectionDialog(
             Button(
                 onClick = onDismissRequest,
                 enabled = true,
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                elevation = ButtonDefaults.buttonElevation(
+                    default_elevation,
+                    pressed_elevation
+                ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Ok")
@@ -1420,7 +1559,10 @@ fun GameOverScreen(
 
             //Main Menu button
             Button(
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                elevation = ButtonDefaults.buttonElevation(
+                    default_elevation,
+                    pressed_elevation
+                ),
                 shape = RoundedCornerShape(game_buttons_shape),
                 modifier = Modifier
                     .width(280.dp)
@@ -1441,7 +1583,10 @@ fun GameOverScreen(
 
             //Game Menu button
             Button(
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                elevation = ButtonDefaults.buttonElevation(
+                    default_elevation,
+                    pressed_elevation
+                ),
                 shape = RoundedCornerShape(game_buttons_shape),
                 modifier = Modifier
                     .width(280.dp)
@@ -1459,7 +1604,10 @@ fun GameOverScreen(
 
             //Play again button
             Button(
-                elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
+                elevation = ButtonDefaults.buttonElevation(
+                    default_elevation,
+                    pressed_elevation
+                ),
                 shape = RoundedCornerShape(game_buttons_shape),
                 modifier = Modifier
                     .width(280.dp)
