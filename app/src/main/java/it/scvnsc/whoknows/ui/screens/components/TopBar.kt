@@ -1,6 +1,13 @@
 package it.scvnsc.whoknows.ui.screens.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,13 +24,18 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.theme.DarkYellow
+import it.scvnsc.whoknows.ui.theme.titleTextStyle
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.theme.top_bar_height
 import it.scvnsc.whoknows.ui.theme.top_bar_padding
@@ -44,6 +56,9 @@ fun TopBar(
     settingsViewModel: SettingsViewModel? = null
 ) {
     val isLandscape = isLandscape()
+    val context = LocalContext.current
+
+
     Row(
         modifier = Modifier
             .padding(top = if (isLandscape) 0.dp else top_bar_padding)
@@ -88,6 +103,9 @@ fun TopBar(
                     .weight(0.6F)
                     .fillMaxSize()
             ) {
+                /*
+
+                TODO:: da rimuovere
                 Text(
                     text = title,
                     style = topBarTextStyle, // Sostituisci con lo stile desiderato
@@ -96,6 +114,52 @@ fun TopBar(
                         .fillMaxWidth()
                         .padding(16.dp)
                 )
+
+
+                 */
+
+                val text = context.getString(R.string.app_name)
+                val infiniteTransition = rememberInfiniteTransition(label = "")
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    text.forEachIndexed { index, char ->
+                        // Creiamo un'animazione per la traslazione verticale e la scala per ogni lettera
+                        val offsetY by infiniteTransition.animateFloat(
+                            initialValue = 0f,
+                            targetValue = -10f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(300, easing = FastOutSlowInEasing, delayMillis = index * 100),
+                                repeatMode = RepeatMode.Reverse
+                            ), label = ""
+                        )
+
+                        val scale by infiniteTransition.animateFloat(
+                            initialValue = 1f,
+                            targetValue = 1.2f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(300, easing = FastOutSlowInEasing, delayMillis = index * 100),
+                                repeatMode = RepeatMode.Reverse
+                            ), label = ""
+                        )
+
+                        Text(
+                            text = char.toString(),
+                            style = topBarTextStyle,
+                            modifier = Modifier
+                                .graphicsLayer(
+                                    translationY = offsetY,  // Salto verticale della lettera
+                                    scaleX = scale,  // Scala orizzontale della lettera
+                                    scaleY = scale   // Scala verticale della lettera
+                                )
+                        )
+                    }
+                }
+
             }
         } else {
             Spacer(

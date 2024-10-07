@@ -2,6 +2,12 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,10 +30,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -383,6 +391,7 @@ fun HomeViewButtons(navController: NavHostController) {
     }
 }
 
+/*
 @Composable
 fun AppTitle(context: Context) {
     Text(
@@ -392,5 +401,81 @@ fun AppTitle(context: Context) {
         modifier = Modifier
             .fillMaxWidth()
     )
+}
+
+
+@Composable
+fun AppTitle(context: Context) {
+    // Stato per l'animazione oscillante
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = -10f,
+        targetValue = 10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    Text(
+        text = context.getString(R.string.app_name),
+        style = titleTextStyle,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            // Aggiungi effetto 3D oscillante
+            .graphicsLayer {
+                rotationY = rotation  // Oscillazione sull'asse Y
+                cameraDistance = 12f * density  // Distanza per l'effetto 3D
+            }
+    )
+}
+
+
+ */
+
+@Composable
+fun AppTitle(context: Context) {
+    val text = context.getString(R.string.app_name)
+
+    // Creiamo una transizione infinita per animare il movimento delle lettere
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        text.forEachIndexed { index, char ->
+            // Creiamo un'animazione per la traslazione verticale e la scala per ogni lettera
+            val offsetY by infiniteTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = -10f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(300, easing = FastOutSlowInEasing, delayMillis = index * 100),
+                    repeatMode = RepeatMode.Reverse
+                ), label = ""
+            )
+
+            val scale by infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.2f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(300, easing = FastOutSlowInEasing, delayMillis = index * 100),
+                    repeatMode = RepeatMode.Reverse
+                ), label = ""
+            )
+
+            Text(
+                text = char.toString(),
+                style = titleTextStyle,
+                modifier = Modifier
+                    .graphicsLayer(
+                        translationY = offsetY,  // Salto verticale della lettera
+                        scaleX = scale,  // Scala orizzontale della lettera
+                        scaleY = scale   // Scala verticale della lettera
+                    )
+            )
+        }
+    }
 }
 
