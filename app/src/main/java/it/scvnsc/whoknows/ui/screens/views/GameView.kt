@@ -66,7 +66,11 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -617,6 +621,7 @@ fun GameTimer(gameViewModel: GameViewModel) {
 fun GameScore(gameViewModel: GameViewModel) {
     val currentScore = gameViewModel.score.observeAsState().value
     val isLandscape = isLandscape()
+
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
@@ -882,6 +887,11 @@ fun PrintRemainingLives(gameViewModel: GameViewModel) {
     // Funzione per mostrare un cuore con animazione quando si perde una vita
     @Composable
     fun AnimatedHeart(show: Boolean) {
+        val infiniteTransition = rememberInfiniteTransition(label = "")
+
+        /*
+
+        TODO:: animazione cuori fade out
         val scale = animateFloatAsState(
             targetValue = if (show) 1f else 0f,
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing), label = ""
@@ -899,6 +909,33 @@ fun PrintRemainingLives(gameViewModel: GameViewModel) {
                 .size(if (isLandscape) heart_icon_size_landscape else heart_icon_size)
                 .scale(scale.value)
                 .alpha(alpha.value)
+        )
+        */
+
+        // Animating the scale to pulse between 0.9f and 1.1f
+        val scale by infiniteTransition.animateFloat(
+            initialValue = 0.9f,
+            targetValue = 1.0f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 700, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            ), label = ""
+        )
+
+        // Animate alpha for fade out effect when life is lost
+        val alpha by animateFloatAsState(
+            targetValue = if (show) 1f else 0f,
+            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing), label = ""
+        )
+
+        Icon(
+            Icons.Default.Favorite,
+            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = alpha),
+            contentDescription = null,
+            modifier = Modifier
+                .size(if (isLandscape) heart_icon_size_landscape else heart_icon_size)
+                .scale(if (show) scale else 0f) // Scale to 0 if not showing
+                .alpha(alpha) // Apply fade out animation
         )
     }
 
