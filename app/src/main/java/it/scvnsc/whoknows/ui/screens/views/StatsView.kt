@@ -135,7 +135,8 @@ fun StatsView(
                             .fillMaxWidth()
                             .padding(
                                 start = if (isLandscape) bottom_bar_padding else 0.dp,
-                                end = if (isLandscape) bottom_bar_padding else 0.dp
+                                end = if (isLandscape) bottom_bar_padding else 0.dp,
+                                top = if (isLandscape) bottom_bar_padding else 0.dp
                             )
                     ) {
                         TopBar(
