@@ -8,7 +8,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +35,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -392,49 +390,6 @@ fun HomeViewButtons(navController: NavHostController) {
         }
     }
 }
-
-/*
-@Composable
-fun AppTitle(context: Context) {
-    Text(
-        text = context.getString(R.string.app_name),
-        style = titleTextStyle,
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-    )
-}
-
-
-@Composable
-fun AppTitle(context: Context) {
-    // Stato per l'animazione oscillante
-    val infiniteTransition = rememberInfiniteTransition(label = "")
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = -10f,
-        targetValue = 10f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ), label = ""
-    )
-
-    Text(
-        text = context.getString(R.string.app_name),
-        style = titleTextStyle,
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            // Aggiungi effetto 3D oscillante
-            .graphicsLayer {
-                rotationY = rotation  // Oscillazione sull'asse Y
-                cameraDistance = 12f * density  // Distanza per l'effetto 3D
-            }
-    )
-}
-
-
- */
 
 @Composable
 fun AppTitle(context: Context) {
