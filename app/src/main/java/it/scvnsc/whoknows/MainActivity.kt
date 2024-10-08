@@ -7,6 +7,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -91,12 +100,45 @@ class MainActivity : ComponentActivity() {
         gameViewModel = viewModel<GameViewModel>()
         statsViewModel = viewModel<StatsViewModel>()
 
-        NavHost(navController = navController, startDestination = "home") {
-            composable("home") {
+        NavHost(
+            navController = navController,
+            startDestination = "home",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            composable(
+                "home",
+                enterTransition = {
+                    slideIntoContainer(
+                        animationSpec = tween(600, easing = EaseOut),
+                        towards = AnimatedContentTransitionScope.SlideDirection.End
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        animationSpec = tween(600, easing = EaseOut),
+                        towards = AnimatedContentTransitionScope.SlideDirection.Start
+                    )
+                }
+            ) {
                 HomeView(navController, settingsViewModel)
             }
 
-            composable("stats") {
+            composable(
+                "stats",
+                enterTransition = {
+                    slideIntoContainer(
+                        animationSpec = tween(600, easing = EaseOut),
+                        towards = AnimatedContentTransitionScope.SlideDirection.Start
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        animationSpec = tween(600, easing = EaseOut),
+                        towards = AnimatedContentTransitionScope.SlideDirection.End
+                    )
+                }
+            ) {
                 BackHandler {
                     if(statsViewModel.showGameDetails.value == true){
                         statsViewModel.setShowGameDetails(false)
@@ -109,11 +151,39 @@ class MainActivity : ComponentActivity() {
                 StatsView(navController, statsViewModel, settingsViewModel)
             }
 
-            composable("settings") {
+            composable(
+                "settings",
+                enterTransition = {
+                    slideIntoContainer(
+                        animationSpec = tween(600, easing = EaseOut),
+                        towards = AnimatedContentTransitionScope.SlideDirection.Start
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        animationSpec = tween(600, easing = EaseOut),
+                        towards = AnimatedContentTransitionScope.SlideDirection.End
+                    )
+                }
+            ) {
                 SettingsView(navController, settingsViewModel)
             }
 
-            composable("game") {
+            composable(
+                "game",
+                enterTransition = {
+                    slideIntoContainer(
+                        animationSpec = tween(600, easing = EaseOut),
+                        towards = AnimatedContentTransitionScope.SlideDirection.Start
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        animationSpec = tween(600, easing = EaseOut),
+                        towards = AnimatedContentTransitionScope.SlideDirection.End
+                    )
+                }
+            ) {
                 BackHandler {
                     if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false) {
                         // Aggiungi qui il comportamento specifico per la schermata di gioco
@@ -130,9 +200,7 @@ class MainActivity : ComponentActivity() {
 
                 GameView(navController, gameViewModel, settingsViewModel)
             }
-
         }
-
     }
 }
 
