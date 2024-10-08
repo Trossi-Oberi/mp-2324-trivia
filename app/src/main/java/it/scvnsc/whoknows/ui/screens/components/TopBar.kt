@@ -151,11 +151,11 @@ fun TopBar(
                             text = char.toString(),
                             style = topBarTextStyle,
                             modifier = Modifier
-                                .graphicsLayer(
-                                    translationY = offsetY,  // Salto verticale della lettera
-                                    scaleX = scale,  // Scala orizzontale della lettera
+                                .graphicsLayer{
+                                    translationY = offsetY  // Salto verticale della lettera
+                                    scaleX = scale  // Scala orizzontale della lettera
                                     scaleY = scale   // Scala verticale della lettera
-                                )
+                                }
                         )
                     }
                 }

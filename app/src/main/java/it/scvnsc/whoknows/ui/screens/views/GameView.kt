@@ -85,6 +85,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -960,7 +961,11 @@ fun PrintRemainingLives(gameViewModel: GameViewModel) {
             contentDescription = null,
             modifier = Modifier
                 .size(if (isLandscape) heart_icon_size_landscape else heart_icon_size)
-                .scale(if (show) scale else 0f) // Scale to 0 if not showing
+                .graphicsLayer {
+                    scaleX = if (show) scale else 0f
+                    scaleY = if (show) scale else 0f
+
+                }
                 .alpha(alpha) // Apply fade out animation
         )
     }
