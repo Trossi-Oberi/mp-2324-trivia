@@ -103,21 +103,6 @@ fun TopBar(
                     .weight(0.6F)
                     .fillMaxSize()
             ) {
-                /*
-
-                TODO:: da rimuovere
-                Text(
-                    text = title,
-                    style = topBarTextStyle, // Sostituisci con lo stile desiderato
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                )
-
-
-                 */
-
                 val text = context.getString(R.string.app_name)
                 val infiniteTransition = rememberInfiniteTransition(label = "")
 
