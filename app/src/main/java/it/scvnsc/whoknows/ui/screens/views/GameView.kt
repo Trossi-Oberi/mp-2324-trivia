@@ -75,6 +75,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -84,7 +87,6 @@ import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
@@ -95,6 +97,7 @@ import it.scvnsc.whoknows.ui.theme.buttonsTextStyle
 import it.scvnsc.whoknows.ui.theme.default_elevation
 import it.scvnsc.whoknows.ui.theme.disabled_elevation
 import it.scvnsc.whoknows.ui.theme.fontSizeBig
+import it.scvnsc.whoknows.ui.theme.fontSizeMedium
 import it.scvnsc.whoknows.ui.theme.fontSizeNormal
 import it.scvnsc.whoknows.ui.theme.fontSizeUpperMedium
 import it.scvnsc.whoknows.ui.theme.fontSizeUpperNormal
@@ -108,8 +111,10 @@ import it.scvnsc.whoknows.ui.theme.game_buttons_spacing
 import it.scvnsc.whoknows.ui.theme.heart_icon_size
 import it.scvnsc.whoknows.ui.theme.heart_icon_size_landscape
 import it.scvnsc.whoknows.ui.theme.home_buttons_height
+import it.scvnsc.whoknows.ui.theme.home_buttons_height_landscape
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
+import it.scvnsc.whoknows.ui.theme.home_buttons_width_landscape
 import it.scvnsc.whoknows.ui.theme.medium_spacing_height
 import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
@@ -349,8 +354,8 @@ fun GameViewInGame(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = if (isLandscape) bottom_bar_padding else 0.dp,
-                    end = if (isLandscape) bottom_bar_padding else 0.dp,
+                    start = if (isLandscape) 25.dp else 0.dp,
+                    end = if (isLandscape) 25.dp else 0.dp,
                     bottom = 10.dp
                 )
         ) {
@@ -642,7 +647,6 @@ fun GameScore(gameViewModel: GameViewModel) {
                     .padding(all = if (isLandscape) 0.dp else small_padding)
                     .padding(end = if (isLandscape) 10.dp else 0.dp)
                     .fillMaxWidth()
-                    //.border(3.dp, Color.Green)
             ) {
                 Icon(
                     Icons.Default.SportsScore,
@@ -652,7 +656,6 @@ fun GameScore(gameViewModel: GameViewModel) {
                         .size(size = if (isLandscape) 41.dp else 48.dp)
                         .padding(end = if (isLandscape) 3.dp else 10.dp)
                         .fillMaxSize()
-                        //.border(3.dp, Color.Red)
                 )
 
                 /*
@@ -671,7 +674,7 @@ fun GameScore(gameViewModel: GameViewModel) {
 
                 */
 
-                if (isLandscape){
+                if (isLandscape) {
                     Text(
                         text = "Score: ",
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -681,7 +684,7 @@ fun GameScore(gameViewModel: GameViewModel) {
                         modifier = Modifier.padding(start = 6.dp)
                     )
                     AnimatedScoreCount(currentScore)
-                }else{
+                } else {
                     Column(
                         horizontalAlignment = Alignment.End,
                         modifier = Modifier.fillMaxWidth()
@@ -1020,6 +1023,7 @@ fun QuestionBox(gameViewModel: GameViewModel) {
             .padding(start = 20.dp, end = 20.dp)
     ) {
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -1054,15 +1058,17 @@ fun ShowAnswersLandscape(gvm: GameViewModel) {
     val answers = gvm.shuffledAnswers.observeAsState().value
     val givenAnswer = gvm.userAnswer.observeAsState().value
 
-    Column(
+    Column (
         modifier = Modifier
-    ) {
+            .padding(top=8.dp)
+    ){
         LazyVerticalGrid(
+            userScrollEnabled = false,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 8.dp, bottom = 10.dp),
+                .padding(top = 0.dp, bottom = 10.dp),
             columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(all = 10.dp),
+            contentPadding = PaddingValues(all = 8.dp),
             verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
 
@@ -1090,12 +1096,12 @@ fun ShowQuestion(gameViewModel: GameViewModel) {
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Text(
-            text = gameViewModel.questionForUser.observeAsState().value?.question ?: "",
-            style = gameQuestionTextStyle,
-            textAlign = TextAlign.Center,
-        )
     }
+    Text(
+        text = gameViewModel.questionForUser.observeAsState().value?.question ?: "",
+        style = gameQuestionTextStyle,
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Composable
@@ -1147,7 +1153,7 @@ fun AnswerButton(
         shape = RoundedCornerShape(game_buttons_shape),
         modifier = Modifier
             .fillMaxWidth()
-            .height(game_buttons_height),
+            .height(height = if (isLandscape) 65.dp else game_buttons_height),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor
         ),
@@ -1183,78 +1189,45 @@ fun GameViewMainPage(
     //determino orientamento schermo
     val isLandscape = isLandscape()
     val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
-    if (isLandscape) {
-        //TODO:: da sistemare
-    } else {
-        Column(
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .paint(
+                // Replace with your image id
+                painterResource(
+                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                ),
+                contentScale = ContentScale.Crop
+            )
+
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .paint(
-                    // Replace with your image id
-                    painterResource(
-                        id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
-                    ),
-                    contentScale = ContentScale.Crop
+                .fillMaxWidth()
+                .padding(
+                    start = if (isLandscape) bottom_bar_padding else 0.dp,
+                    end = if (isLandscape) bottom_bar_padding else 0.dp,
+                    top = if (isLandscape) bottom_bar_padding else 0.dp
                 )
-
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                TopBar(
-                    navController = navController,
-                    onLeftBtnClick = { navController.navigate("home") },
-                    leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                    showTitle = false,
-                    showRightButton = true,
-                    settingsViewModel = settingsViewModel
-                )
-            }
+            TopBar(
+                title = context.getString(R.string.app_name),
+                navController = navController,
+                onLeftBtnClick = { navController.navigate("home") },
+                leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                showTitle = isLandscape,
+                showRightButton = true,
+                settingsViewModel = settingsViewModel
+            )
+        }
 
 
-            Crossfade(targetState = showLoading, label = "") { showLoading ->
-                when (showLoading) {
-                    true -> LoadingScreen()
-                    false -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            GameMenuButtons(gameViewModel)
-                        }
-                    }
-
-                    null -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            GameMenuButtons(gameViewModel)
-                        }
-                    }
-
-
-                }
-
-                /*
-                if (showLoading == true) {
-                    LoadingScreen()
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        TopBar(
-                            navController = navController,
-                            onLeftBtnClick = { navController.navigate("home") },
-                            leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                            showTitle = false,
-                            showRightButton = true,
-                            settingsViewModel = settingsViewModel
-                        )
-                    }
-
+        Crossfade(targetState = showLoading, label = "") { showLoading ->
+            when (showLoading) {
+                true -> LoadingScreen()
+                false -> {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1263,17 +1236,56 @@ fun GameViewMainPage(
                     }
                 }
 
-                 */
+                null -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        GameMenuButtons(gameViewModel)
+                    }
+                }
+
+
             }
+
+            /*
+            if (showLoading == true) {
+                LoadingScreen()
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    TopBar(
+                        navController = navController,
+                        onLeftBtnClick = { navController.navigate("home") },
+                        leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                        showTitle = false,
+                        showRightButton = true,
+                        settingsViewModel = settingsViewModel
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    GameMenuButtons(gameViewModel)
+                }
+            }
+
+             */
         }
     }
 }
+
 
 @Composable
 fun GameMenuButtons(
     gameViewModel: GameViewModel
 ) {
     val context = LocalContext.current
+    val isLandscape = isLandscape()
 
     var showDifficultySelectionDialog by rememberSaveable { mutableStateOf(false) }
     var showCategorySelectionDialog by rememberSaveable { mutableStateOf(false) }
@@ -1281,46 +1293,8 @@ fun GameMenuButtons(
     var selectedDifficulty by rememberSaveable { mutableStateOf("") }
     var selectedCategory by rememberSaveable { mutableStateOf("") }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 40.dp, bottom = 100.dp)
-    ) {
-        //Difficulty Selection Dialog
-        if (showDifficultySelectionDialog) {
-            DifficultySelectionDialog(
-                onDismissRequest = {
-                    showDifficultySelectionDialog = false
-                },
-                onDifficultySelected = {
-                    selectedDifficulty = it
-                    gameViewModel.setDifficulty(it)
-                },
-                gameViewModel = gameViewModel
-            )
-        }
-
-        //Category selection dialog
-        if (showCategorySelectionDialog) {
-            CategorySelectionDialog(
-                onDismissRequest = {
-                    showCategorySelectionDialog = false
-                },
-                categories = gameViewModel.getCategories(),
-                //categories = categories!!,
-                onCategorySelected = {
-                    selectedCategory = it
-                    gameViewModel.setCategory(it)
-                },
-                gameViewModel = gameViewModel
-            )
-        }
-
-        //App title
-        AppTitle(context)
-
+    @Composable
+    fun StartGameButton(gameViewModel: GameViewModel) {
         //Start game button
         Button(
             onClick = {
@@ -1329,8 +1303,8 @@ fun GameMenuButtons(
             elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             shape = RoundedCornerShape(home_buttons_shape),
             modifier = Modifier
-                .height(home_buttons_height)
-                .width(home_buttons_width)
+                .height(height = if (isLandscape) home_buttons_height_landscape else home_buttons_height)
+                .width(width = if (isLandscape) home_buttons_width_landscape else home_buttons_width)
         ) {
             Row(
                 modifier = Modifier
@@ -1354,7 +1328,10 @@ fun GameMenuButtons(
             }
 
         }
+    }
 
+    @Composable
+    fun SelectDifficultyButton() {
         //Choose difficulty button
         Button(
             onClick = {
@@ -1363,8 +1340,8 @@ fun GameMenuButtons(
             shape = RoundedCornerShape(home_buttons_shape),
             elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             modifier = Modifier
-                .height(home_buttons_height)
-                .width(home_buttons_width)
+                .height(height = if (isLandscape) home_buttons_height_landscape else home_buttons_height)
+                .width(width = if (isLandscape) home_buttons_width_landscape else home_buttons_width)
         ) {
             Row(
                 modifier = Modifier
@@ -1384,11 +1361,15 @@ fun GameMenuButtons(
                 Text(
                     text = "Difficulty",
                     style = buttonsTextStyle,
+                    fontSize = if (isLandscape) 23.sp else fontSizeMedium,
                     textAlign = TextAlign.Center
                 )
             }
         }
+    }
 
+    @Composable
+    fun SelectCategoryButton() {
         //Choose category button
         Button(
             onClick = {
@@ -1397,8 +1378,8 @@ fun GameMenuButtons(
             shape = RoundedCornerShape(home_buttons_shape),
             elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
             modifier = Modifier
-                .height(home_buttons_height)
-                .width(home_buttons_width)
+                .height(height = if (isLandscape) home_buttons_height_landscape else home_buttons_height)
+                .width(width = if (isLandscape) home_buttons_width_landscape else home_buttons_width)
         ) {
             Row(
                 modifier = Modifier
@@ -1418,10 +1399,114 @@ fun GameMenuButtons(
                 Text(
                     text = "Category",
                     style = buttonsTextStyle,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontSize = if (isLandscape) 23.sp else fontSizeMedium
                 )
             }
         }
+    }
+
+    if (isLandscape) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+            //.fillMaxSize()
+            //.padding(top = 40.dp, bottom = 100.dp)
+        ) {
+            //Difficulty Selection Dialog
+            if (showDifficultySelectionDialog) {
+                DifficultySelectionDialog(
+                    onDismissRequest = {
+                        showDifficultySelectionDialog = false
+                    },
+                    onDifficultySelected = {
+                        selectedDifficulty = it
+                        gameViewModel.setDifficulty(it)
+                    },
+                    gameViewModel = gameViewModel
+                )
+            }
+
+            //Category selection dialog
+            if (showCategorySelectionDialog) {
+                CategorySelectionDialog(
+                    onDismissRequest = {
+                        showCategorySelectionDialog = false
+                    },
+                    categories = gameViewModel.getCategories(),
+                    //categories = categories!!,
+                    onCategorySelected = {
+                        selectedCategory = it
+                        gameViewModel.setCategory(it)
+                    },
+                    gameViewModel = gameViewModel
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = bottom_bar_padding, end = bottom_bar_padding)
+            ) {
+                StartGameButton(gameViewModel)
+                SelectDifficultyButton()
+                SelectCategoryButton()
+            }
+        }
+    } else {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 40.dp, bottom = 100.dp)
+        ) {
+            //Difficulty Selection Dialog
+            if (showDifficultySelectionDialog) {
+                DifficultySelectionDialog(
+                    onDismissRequest = {
+                        showDifficultySelectionDialog = false
+                    },
+                    onDifficultySelected = {
+                        selectedDifficulty = it
+                        gameViewModel.setDifficulty(it)
+                    },
+                    gameViewModel = gameViewModel
+                )
+            }
+
+            //Category selection dialog
+            if (showCategorySelectionDialog) {
+                CategorySelectionDialog(
+                    onDismissRequest = {
+                        showCategorySelectionDialog = false
+                    },
+                    categories = gameViewModel.getCategories(),
+                    //categories = categories!!,
+                    onCategorySelected = {
+                        selectedCategory = it
+                        gameViewModel.setCategory(it)
+                    },
+                    gameViewModel = gameViewModel
+                )
+            }
+
+            //App title
+            AppTitle(context)
+
+            //Start game button
+            StartGameButton(gameViewModel)
+
+            //Choose difficulty button
+            SelectDifficultyButton()
+
+            //Choose category button
+            SelectCategoryButton()
+
+        }
+
     }
 }
 

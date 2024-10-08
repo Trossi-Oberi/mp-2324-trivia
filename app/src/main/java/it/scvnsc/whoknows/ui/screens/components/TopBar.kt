@@ -133,7 +133,7 @@ fun TopBar(
                             initialValue = 0f,
                             targetValue = -10f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(300, easing = FastOutSlowInEasing, delayMillis = index * 100),
+                                animation = tween(500, easing = FastOutSlowInEasing, delayMillis = index * 150),
                                 repeatMode = RepeatMode.Reverse
                             ), label = ""
                         )
@@ -142,7 +142,7 @@ fun TopBar(
                             initialValue = 1f,
                             targetValue = 1.2f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(300, easing = FastOutSlowInEasing, delayMillis = index * 100),
+                                animation = tween(500, easing = FastOutSlowInEasing, delayMillis = index * 150),
                                 repeatMode = RepeatMode.Reverse
                             ), label = ""
                         )

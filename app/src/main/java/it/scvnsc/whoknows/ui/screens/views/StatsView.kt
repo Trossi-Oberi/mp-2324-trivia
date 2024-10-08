@@ -3,12 +3,14 @@ package it.scvnsc.whoknows.ui.screens.views
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -805,8 +807,8 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
 fun QuestionsBox(statsViewModel: StatsViewModel) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(if (isLandscape()) 350.dp else 450.dp)
+            .fillMaxSize()
+            //.border(3.dp, Color.Green)
     ) {
         Column {
             QuestionsHeader()
@@ -823,14 +825,16 @@ fun QuestionsList(statsViewModel: StatsViewModel) {
     val isLandScape = isLandscape()
 
     Box(
+
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                start = if (isLandScape) 100.dp else 20.dp,
-                end = if (isLandScape) 100.dp else 20.dp,
+                start = if (isLandScape) 100.dp else 10.dp,
+                end = if (isLandScape) 100.dp else 10.dp,
                 top = 20.dp,
                 bottom = if (isLandScape) 20.dp else 0.dp
             )
+            //.border(3.dp, Color.Red)
     ) {
         LazyColumn {
             with(statsViewModel) {
@@ -843,6 +847,7 @@ fun QuestionsList(statsViewModel: StatsViewModel) {
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
