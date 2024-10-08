@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
     // aggiungere musica di sottofondo partita
     // migliorare grafica schermata partite passate
     // sistemare landscape game view menu e game over screen
+    // tante animazioni -> applicazione laggosa...vedere meglio come fare
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {

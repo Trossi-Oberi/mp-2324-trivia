@@ -60,9 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import android.app.AlertDialog
 import android.content.Context
-import androidx.collection.mutableIntSetOf
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -75,10 +73,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -86,7 +83,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import it.scvnsc.whoknows.R
@@ -114,7 +110,6 @@ import it.scvnsc.whoknows.ui.theme.home_buttons_height
 import it.scvnsc.whoknows.ui.theme.home_buttons_shape
 import it.scvnsc.whoknows.ui.theme.home_buttons_width
 import it.scvnsc.whoknows.ui.theme.medium_spacing_height
-import it.scvnsc.whoknows.ui.theme.padding_difficulty
 import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.theme.star_icon_size
@@ -425,9 +420,17 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
     AnimatedVisibility(
         visible = gameOver == true,
         enter = slideInVertically(
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessLow
+            ),
             initialOffsetY = { -it }
         ),
         exit = slideOutVertically(
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessLow
+            ),
             targetOffsetY = {
                 -it
             }
@@ -632,9 +635,13 @@ fun GameScore(gameViewModel: GameViewModel) {
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         content = {
             Row(
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(all = if (isLandscape) 0.dp else small_padding)
+                    .padding(end = if (isLandscape) 10.dp else 0.dp)
+                    .fillMaxWidth()
+                    //.border(3.dp, Color.Green)
             ) {
                 Icon(
                     Icons.Default.SportsScore,
@@ -642,8 +649,9 @@ fun GameScore(gameViewModel: GameViewModel) {
                     contentDescription = null,
                     modifier = Modifier
                         .size(size = if (isLandscape) 41.dp else 48.dp)
-                        .fillMaxSize()
                         .padding(end = if (isLandscape) 3.dp else 10.dp)
+                        .fillMaxSize()
+                        //.border(3.dp, Color.Red)
                 )
 
                 /*
@@ -662,40 +670,29 @@ fun GameScore(gameViewModel: GameViewModel) {
 
                 */
 
-                Column(
-                    horizontalAlignment = if (isLandscape) Alignment.Start else Alignment.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                if (isLandscape){
                     Text(
-                        text = if (isLandscape) "Score:" else "Score:",
+                        text = "Score: ",
                         color = MaterialTheme.colorScheme.onPrimary,
                         style = gameScoreTextStyle,
-                        fontSize = if (isLandscape) fontSizeNormal else fontSizeUpperNormal,
-                        textAlign = if (isLandscape) TextAlign.Left else TextAlign.Right,
+                        fontSize = fontSizeNormal,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.padding(start = 6.dp)
                     )
-
-                    AnimatedContent(
-                        targetState = currentScore,
-                        transitionSpec = {
-                            if (targetState!! > initialState!!) {
-                                slideInVertically { height -> height } + fadeIn() togetherWith
-                                        slideOutVertically { height -> -height } + fadeOut()
-                            } else {
-                                slideInVertically { height -> -height } + fadeIn() togetherWith
-                                        slideOutVertically { height -> height } + fadeOut()
-                            }.using(
-                                SizeTransform(clip = false)
-                            )
-                        },
-                        label = "animated score"
-                    ) { score ->
+                    AnimatedScoreCount(currentScore)
+                }else{
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Text(
-                            text = "$score",
+                            text = "Score:",
                             color = MaterialTheme.colorScheme.onPrimary,
                             style = gameScoreTextStyle,
-                            fontSize = if (isLandscape) fontSizeNormal else fontSizeUpperNormal,
-                            textAlign = if (isLandscape) TextAlign.Left else TextAlign.Right,
+                            fontSize = fontSizeUpperNormal,
+                            textAlign = TextAlign.Right,
                         )
+                        AnimatedScoreCount(currentScore)
                     }
                 }
             }
@@ -707,6 +704,35 @@ fun GameScore(gameViewModel: GameViewModel) {
             Color.Transparent
         )
     )
+}
+
+@Composable
+fun AnimatedScoreCount(currentScore: Int?) {
+    val isLandscape = isLandscape()
+    AnimatedContent(
+        targetState = currentScore,
+        transitionSpec = {
+            if (targetState!! > initialState!!) {
+                slideInVertically { height -> height } + fadeIn() togetherWith
+                        slideOutVertically { height -> -height } + fadeOut()
+            } else {
+                slideInVertically { height -> -height } + fadeIn() togetherWith
+                        slideOutVertically { height -> height } + fadeOut()
+            }.using(
+                SizeTransform(clip = false)
+            )
+        },
+        label = "animated score"
+    ) { score ->
+        Text(
+            text = "$score",
+            color = MaterialTheme.colorScheme.onPrimary,
+            style = gameScoreTextStyle,
+            fontSize = if (isLandscape) fontSizeNormal else fontSizeUpperNormal,
+            textAlign = if (isLandscape) TextAlign.Left else TextAlign.Right,
+            modifier = Modifier.padding(top = if (isLandscape) 0.dp else 0.dp)
+        )
+    }
 }
 
 @Composable
@@ -954,9 +980,8 @@ fun PrintRemainingLives(gameViewModel: GameViewModel) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            for (i in 1..3) {
-                val isVisible = i <= remainingLives
-                AnimatedHeart(show = isVisible)
+            for (i in 1..remainingLives) {
+                AnimatedHeart(show = true)
             }
         }
     }
