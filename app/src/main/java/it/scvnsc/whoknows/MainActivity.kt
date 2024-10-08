@@ -110,13 +110,13 @@ class MainActivity : ComponentActivity() {
                 "home",
                 enterTransition = {
                     slideIntoContainer(
-                        animationSpec = tween(600, easing = EaseOut),
+                        animationSpec = tween(400, easing = EaseOut),
                         towards = AnimatedContentTransitionScope.SlideDirection.End
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        animationSpec = tween(600, easing = EaseOut),
+                        animationSpec = tween(400, easing = EaseOut),
                         towards = AnimatedContentTransitionScope.SlideDirection.Start
                     )
                 }
@@ -128,13 +128,13 @@ class MainActivity : ComponentActivity() {
                 "stats",
                 enterTransition = {
                     slideIntoContainer(
-                        animationSpec = tween(600, easing = EaseOut),
+                        animationSpec = tween(400, easing = EaseOut),
                         towards = AnimatedContentTransitionScope.SlideDirection.Start
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        animationSpec = tween(600, easing = EaseOut),
+                        animationSpec = tween(400, easing = EaseOut),
                         towards = AnimatedContentTransitionScope.SlideDirection.End
                     )
                 }
@@ -155,13 +155,13 @@ class MainActivity : ComponentActivity() {
                 "settings",
                 enterTransition = {
                     slideIntoContainer(
-                        animationSpec = tween(600, easing = EaseOut),
+                        animationSpec = tween(400, easing = EaseOut),
                         towards = AnimatedContentTransitionScope.SlideDirection.Start
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        animationSpec = tween(600, easing = EaseOut),
+                        animationSpec = tween(400, easing = EaseOut),
                         towards = AnimatedContentTransitionScope.SlideDirection.End
                     )
                 }
@@ -173,13 +173,13 @@ class MainActivity : ComponentActivity() {
                 "game",
                 enterTransition = {
                     slideIntoContainer(
-                        animationSpec = tween(600, easing = EaseOut),
+                        animationSpec = tween(400, easing = EaseOut),
                         towards = AnimatedContentTransitionScope.SlideDirection.Start
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        animationSpec = tween(600, easing = EaseOut),
+                        animationSpec = tween(400, easing = EaseOut),
                         towards = AnimatedContentTransitionScope.SlideDirection.End
                     )
                 }
