@@ -58,7 +58,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import android.app.AlertDialog
 import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
@@ -75,16 +74,21 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HeartBroken
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
@@ -170,30 +174,6 @@ fun GameView(
                         }
                     }
                 }
-                /*
-                with(gameViewModel) {
-                    if (isOffline == true) {
-                        NetworkErrorScreen(navController, gameViewModel)
-
-                        //stoppo il timer se la connessione viene persa
-                        if (isPlaying.observeAsState().value == true) {
-                            pauseTimer()
-                        }
-                    } else {
-                        if (isPlaying.observeAsState().value == false) {
-                            if (isApiSetupComplete.observeAsState().value == false) {
-                                setupAPI()
-                            }
-                            GameViewMainPage(navController, gameViewModel, settingsViewModel)
-                        }
-
-                        if (isPlaying.observeAsState().value == true) {
-                            GameViewInGame(navController, gameViewModel, settingsViewModel)
-                        }
-                    }
-                }
-
-                 */
             }
         )
 
@@ -307,12 +287,15 @@ fun GameViewInGame(
     val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
     val isGameOver = gameViewModel.isGameOver.observeAsState().value
 
+    val isDark = settingsViewModel.isDarkTheme.observeAsState().value == true
+    val showExitConfirmationDialog = rememberSaveable { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .paint(
                 painterResource(
-                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                    id = if (isDark) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
                 ),
                 contentScale = ContentScale.Crop
             )
@@ -330,7 +313,7 @@ fun GameViewInGame(
                 navController = navController,
                 onLeftBtnClick = {
                     if (isGameOver == false) {
-                        showExitConfirmationDialog(context, gameViewModel)
+                        showExitConfirmationDialog.value = true
                     } else {
                         navController.navigate("game")
                         gameViewModel.setIsPlaying(false)
@@ -379,30 +362,89 @@ fun GameViewInGame(
             }
         }
     }
+
+    if(showExitConfirmationDialog.value){
+        ExitConfirmationDialog(context, gameViewModel, isDark, showExitConfirmationDialog)
+    }
+
 }
 
-
-fun showExitConfirmationDialog(context: Context, gameViewModel: GameViewModel) {
-    //stoppo il timer durante la conferma di uscita
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExitConfirmationDialog(
+    context: Context,
+    gameViewModel: GameViewModel,
+    isDark: Boolean,
+    showExitConfirmationDialog: MutableState<Boolean>
+) {
+    // Stop the timer during exit confirmation
     gameViewModel.pauseTimer()
 
-    AlertDialog.Builder(context)
-        .setTitle("Exit game")
-        .setMessage("Are you sure you want to exit the game?")
-        .setPositiveButton("Yes") { _, _ ->
-            gameViewModel.onQuitGameClicked()
-            Toast.makeText(context, "Game exited successfully", Toast.LENGTH_SHORT).show()
-        }
-        .setNegativeButton("No") { dialog, _ ->
-            //riavvio il timer se l'utente vuole proseguire con la partita
+    BasicAlertDialog(
+        onDismissRequest = {
             gameViewModel.resumeTimer()
-            dialog.dismiss()
+            showExitConfirmationDialog.value = false
         }
-        .setOnDismissListener {
-            //riavvio il timer se l'utente vuole proseguire con la partita
-            gameViewModel.resumeTimer()
+
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp)
+                .clip(RoundedCornerShape(16.dp)),
+            color = if (isDark) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(30.dp)
+            ) {
+                Text(
+                    text = "Exit game",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = if (isDark) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Are you sure you want to exit the game?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isDark) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = {
+                            gameViewModel.resumeTimer()
+                            showExitConfirmationDialog.value = false
+                        }
+                    ) {
+                        Text("No")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            gameViewModel.onQuitGameClicked()
+
+                            showExitConfirmationDialog.value = false
+
+                            //mostra toast di uscita gioco avvenuta con successo
+                            context.let { ctx ->
+                                Toast.makeText(
+                                    ctx,
+                                    "Game exited successfully",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    ) {
+                        Text("Yes")
+                    }
+                }
+            }
         }
-        .show()
+    }
 }
 
 @Composable
@@ -444,7 +486,6 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
             }
         )
     ) {
-        //TODO: Cambiare GameOverScreen quando e' landscape
         GameOverScreen(gameViewModel, navController)
     }
 
@@ -659,22 +700,6 @@ fun GameScore(gameViewModel: GameViewModel) {
                         .padding(end = if (isLandscape) 3.dp else 10.dp)
                         .fillMaxSize()
                 )
-
-                /*
-
-                Text(
-                    text = if (isLandscape) "Score: $currentScore" else "Score:\n$currentScore",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = gameScoreTextStyle,
-                    fontSize = if (isLandscape) fontSizeNormal else fontSizeUpperNormal,
-                    textAlign = if (isLandscape) TextAlign.Left else TextAlign.Right,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        //.padding(start = if (isLandscape) 5.dp else 0.dp)
-                )
-
-
-                */
 
                 if (isLandscape) {
                     Text(
@@ -1246,37 +1271,7 @@ fun GameViewMainPage(
                         GameMenuButtons(gameViewModel)
                     }
                 }
-
-
             }
-
-            /*
-            if (showLoading == true) {
-                LoadingScreen()
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    TopBar(
-                        navController = navController,
-                        onLeftBtnClick = { navController.navigate("home") },
-                        leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                        showTitle = false,
-                        showRightButton = true,
-                        settingsViewModel = settingsViewModel
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    GameMenuButtons(gameViewModel)
-                }
-            }
-
-             */
         }
     }
 }
@@ -1412,9 +1407,6 @@ fun GameMenuButtons(
         Column(
             verticalArrangement = Arrangement.spacedBy(40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-            //.fillMaxSize()
-            //.padding(top = 40.dp, bottom = 100.dp)
         ) {
             //Difficulty Selection Dialog
             if (showDifficultySelectionDialog) {
@@ -1795,7 +1787,6 @@ fun GameOverScreen(
                 PlayAgainButton(gameViewModel)
                 Spacer(modifier = Modifier.height(90.dp))
             }
-
         }
     }
 }
