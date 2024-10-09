@@ -1674,7 +1674,9 @@ fun GameOverScreen(
                 containerColor = MaterialTheme.colorScheme.primary
             ),
             onClick = {
-                navController.navigate("home")
+                //torna alla home page senza salvare nulla sullo stack del navController
+                navController.popBackStack()
+
                 gameViewModel.setIsPlaying(false)
                 gameViewModel.clearUserAnswer()
                 gameViewModel.setGameOver(false)
@@ -1701,6 +1703,9 @@ fun GameOverScreen(
                 gameViewModel.setIsPlaying(false)
                 gameViewModel.clearUserAnswer()
                 gameViewModel.setGameOver(false)
+
+                //torna indietro senza ricomporre l'interfaccia
+                navController.enableOnBackPressed(true)
             }) {
             Text(text = "Game Menu", fontSize = fontSizeNormal)
         }
