@@ -1,6 +1,8 @@
 package it.scvnsc.whoknows
 
 import android.annotation.SuppressLint
+import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -32,6 +34,7 @@ import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
+import it.scvnsc.whoknows.utils.PreferencesManager
 
 class MainActivity : ComponentActivity() {
     private lateinit var gameViewModel: GameViewModel

@@ -61,6 +61,7 @@ import androidx.navigation.NavHostController
 import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -230,8 +231,8 @@ fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameView
                     onClick = {
                         //chiudo la partita e torno alla home
                         gameViewModel.onQuitGameClicked()
-
                         navController.navigate("home")
+                        gameViewModel.setIsPlaying(false)
                     },
                     modifier = Modifier
                         .width(200.dp)
@@ -346,11 +347,14 @@ fun GameViewInGame(
         ) {
             Crossfade(targetState = showLoading, label = "") { showLoading ->
                 when (showLoading!!) {
+
                     true -> {
+                        Log.d("Debug", "showLoading: $showLoading")
                         LoadingScreen()
                     }
 
                     false -> {
+                        Log.d("Debug", "showLoading: $showLoading")
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -476,15 +480,7 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
             ),
             initialOffsetY = { -it }
         ),
-        exit = slideOutVertically(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessLow
-            ),
-            targetOffsetY = {
-                -it
-            }
-        )
+        exit = fadeOut()
     ) {
         GameOverScreen(gameViewModel, navController)
     }
@@ -1180,7 +1176,7 @@ fun AnswerButton(
         shape = RoundedCornerShape(game_buttons_shape),
         modifier = Modifier
             .fillMaxWidth()
-            .height(height = if (isLandscape) 65.dp else game_buttons_height),
+            .height(height = if (isLandscape) 58.dp else game_buttons_height),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor
         ),

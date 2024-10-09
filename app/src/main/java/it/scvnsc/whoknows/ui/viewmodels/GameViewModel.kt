@@ -452,7 +452,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun resumeTimer() {
-        _isGameTimerInterrupted.value = false
+        _isGameTimerInterrupted.postValue(false)
+        //_isGameTimerInterrupted.value = false
         Log.d("Debug", "Timer resumed")
         // Logica per riprendere il timer
     }
