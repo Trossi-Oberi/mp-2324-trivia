@@ -10,25 +10,24 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import it.scvnsc.whoknows.services.NetworkMonitorService
+import it.scvnsc.whoknows.ui.screens.views.ExitConfirmationDialog
 import it.scvnsc.whoknows.ui.screens.views.HomeView
 import it.scvnsc.whoknows.ui.screens.views.GameView
 import it.scvnsc.whoknows.ui.screens.views.SettingsView
 import it.scvnsc.whoknows.ui.screens.views.StatsView
-import it.scvnsc.whoknows.ui.screens.views.showExitConfirmationDialog
 import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
@@ -184,10 +183,14 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             ) {
+                val showExitConfirmationDialog = rememberSaveable { mutableStateOf(false) }
+
                 BackHandler {
                     if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false) {
                         // Aggiungi qui il comportamento specifico per la schermata di gioco
-                        showExitConfirmationDialog(this@MainActivity, gameViewModel)
+                        showExitConfirmationDialog.value = true
+
+                        //showExitConfirmationDialog(this@MainActivity, gameViewModel)
                     } else if (gameViewModel.isGameOver.value == true) {
                         /*setta isPlaying off e rimane su gameView*/
                         gameViewModel.setIsPlaying(false)
@@ -199,6 +202,14 @@ class MainActivity : ComponentActivity() {
                 }
 
                 GameView(navController, gameViewModel, settingsViewModel)
+
+                val isDark = settingsViewModel.isDarkTheme.observeAsState().value == true
+
+                if(showExitConfirmationDialog.value){
+                    WhoKnowsTheme (darkTheme = isDark) {
+                        ExitConfirmationDialog(applicationContext, gameViewModel, isDark, showExitConfirmationDialog)
+                    }
+                }
             }
         }
     }
