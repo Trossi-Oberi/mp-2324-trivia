@@ -1,12 +1,18 @@
 package it.scvnsc.whoknows.ui.screens.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -25,17 +31,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.theme.DarkYellow
-import it.scvnsc.whoknows.ui.theme.titleTextStyle
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.theme.top_bar_height
 import it.scvnsc.whoknows.ui.theme.top_bar_padding
@@ -57,7 +63,6 @@ fun TopBar(
 ) {
     val isLandscape = isLandscape()
     val context = LocalContext.current
-
 
     Row(
         modifier = Modifier
@@ -118,7 +123,11 @@ fun TopBar(
                             initialValue = 0f,
                             targetValue = -10f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(500, easing = FastOutSlowInEasing, delayMillis = index * 150),
+                                animation = tween(
+                                    500,
+                                    easing = FastOutSlowInEasing,
+                                    delayMillis = index * 150
+                                ),
                                 repeatMode = RepeatMode.Reverse
                             ), label = ""
                         )
@@ -127,7 +136,11 @@ fun TopBar(
                             initialValue = 1f,
                             targetValue = 1.2f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(500, easing = FastOutSlowInEasing, delayMillis = index * 150),
+                                animation = tween(
+                                    500,
+                                    easing = FastOutSlowInEasing,
+                                    delayMillis = index * 150
+                                ),
                                 repeatMode = RepeatMode.Reverse
                             ), label = ""
                         )
@@ -136,7 +149,7 @@ fun TopBar(
                             text = char.toString(),
                             style = topBarTextStyle,
                             modifier = Modifier
-                                .graphicsLayer{
+                                .graphicsLayer {
                                     translationY = offsetY  // Salto verticale della lettera
                                     scaleX = scale  // Scala orizzontale della lettera
                                     scaleY = scale   // Scala verticale della lettera
@@ -162,6 +175,8 @@ fun TopBar(
                     .fillMaxSize()
             ) {
                 if (showThemeChange) {
+                    val isDarkTheme = settingsViewModel?.isDarkTheme?.observeAsState()?.value
+
                     with(settingsViewModel) {
                         IconButton(
                             onClick = { this?.toggleTheme() },
@@ -169,17 +184,32 @@ fun TopBar(
                             modifier = Modifier
                                 .align(Alignment.Center)
                         ) {
-                            if (this?.isDarkTheme?.value == true) {
+                            val targetRotation by animateFloatAsState(
+                                targetValue = if (isDarkTheme == true) 360f else 0f,
+                                animationSpec = tween(
+                                    durationMillis = 500,
+                                    easing = FastOutSlowInEasing
+                                ),
+                                label = ""
+                            )
+
+                            AnimatedContent(
+                                targetState = isDarkTheme,
+                                transitionSpec = {
+                                    fadeIn(
+                                        animationSpec = tween(
+                                            300,
+                                            delayMillis = 150
+                                        )
+                                    ) togetherWith fadeOut(animationSpec = tween(500))
+                                },
+                                label = "Theme Icon Animation"
+                            ) { isDark ->
                                 Icon(
-                                    Icons.Filled.WbSunny,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                            } else {
-                                Icon(
-                                    Icons.Filled.DarkMode,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary
+                                    imageVector = if (isDark == true) Icons.Filled.WbSunny else Icons.Filled.DarkMode,
+                                    contentDescription = if (isDark == true) "Switch to Light Mode" else "Switch to Dark Mode",
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.rotate(targetRotation)
                                 )
                             }
                         }
