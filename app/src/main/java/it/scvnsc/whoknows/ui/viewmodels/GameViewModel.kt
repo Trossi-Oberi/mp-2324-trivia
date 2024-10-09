@@ -437,8 +437,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         //salvo nella variabile lastGame l'ultima partita salvata
         _lastGame.value = gameRepository.getLastGame()
 
-        //imposto isPlaying a false, in modo che torni alla schermata iniziale di gioco
-        //_isPlaying.value = false
+        //resetto il game timer
+        _isGameTimerInterrupted.value = false
 
         //imposto gameOver a true in modo da far comparire la schermata di gameOver
         _isGameOver.value = true
@@ -468,7 +468,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 throw e
             }
         }
-        //Log.d("WhoKnows", "GameViewModel initialized successfully")
     }
 
 }
