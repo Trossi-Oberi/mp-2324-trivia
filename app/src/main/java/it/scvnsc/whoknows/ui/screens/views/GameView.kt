@@ -86,11 +86,17 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.traceEventEnd
+import androidx.compose.runtime.traceEventStart
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.SideEffect
+import androidx.compose.ui.util.trace
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -128,6 +134,7 @@ import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
 import it.scvnsc.whoknows.utils.isLandscape
 
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun GameView(
@@ -146,33 +153,31 @@ fun GameView(
             modifier = Modifier
                 .fillMaxSize(),
             content = {
-                Crossfade(targetState = isOffline to isPlaying, label = "") { (offline, playing) ->
-                    when {
-                        // Mostra la schermata di errore di rete
-                        offline == true -> {
-                            NetworkErrorScreen(navController, gameViewModel)
+                when {
+                    // Mostra la schermata di errore di rete
+                    isOffline == true -> {
+                        NetworkErrorScreen(navController, gameViewModel)
 
-                            // Stop timer quando la connessione viene persa
-                            if (playing == true) {
-                                gameViewModel.pauseTimer()
-                            }
+                        // Stop timer quando la connessione viene persa
+                        if (isPlaying == true) {
+                            gameViewModel.pauseTimer()
                         }
+                    }
 
-                        // Mostra la schermata principale (setup dell'API)
-                        playing == false && isApiSetupComplete == false -> {
-                            gameViewModel.setupAPI()
-                            GameViewMainPage(navController, gameViewModel, settingsViewModel)
-                        }
+                    // Mostra la schermata principale (setup dell'API)
+                    isPlaying == false && isApiSetupComplete == false -> {
+                        gameViewModel.setupAPI()
+                        GameViewMainPage(navController, gameViewModel, settingsViewModel)
+                    }
 
-                        // Mostra la schermata in-game quando si sta giocando
-                        playing == true -> {
-                            GameViewInGame(navController, gameViewModel, settingsViewModel)
-                        }
+                    // Mostra la schermata in-game quando si sta giocando
+                    isPlaying == true -> {
+                        GameViewInGame(navController, gameViewModel, settingsViewModel)
+                    }
 
-                        else -> {
-                            // Mostra la schermata di attesa/preparazione se non sta giocando
-                            GameViewMainPage(navController, gameViewModel, settingsViewModel)
-                        }
+                    else -> {
+                        // Mostra la schermata di attesa/preparazione se non sta giocando
+                        GameViewMainPage(navController, gameViewModel, settingsViewModel)
                     }
                 }
             }
@@ -183,11 +188,15 @@ fun GameView(
                 gameViewModel.resumeTimer()
             }
         }
+
     }
 }
 
+
 @Composable
 fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameViewModel) {
+    Log.d("Debug", "NetworkErrorScreen called")
+
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -330,9 +339,10 @@ fun GameViewInGame(
 
         }
 
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .size(size = small_padding)
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(size = small_padding)
         )
 
         Box(
@@ -345,29 +355,27 @@ fun GameViewInGame(
                     bottom = 10.dp
                 )
         ) {
-            Crossfade(targetState = showLoading, label = "") { showLoading ->
-                when (showLoading!!) {
 
-                    true -> {
-                        Log.d("Debug", "showLoading: $showLoading")
-                        LoadingScreen()
-                    }
+            when (showLoading!!) {
+                true -> {
+                    Log.d("Debug", "showLoading: $showLoading")
+                    LoadingScreen()
+                }
 
-                    false -> {
-                        Log.d("Debug", "showLoading: $showLoading")
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                        ) {
-                            GameBox(gameViewModel, navController)
-                        }
+                false -> {
+                    Log.d("Debug", "showLoading: $showLoading")
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        GameBox(gameViewModel, navController)
                     }
                 }
             }
         }
     }
 
-    if(showExitConfirmationDialog.value){
+    if (showExitConfirmationDialog.value) {
         ExitConfirmationDialog(context, gameViewModel, isDark, showExitConfirmationDialog)
     }
 
@@ -381,6 +389,8 @@ fun ExitConfirmationDialog(
     isDark: Boolean,
     showExitConfirmationDialog: MutableState<Boolean>
 ) {
+    Log.d("Debug", "ExitConfirmationDialog called")
+
     // Stop the timer during exit confirmation
     gameViewModel.pauseTimer()
 
@@ -1246,26 +1256,23 @@ fun GameViewMainPage(
             )
         }
 
-
-        Crossfade(targetState = showLoading, label = "") { showLoading ->
-            when (showLoading) {
-                true -> LoadingScreen()
-                false -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        GameMenuButtons(gameViewModel)
-                    }
+        when (showLoading) {
+            true -> LoadingScreen()
+            false -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    GameMenuButtons(gameViewModel)
                 }
+            }
 
-                null -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        GameMenuButtons(gameViewModel)
-                    }
+            null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    GameMenuButtons(gameViewModel)
                 }
             }
         }
@@ -1665,7 +1672,10 @@ fun GameOverScreen(
             modifier = Modifier
                 .width(280.dp)
                 .height(game_buttons_height)
-                .padding(start = if (isLandscape) 15.dp else 0.dp, end = if (isLandscape) 15.dp else 0.dp),
+                .padding(
+                    start = if (isLandscape) 15.dp else 0.dp,
+                    end = if (isLandscape) 15.dp else 0.dp
+                ),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             ),
@@ -1692,16 +1702,16 @@ fun GameOverScreen(
             modifier = Modifier
                 .width(280.dp)
                 .height(game_buttons_height)
-                .padding(start = if (isLandscape) 15.dp else 0.dp, end = if (isLandscape) 15.dp else 0.dp),
+                .padding(
+                    start = if (isLandscape) 15.dp else 0.dp,
+                    end = if (isLandscape) 15.dp else 0.dp
+                ),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = {
                 /*setta isPlaying off e rimane su gameView*/
                 gameViewModel.setIsPlaying(false)
                 gameViewModel.clearUserAnswer()
                 gameViewModel.setGameOver(false)
-
-                //torna indietro senza ricomporre l'interfaccia
-                navController.enableOnBackPressed(true)
             }) {
             Text(text = "Game Menu", fontSize = fontSizeNormal)
         }
@@ -1718,7 +1728,10 @@ fun GameOverScreen(
             modifier = Modifier
                 .width(280.dp)
                 .height(game_buttons_height)
-                .padding(start = if (isLandscape) 15.dp else 0.dp, end = if (isLandscape) 15.dp else 0.dp),
+                .padding(
+                    start = if (isLandscape) 15.dp else 0.dp,
+                    end = if (isLandscape) 15.dp else 0.dp
+                ),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = {
                 gameViewModel.onStartClicked()
@@ -1727,8 +1740,9 @@ fun GameOverScreen(
         }
     }
 
-    Box(modifier = Modifier
-        .fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
         Column(
             modifier = Modifier
@@ -1765,21 +1779,21 @@ fun GameOverScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            if (isRecord==false){
+            if (isRecord == false) {
                 Spacer(modifier = Modifier.height(height = if (isLandscape) 40.dp else 0.dp))
             }
 
-            if (isLandscape){
+            if (isLandscape) {
                 Spacer(modifier = Modifier.height(20.dp))
-                Row (
+                Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
                     MainMenuButton()
                     GameMenuButton()
                     PlayAgainButton(gameViewModel)
                 }
-            }else{
+            } else {
                 Spacer(modifier = Modifier.height(50.dp))
                 MainMenuButton()
                 Spacer(modifier = Modifier.height(15.dp))
