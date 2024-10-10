@@ -1,7 +1,6 @@
 package it.scvnsc.whoknows.ui.viewmodels
 
 import android.app.Application
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -22,8 +21,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferencesManager.isDarkTheme = newTheme
         _isDarkTheme.value = newTheme
 
-        //Log.d("SettingsViewModel", "Theme toggled to $newTheme")
-
         Toast.makeText(getApplication(), "Theme ${if(newTheme) "dark" else "light"}", Toast.LENGTH_SHORT).show()
     }
 
@@ -31,8 +28,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val newSoundSetting = !preferencesManager.isSoundEnabled
         preferencesManager.isSoundEnabled = newSoundSetting
         _isSoundEnabled.value = newSoundSetting
-
-        //Log.d("SettingsViewModel", "Sound setting toggled to $newSoundSetting")
 
         Toast.makeText(getApplication(), "Sound ${if(newSoundSetting) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
     }
