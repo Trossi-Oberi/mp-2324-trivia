@@ -1,6 +1,9 @@
 package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +33,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -79,9 +84,9 @@ fun SettingsView(
                         .paint(
                             // Replace with your image id
                             painterResource(
-                                id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                                id = if (isDarkTheme) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
                             ),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
                         )
                         .fillMaxSize()
                 ) {
@@ -138,6 +143,29 @@ fun SettingsButtons(
         .width(if (isLandscape) difficulty_buttons_width_landscape else difficulty_buttons_width)
 
     val iconSize = if (isLandscape) icon_size_settings_landscape else icon_size_settings
+
+
+    //animate icon rotation
+    val themeIconRotation by animateFloatAsState(
+        targetValue = if (isDarkTheme) 360f else 0f,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = FastOutSlowInEasing
+        ),
+        label = "Theme Icon Rotation"
+    )
+
+    // Sound icon fade animation
+    val soundIconAlpha by animateFloatAsState(
+        targetValue = if (isSoundEnabled) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 700,
+            easing = FastOutSlowInEasing
+        ),
+        label = "Sound Icon Alpha"
+    )
+
+
 
     val buttonContent: @Composable (String, @Composable () -> Unit) -> Unit = { text, icon ->
         if (isLandscape) {
@@ -198,10 +226,14 @@ fun SettingsButtons(
             modifier = buttonModifier
         ) {
             buttonContent("Toggle Theme") {
+                Spacer(modifier = Modifier.size(10.dp))
+
                 Icon(
-                    if (isDarkTheme) Icons.Default.WbSunny else Icons.Default.DarkMode,
+                    if (isDarkTheme) Icons.Default.DarkMode else Icons.Default.WbSunny,
                     contentDescription = null,
-                    modifier = Modifier.size(iconSize)
+                    modifier = Modifier
+                        .size(iconSize)
+                        .rotate(themeIconRotation)
                 )
             }
         }
@@ -213,11 +245,30 @@ fun SettingsButtons(
             modifier = buttonModifier
         ) {
             buttonContent("Toggle Sound") {
-                Icon(
-                    if (isSoundEnabled) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
-                    contentDescription = null,
+                Spacer(modifier = Modifier.size(10.dp))
+
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier.size(iconSize)
-                )
+                ) {
+                    // Faded out icon (VolumeOff)
+                    Icon(
+                        Icons.AutoMirrored.Filled.VolumeOff,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(iconSize)
+                            .alpha(1f - soundIconAlpha)
+                    )
+                    // Faded in icon (VolumeUp)
+                    Icon(
+                        Icons.AutoMirrored.Filled.VolumeUp,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(iconSize)
+                            .alpha(soundIconAlpha)
+                    )
+                }
+
             }
         }
 
