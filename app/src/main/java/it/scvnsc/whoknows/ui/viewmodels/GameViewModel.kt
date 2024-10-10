@@ -36,14 +36,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val WAIT_TIME = 500L
     private val STARTING_LIVES = 3
 
-    //Difficolta' selezionata dall'utente
-    private val _selectedDifficulty = MutableLiveData(DEFAULT_DIFFICULTY)
-    val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
-
-    //Categoria selezionata dall'utente
-    private val _selectedCategory = MutableLiveData(DEFAULT_CATEGORY)
-    val selectedCategory: LiveData<String> get() = _selectedCategory
-
     fun getCategories(): List<String> {
         val availableCategories = mutableListOf("Mixed")
         availableCategories.addAll(CategoryManager.categories.keys)
@@ -54,11 +46,27 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Domande poste all'utente
     private var askedQuestions = mutableListOf<Question>()
 
-    //Domanda posta all'utente e possibili risposte (in ordine casuale, altrimenti la risposta corretta sarebbe sempre la prima)
-    private val _questionForUser = MutableLiveData<Question?>()
-    val questionForUser: LiveData<Question?> get() = _questionForUser
-    private val _shuffledAnswers = MutableLiveData<List<String>>()
-    val shuffledAnswers: LiveData<List<String>> get() = _shuffledAnswers
+    //Memorizza la risposta clickata dall'utente (serve per aggiornare l'interfaccia GameView con i colori verde se corretta e rosso se errata)
+    private val _userAnswer = MutableLiveData<String>()
+    val userAnswer: LiveData<String> get() = _userAnswer
+
+    //Timer per nuova richiesta API
+    private var apiTimerJob: Job? = null
+
+    //MediaPlayer per riproduzione suono in base alla risposta selezionata
+    private var mediaPlayer: MediaPlayer? = null
+
+    //Timer di gioco
+    private var gameTimer = 0
+
+    private val _elapsedTime = MutableLiveData<String>()
+    val elapsedTime: LiveData<String> = _elapsedTime
+
+    private val _isGameTimerInterrupted = MutableLiveData<Boolean?>()
+    val isGameTimerInterrupted: LiveData<Boolean?> = _isGameTimerInterrupted
+
+    private val _lastGame = MutableLiveData<Game>()
+    val lastGame: LiveData<Game> get() = _lastGame
 
     //Controlla se si sta giocando
     private val _isPlaying = MutableLiveData(false)
@@ -68,37 +76,25 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _isGameOver = MutableLiveData(false)
     val isGameOver: LiveData<Boolean> get() = _isGameOver
 
-    //Memorizza la risposta clickata dall'utente (serve per aggiornare l'interfaccia GameView con i colori verde se corretta e rosso se errata)
-    private val _userAnswer = MutableLiveData<String>()
-    val userAnswer: LiveData<String> get() = _userAnswer
+    //Difficolta' selezionata dall'utente
+    private val _selectedDifficulty = MutableLiveData(DEFAULT_DIFFICULTY)
+    val selectedDifficulty: LiveData<String> get() = _selectedDifficulty
+
+    //Categoria selezionata dall'utente
+    private val _selectedCategory = MutableLiveData(DEFAULT_CATEGORY)
+    val selectedCategory: LiveData<String> get() = _selectedCategory
 
     //Fa in modo che solo una risposta sia selezionabile
     private val _isAnswerSelected = MutableLiveData(false)
     val isAnswerSelected: LiveData<Boolean> get() = _isAnswerSelected
 
-    //MediaPlayer per riproduzione suono in base alla risposta selezionata
-    private var mediaPlayer: MediaPlayer? = null
+    //Punteggio della partita
+    private val _score = MutableLiveData<Int>()
+    val score: LiveData<Int> = _score
 
     //Controlla se il nuovo punteggio e' un record
     private val _isRecord = MutableLiveData(false)
     val isRecord: LiveData<Boolean> get() = _isRecord
-
-    //Timer di gioco
-    private var gameTimer = 0
-    private val _elapsedTime = MutableLiveData<String>()
-    val elapsedTime: LiveData<String> = _elapsedTime
-    private val _isGameTimerInterrupted = MutableLiveData<Boolean?>()
-    val isGameTimerInterrupted: LiveData<Boolean?> = _isGameTimerInterrupted
-
-    private val _lastGame = MutableLiveData<Game>()
-    val lastGame: LiveData<Game> get() = _lastGame
-
-    //Timer per nuova richiesta API
-    private var apiTimerJob: Job? = null
-
-    //Punteggio della partita
-    private val _score = MutableLiveData<Int>()
-    val score: LiveData<Int> = _score
 
     //Vite dell'utente
     private val _lives = MutableLiveData<Int>()
@@ -106,6 +102,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isApiSetupComplete = MutableLiveData(false)
     val isApiSetupComplete: LiveData<Boolean> get() = _isApiSetupComplete
+
+    //Domanda posta all'utente e possibili risposte (in ordine casuale, altrimenti la risposta corretta sarebbe sempre la prima)
+    private val _questionForUser = MutableLiveData<Question?>()
+    val questionForUser: LiveData<Question?> get() = _questionForUser
+
+    private val _shuffledAnswers = MutableLiveData<List<String>>()
+    val shuffledAnswers: LiveData<List<String>> get() = _shuffledAnswers
 
     //Repositories
     private val questionRepository: QuestionRepository
@@ -150,7 +153,17 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     fun onAnswerClicked(givenAnswer: String) {
         _isAnswerSelected.value = true
         viewModelScope.launch {
+
             _userAnswer.postValue(givenAnswer)
+
+            //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
+            _questionForUser.value?.givenAnswer = givenAnswer
+
+            questionRepository.updateLastQuestion(
+                _questionForUser.value!!.id,
+                givenAnswer
+            )
+
             evaluateAnswer(givenAnswer)
         }
     }
@@ -162,31 +175,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             updateScore()
             playSound(R.raw.correct_answer)
             delay(WAIT_TIME)
-
-            //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
-            _questionForUser.value?.givenAnswer = givenAnswer
-
-            questionRepository.updateLastQuestion(
-                _questionForUser.value!!.id,
-                givenAnswer
-            )
             fetchNewQuestion()
-
         } else {
             //Risposta sbagliata -> -1 vita, prossima domanda
             //Risposta sbagliata &&  Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             _lives.value = _lives.value!! - 1
-            Log.d("Debug", "Current lives: ${_lives.value}")
+            Log.d("GameViewModel", "Current lives: ${_lives.value}")
             playSound(R.raw.wrong_answer)
             delay(WAIT_TIME)
 
-            //imposto la risposta data dall'utente nella domanda corrente e aggiorno il database
-            _questionForUser.value?.givenAnswer = givenAnswer
-            questionRepository.updateLastQuestion(_questionForUser.value!!.id, givenAnswer)
-
             if (_lives.value == 0){
                 //Salvataggio game nel DB
-                Log.d("Debug", "Game ended with score: ${_score.value}")
+                Log.d("GameViewModel", "Game ended with score: ${_score.value}")
                 val playedGame = Game(
                     _score.value!!,
                     _selectedDifficulty.value!!,
@@ -200,8 +200,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 //In ogni caso salvo la partita
                 saveGameAndQuestions(playedGame, askedQuestions)
 
-                //Devo settare isPlaying ad off solamente se l'utente clicka main menu o game menu
-                //Altrimenti isPlaying rimane true e isGameOver torna false, per iniziare una nuova partita
                 _isGameOver.postValue(true)
 
                 //salvo nella variabile lastGame l'ultima partita salvata
@@ -236,7 +234,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             Context.MODE_PRIVATE
         )
         val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", false)
-        Log.d("Debug", "isSoundEnabled: $isSoundEnabled")
+
+        //Se il suono è disabilitato non riproduco il suono
         if (!isSoundEnabled) return
 
         mediaPlayer?.release()
@@ -254,7 +253,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         val newGameID = gameRepository.saveGame(playedGame)
         playedGame.id = newGameID
-        Log.d("Debug", "Game saved with ID: ${playedGame.id}")
+
         gameQuestionRepository.saveGameAndQuestions(playedGame, askedQuestions)
     }
 
@@ -263,11 +262,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val isNewRecord = playedGame.score!! > maxScore
 
         if (maxScore == 0) {
-            Log.d("Debug", "New record: ${playedGame.score}")
+            Log.d("GameViewModel", "New record: ${playedGame.score}")
         } else {
             when (isNewRecord) {
-                true -> Log.d("Debug", "New record: ${playedGame.score}")
-                false -> Log.d("Debug", "No new record")
+                true -> Log.d("GameViewModel", "New record: ${playedGame.score}")
+                false -> Log.d("GameViewModel", "No new record")
             }
         }
 
@@ -299,7 +298,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
-        Log.d("Debug", "Current question: ${_questionForUser.value}")
+
+        Log.d("GameViewModel", "Game started")
+        Log.d("GameViewModel", "Current question: ${_questionForUser.value}")
         //Start timer della partita
         startTimer()
     }
@@ -315,11 +316,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Funzione che ottiene la nuova domanda da presentare all'utente (l'API fornisce le domande in ordine casuale)
     private suspend fun nextQuestion(): Question? {
 
+        //Se il timer per la prossima richiesta API non e' null, aspetto che finisca
         if (apiTimerJob != null) {
-            Log.d("Debug", "API timer non è null")
+            //Log.d("Debug", "API timer non è null")
             _isGameTimerInterrupted.value = true
             apiTimerJob?.join()
-            Log.d("Debug", "API timer joinato")
+            //Log.d("Debug", "API timer joinato")
         }
 
         val newQuestion: Question
@@ -329,12 +331,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 convertMixed(_selectedDifficulty.value.toString()).lowercase()
             )) {
                 is NetworkResult.Success -> {
-                    //Log.d("Debug", "New question retrieved: ${result.data}")
                     newQuestion = result.data
                 }
 
                 is NetworkResult.Error -> {
-                    Log.e("WhoKnows", "Error: ${result.exception.message}")
+                    Log.e("GameViewModel", "Error: ${result.exception.message}")
                     return null
                 }
             }
@@ -343,12 +344,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             return null
         }
 
+        //avvio il timer per la prossima richiesta API
         apiCountdownTimer()
+
         askedQuestions.add(newQuestion)
         _shuffledAnswers.value = shuffleAnswers(newQuestion)
+
+        //riavvio il timer di gioco
         _isGameTimerInterrupted.value = false
+
         return newQuestion
     }
+
 
     //Funzione che viene chiamata quando viene fatta una nuova richiesta API, setta il booleano a false e dopo 5 secondi lo setta di nuovo a true
     private fun apiCountdownTimer() {
@@ -368,8 +375,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //Inizializza il timer di gioco
     private fun startTimer() {
-        _isGameOver.value = false //per forza cosi', se utilizzo postValue non si aggiorna il timer
+
+        _isGameOver.value = false //per forza così, se utilizzo postValue non si aggiorna il timer
+
         viewModelScope.launch {
+            Log.d("GameViewModel", "Timer started")
+
+
             gameTimer = 0
             while (_isGameOver.value == false) {
                 if (_isGameTimerInterrupted.value == false) {
@@ -417,7 +429,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _questionForUser.value?.givenAnswer = ""
 
         //Salvataggio game nel DB
-        Log.d("Debug", "Game ended with score: ${_score.value}")
+        Log.d("GameViewModel", "Game ended with score: ${_score.value}")
+
         val playedGame = Game(
             _score.value!!,
             _selectedDifficulty.value!!,
@@ -447,14 +460,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun pauseTimer() {
         _isGameTimerInterrupted.value = true
-        Log.d("Debug", "Timer paused")
+        Log.d("GameViewModel", "Timer paused")
         // Logica per fermare il timer
     }
 
     fun resumeTimer() {
         _isGameTimerInterrupted.postValue(false)
         //_isGameTimerInterrupted.value = false
-        Log.d("Debug", "Timer resumed")
+        Log.d("GameViewModel", "Timer resumed")
         // Logica per riprendere il timer
     }
 
@@ -462,6 +475,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             //provo a fare il setup dell'api all'avvio del programma, se fallisce loggo un errore
             try {
+                Log.d("GameViewModel", "API setup started")
                 questionRepository.setupInteractionWithAPI()
                 _isApiSetupComplete.value = true
             } catch (e: Exception) {
