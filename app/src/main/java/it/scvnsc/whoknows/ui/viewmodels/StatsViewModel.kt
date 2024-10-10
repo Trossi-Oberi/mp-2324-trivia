@@ -84,7 +84,6 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
 
             //eseguo l'operazione di get delle domande
             val questionIDs = gameQuestionRepository.getQuestionsIDs(_selectedGame.value!!)
-            //_selectedGameQuestionsIDs.postValue(gameQuestionRepository.getQuestionsIDs(_selectedGame.value!!))
 
             //Provo ad ottenere le domande della partita selezionata tramite l'ID delle domande
             when(val questions = questionRepository.getQuestionsByIDs(questionIDs)){
@@ -96,8 +95,6 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
             }
-
-            //_selectedGameQuestions.value = questionRepository.getQuestionsByIDs(questionIDs)
 
             _gameQuestionsReady.value = true
         }
@@ -122,8 +119,6 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
         gameRepository = GameRepository(gameDAO)
         questionRepository = QuestionRepository(questionDAO)
         gameQuestionRepository = GameQuestionRepository(gameQuestionDAO)
-        
-        Log.d("WhoKnows", "StatsViewModel initialized successfully")
     }
 
 }

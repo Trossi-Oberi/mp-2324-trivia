@@ -1,8 +1,6 @@
 package it.scvnsc.whoknows
 
 import android.annotation.SuppressLint
-import android.app.Application
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -34,7 +32,6 @@ import it.scvnsc.whoknows.ui.theme.WhoKnowsTheme
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
-import it.scvnsc.whoknows.utils.PreferencesManager
 
 class MainActivity : ComponentActivity() {
     private lateinit var gameViewModel: GameViewModel
@@ -55,7 +52,7 @@ class MainActivity : ComponentActivity() {
         //avvio il monitoraggio della rete
         NetworkMonitorService.startMonitoring(this)
 
-        Log.d("WhoKnows", "Network monitoring service started...")
+        Log.d("MainActivity", "Network monitoring service started...")
 
         // Inizializzo l'app normalmente
         setContent {
@@ -72,7 +69,7 @@ class MainActivity : ComponentActivity() {
 
         //avvio il monitoraggio della rete
         NetworkMonitorService.startMonitoring(this)
-        Log.d("WhoKnows", "Network monitoring service started...")
+        Log.d("MainActivity", "Network monitoring service started...")
     }
 
 
@@ -82,7 +79,7 @@ class MainActivity : ComponentActivity() {
 
         //Ferma il monitoraggio della rete
         NetworkMonitorService.stopMonitoring(this)
-        Log.d("WhoKnows", "Network monitoring service stopped...")
+        Log.d("MainActivity", "Network monitoring service stopped...")
     }
 
     //Viene chiamata durante la chiusura forzata del processo (es. rotazione schermo)
@@ -91,7 +88,7 @@ class MainActivity : ComponentActivity() {
 
         //Ferma il monitoraggio della rete
         NetworkMonitorService.stopMonitoring(this)
-        Log.d("WhoKnows", "Network monitoring service stopped...")
+        Log.d("MainActivity", "Network monitoring service stopped...")
     }
 
 
