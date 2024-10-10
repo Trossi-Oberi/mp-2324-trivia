@@ -62,8 +62,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _elapsedTime = MutableLiveData<String>()
     val elapsedTime: LiveData<String> = _elapsedTime
 
-    private val _isGameTimerInterrupted = MutableLiveData<Boolean?>()
-    val isGameTimerInterrupted: LiveData<Boolean?> = _isGameTimerInterrupted
+    private val _isGameTimerInterrupted = MutableLiveData(false)
+    val isGameTimerInterrupted: LiveData<Boolean> = _isGameTimerInterrupted
 
     private val _lastGame = MutableLiveData<Game>()
     val lastGame: LiveData<Game> get() = _lastGame
@@ -143,10 +143,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     fun onStartClicked() {
         viewModelScope.launch {
             _isGameOver.value = false
-            _isGameTimerInterrupted.value = true
+            pauseTimer()
             startGame()
             _isPlaying.value = true
-            _isGameTimerInterrupted.value = false
+            resumeTimer()
         }
     }
 
@@ -225,7 +225,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
         //Resetto la risposta data dall'utente e riattivo il timer per continuare a giocare
         _userAnswer.value = ""
-        _isGameTimerInterrupted.value = false
+
+        resumeTimer()
     }
 
     private fun playSound(answerSound: Int) {
@@ -318,10 +319,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         //Se il timer per la prossima richiesta API non e' null, aspetto che finisca
         if (apiTimerJob != null) {
-            //Log.d("Debug", "API timer non è null")
-            _isGameTimerInterrupted.value = true
+            Log.d("TimerJob", "API timer non è null")
+            pauseTimer()
             apiTimerJob?.join()
-            //Log.d("Debug", "API timer joinato")
+            Log.d("TimerJob", "API timer joinato")
         }
 
         val newQuestion: Question
@@ -351,7 +352,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _shuffledAnswers.value = shuffleAnswers(newQuestion)
 
         //riavvio il timer di gioco
-        _isGameTimerInterrupted.value = false
+        resumeTimer()
 
         return newQuestion
     }
@@ -380,7 +381,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             Log.d("GameViewModel", "Timer started")
-
 
             gameTimer = 0
             while (_isGameOver.value == false) {
@@ -425,6 +425,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun quitGame() {
+        //imposto gameOver a true in modo da far comparire la schermata di gameOver
+        _isGameOver.value = true
+
         //imposto la risposta come non data
         _questionForUser.value?.givenAnswer = ""
 
@@ -451,11 +454,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _lastGame.value = gameRepository.getLastGame()
 
         //resetto il game timer
-        _isGameTimerInterrupted.value = false
-
-        //imposto gameOver a true in modo da far comparire la schermata di gameOver
-        _isGameOver.value = true
-
+        resumeTimer()
     }
 
     fun pauseTimer() {
@@ -465,8 +464,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun resumeTimer() {
-        _isGameTimerInterrupted.postValue(false)
-        //_isGameTimerInterrupted.value = false
+        //_isGameTimerInterrupted.postValue(false)
+        _isGameTimerInterrupted.value = false
         Log.d("GameViewModel", "Timer resumed")
         // Logica per riprendere il timer
     }

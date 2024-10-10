@@ -53,6 +53,7 @@ fun TopBar(
     leftBtnIcon: ImageVector? = null, //parametri opzionali (scelta dell'icona se presente navController
     showTitle: Boolean = true,
     title: String? = null,
+    showLeftButton: Boolean = true,
     showRightButton: Boolean = false,
     rightBtnIcon: ImageVector? = null,
     onRightBtnClick: () -> Unit = {},
@@ -70,7 +71,7 @@ fun TopBar(
         verticalAlignment = Alignment.Top
     ) {
         // Navigation icon
-        if (navController != null) {
+        if (navController != null && showLeftButton) {
             Box(
                 modifier = Modifier
                     .weight(0.2F)

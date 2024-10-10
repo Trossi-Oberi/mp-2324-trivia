@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 BackHandler {
-                    if(statsViewModel.showGameDetails.value == true){
+                    if (statsViewModel.showGameDetails.value == true) {
                         statsViewModel.setShowGameDetails(false)
                         statsViewModel.setGameQuestionsReady(false)
                     } else {
@@ -186,11 +186,16 @@ class MainActivity : ComponentActivity() {
                 val showExitConfirmationDialog = rememberSaveable { mutableStateOf(false) }
 
                 BackHandler {
-                    if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false) {
+                    if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false && NetworkMonitorService.isOffline.value == false) {
                         // Aggiungi qui il comportamento specifico per la schermata di gioco
                         showExitConfirmationDialog.value = true
 
-                        //showExitConfirmationDialog(this@MainActivity, gameViewModel)
+                    } else if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false && NetworkMonitorService.isOffline.value == true) {
+                        //chiudo la partita e torno alla home
+                        gameViewModel.onQuitGameClicked()
+                        navController.popBackStack()
+                        gameViewModel.setIsPlaying(false)
+
                     } else if (gameViewModel.isGameOver.value == true) {
                         /*setta isPlaying off e rimane su gameView*/
                         gameViewModel.setIsPlaying(false)
@@ -205,9 +210,14 @@ class MainActivity : ComponentActivity() {
 
                 val isDark = settingsViewModel.isDarkTheme.observeAsState().value == true
 
-                if(showExitConfirmationDialog.value){
-                    WhoKnowsTheme (darkTheme = isDark) {
-                        ExitConfirmationDialog(applicationContext, gameViewModel, isDark, showExitConfirmationDialog)
+                if (showExitConfirmationDialog.value) {
+                    WhoKnowsTheme(darkTheme = isDark) {
+                        ExitConfirmationDialog(
+                            applicationContext,
+                            gameViewModel,
+                            isDark,
+                            showExitConfirmationDialog
+                        )
                     }
                 }
             }

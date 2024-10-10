@@ -154,10 +154,6 @@ fun GameView(
                     isOffline == true -> {
                         NetworkErrorScreen(navController, gameViewModel)
 
-                        // Stop timer quando la connessione viene persa
-                        if (isPlaying == true) {
-                            gameViewModel.pauseTimer()
-                        }
                         wasOfflineBefore = true
                     }
 
@@ -198,6 +194,17 @@ fun GameView(
 fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameViewModel) {
     Log.d("Debug", "NetworkErrorScreen called")
 
+    val isPlaying = gameViewModel.isPlaying.observeAsState().value
+    val isGameOver = gameViewModel.isGameOver.observeAsState().value
+
+    var isTimerPaused by rememberSaveable { mutableStateOf(false) }
+
+    // Stop timer quando la connessione viene persa
+    if (isPlaying == true && isGameOver == false) {
+        gameViewModel.pauseTimer()
+        isTimerPaused = true
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -227,7 +234,7 @@ fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameView
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            if (gameViewModel.isPlaying.observeAsState().value == true) {
+            if (isPlaying == true && isGameOver == false) {
                 Text(
                     text = "Please wait for the connection to be restored, or press the button below to exit and save the game.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -267,8 +274,14 @@ fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameView
 
                 Button(
                     onClick = {
-                        //torno alla home
-                        navController.navigate("home")
+                        //resetto isGameOver in modo da non lasciare attiva la schermata di fine partita e isPlaying in modo da non far partire di nuovo la partita
+                        navController.popBackStack()
+
+                        if(isGameOver == true || isPlaying == true) {
+                            gameViewModel.setIsPlaying(false)
+                            gameViewModel.clearUserAnswer()
+                            gameViewModel.setGameOver(false)
+                        }
                     },
                     modifier = Modifier
                         .width(200.dp)
@@ -322,6 +335,7 @@ fun GameViewInGame(
         ) {
             TopBar(
                 navController = navController,
+                showLeftButton = !showLoading!!,
                 onLeftBtnClick = {
                     if (isGameOver == false) {
                         showExitConfirmationDialog.value = true
@@ -388,19 +402,19 @@ fun ExitConfirmationDialog(
     isDark: Boolean,
     showExitConfirmationDialog: MutableState<Boolean>
 ) {
-    val isTimerPaused by rememberSaveable { mutableStateOf(false) }
-
-    Log.d("Debug", "ExitConfirmationDialog called")
+    var isTimerPaused by rememberSaveable { mutableStateOf(false) }
 
     if(!isTimerPaused) {
         // Stop the timer during exit confirmation
         gameViewModel.pauseTimer()
+        isTimerPaused = true
     }
 
     BasicAlertDialog(
         onDismissRequest = {
             //riavvio il timer
             gameViewModel.resumeTimer()
+            isTimerPaused = false
 
             showExitConfirmationDialog.value = false
         }
@@ -436,6 +450,7 @@ fun ExitConfirmationDialog(
                         onClick = {
                             //riavvio il timer
                             gameViewModel.resumeTimer()
+                            isTimerPaused = false
 
                             showExitConfirmationDialog.value = false
                         }
@@ -446,6 +461,8 @@ fun ExitConfirmationDialog(
                     Button(
                         onClick = {
                             gameViewModel.onQuitGameClicked()
+
+                            isTimerPaused = false
 
                             showExitConfirmationDialog.value = false
 
