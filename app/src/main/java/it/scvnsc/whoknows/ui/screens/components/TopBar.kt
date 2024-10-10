@@ -1,7 +1,6 @@
 package it.scvnsc.whoknows.ui.screens.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -12,7 +11,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -184,7 +182,7 @@ fun TopBar(
                             modifier = Modifier
                                 .align(Alignment.Center)
                         ) {
-                            val targetRotation by animateFloatAsState(
+                            val iconRotation by animateFloatAsState(
                                 targetValue = if (isDarkTheme == true) 360f else 0f,
                                 animationSpec = tween(
                                     durationMillis = 500,
@@ -206,10 +204,10 @@ fun TopBar(
                                 label = "Theme Icon Animation"
                             ) { isDark ->
                                 Icon(
-                                    imageVector = if (isDark == true) Icons.Filled.WbSunny else Icons.Filled.DarkMode,
+                                    imageVector = if (isDark == true) Icons.Filled.DarkMode else Icons.Filled.WbSunny,
                                     contentDescription = if (isDark == true) "Switch to Light Mode" else "Switch to Dark Mode",
                                     tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.rotate(targetRotation)
+                                    modifier = Modifier.rotate(iconRotation)
                                 )
                             }
                         }
