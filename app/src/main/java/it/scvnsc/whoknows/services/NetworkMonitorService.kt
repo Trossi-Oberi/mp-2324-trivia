@@ -37,7 +37,6 @@ class NetworkMonitorService : Service() {
             val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
             val isConnected = activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             _isOffline.value = !isConnected
-            //Log.d("NetworkMonitorService", "isNetworkAvailable: $isConnected")
 
             return when {
                 activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
