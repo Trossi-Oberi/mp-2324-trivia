@@ -184,25 +184,28 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 val showExitConfirmationDialog = rememberSaveable { mutableStateOf(false) }
+                val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
 
                 BackHandler {
-                    if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false && NetworkMonitorService.isOffline.value == false) {
-                        // Aggiungi qui il comportamento specifico per la schermata di gioco
-                        showExitConfirmationDialog.value = true
+                    if(!showLoading!!) {
+                        if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false && NetworkMonitorService.isOffline.value == false) {
+                            // Aggiungi qui il comportamento specifico per la schermata di gioco
+                            showExitConfirmationDialog.value = true
 
-                    } else if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false && NetworkMonitorService.isOffline.value == true) {
-                        //chiudo la partita e torno alla home
-                        gameViewModel.onQuitGameClicked()
-                        navController.popBackStack()
-                        gameViewModel.setIsPlaying(false)
+                        } else if (gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false && NetworkMonitorService.isOffline.value == true) {
+                            //chiudo la partita e torno alla home
+                            gameViewModel.onQuitGameClicked()
+                            navController.popBackStack()
+                            gameViewModel.setIsPlaying(false)
 
-                    } else if (gameViewModel.isGameOver.value == true) {
-                        /*setta isPlaying off e rimane su gameView*/
-                        gameViewModel.setIsPlaying(false)
-                        gameViewModel.clearUserAnswer()
-                        gameViewModel.setGameOver(false)
-                    } else {
-                        navController.popBackStack()
+                        } else if (gameViewModel.isGameOver.value == true) {
+                            /*setta isPlaying off e rimane su gameView*/
+                            gameViewModel.setIsPlaying(false)
+                            gameViewModel.clearUserAnswer()
+                            gameViewModel.setGameOver(false)
+                        } else {
+                            navController.popBackStack()
+                        }
                     }
                 }
 

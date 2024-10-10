@@ -133,7 +133,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setIsPlaying(isPlaying: Boolean) {
-        _isPlaying.postValue(isPlaying)
+        //_isPlaying.postValue(isPlaying)
+        _isPlaying.value = isPlaying
     }
 
     fun setGameOver(isGameOver: Boolean) {

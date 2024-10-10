@@ -310,6 +310,7 @@ fun GameViewInGame(
     val context = LocalContext.current
     val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
     val isGameOver = gameViewModel.isGameOver.observeAsState().value
+    val isPlaying  = gameViewModel.isPlaying.observeAsState().value
 
     val isDark = settingsViewModel.isDarkTheme.observeAsState().value == true
     val showExitConfirmationDialog = rememberSaveable { mutableStateOf(false) }
@@ -346,7 +347,7 @@ fun GameViewInGame(
                         gameViewModel.setGameOver(false)
                     }
                 },
-                leftBtnIcon = if (isGameOver == false) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
+                leftBtnIcon = if (isGameOver == false && isPlaying == true) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
                 showTitle = true,
                 title = context.getString(R.string.app_name),
                 settingsViewModel = settingsViewModel
@@ -1735,9 +1736,9 @@ fun GameOverScreen(
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = {
                 /*setta isPlaying off e rimane su gameView*/
-                gameViewModel.setIsPlaying(false)
                 gameViewModel.clearUserAnswer()
                 gameViewModel.setGameOver(false)
+                gameViewModel.setIsPlaying(false)
             }) {
             Text(text = "Game Menu", fontSize = fontSizeNormal)
         }
