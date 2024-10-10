@@ -60,8 +60,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import android.content.Context
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -86,17 +84,11 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.traceEventEnd
-import androidx.compose.runtime.traceEventStart
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.SideEffect
-import androidx.compose.ui.util.trace
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -146,7 +138,6 @@ fun GameView(
     val isOffline = NetworkMonitorService.isOffline.observeAsState().value
     val isPlaying = gameViewModel.isPlaying.observeAsState().value
     val isApiSetupComplete = gameViewModel.isApiSetupComplete.observeAsState().value
-
 
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
