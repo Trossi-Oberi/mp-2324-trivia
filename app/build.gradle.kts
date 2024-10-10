@@ -100,4 +100,7 @@ dependencies {
     //Splashscreen
     implementation(libs.androidx.core.splashscreen)
 
+    //For tracing app performances
+    implementation(libs.androidx.runtime.tracing)
+
 }
