@@ -139,6 +139,11 @@ fun GameView(
     val isPlaying = gameViewModel.isPlaying.observeAsState().value
     val isApiSetupComplete = gameViewModel.isApiSetupComplete.observeAsState().value
 
+    //per evitare che venga chiamato più volte il setupAPI e per evitare che il timer venga avviato senza motivo
+    var hasCalledSetupAPI by rememberSaveable { mutableStateOf(false) }
+    var wasOfflineBefore by rememberSaveable { mutableStateOf(false) }
+
+
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier
@@ -153,11 +158,16 @@ fun GameView(
                         if (isPlaying == true) {
                             gameViewModel.pauseTimer()
                         }
+                        wasOfflineBefore = true
                     }
 
                     // Mostra la schermata principale (setup dell'API)
                     isPlaying == false && isApiSetupComplete == false -> {
-                        gameViewModel.setupAPI()
+                        if(!hasCalledSetupAPI) {
+                            gameViewModel.setupAPI()
+                            hasCalledSetupAPI = true
+                        }
+
                         GameViewMainPage(navController, gameViewModel, settingsViewModel)
                     }
 
@@ -175,7 +185,7 @@ fun GameView(
         )
 
         LaunchedEffect(key1 = NetworkMonitorService.isOffline.observeAsState().value) {
-            if (isOffline == false) {
+            if (isOffline == false && wasOfflineBefore) {
                 gameViewModel.resumeTimer()
             }
         }
@@ -349,12 +359,10 @@ fun GameViewInGame(
 
             when (showLoading!!) {
                 true -> {
-                    Log.d("Debug", "showLoading: $showLoading")
                     LoadingScreen()
                 }
 
                 false -> {
-                    Log.d("Debug", "showLoading: $showLoading")
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -380,17 +388,22 @@ fun ExitConfirmationDialog(
     isDark: Boolean,
     showExitConfirmationDialog: MutableState<Boolean>
 ) {
+    val isTimerPaused by rememberSaveable { mutableStateOf(false) }
+
     Log.d("Debug", "ExitConfirmationDialog called")
 
-    // Stop the timer during exit confirmation
-    gameViewModel.pauseTimer()
+    if(!isTimerPaused) {
+        // Stop the timer during exit confirmation
+        gameViewModel.pauseTimer()
+    }
 
     BasicAlertDialog(
         onDismissRequest = {
+            //riavvio il timer
             gameViewModel.resumeTimer()
+
             showExitConfirmationDialog.value = false
         }
-
     ) {
         Surface(
             modifier = Modifier
@@ -421,7 +434,9 @@ fun ExitConfirmationDialog(
                 ) {
                     TextButton(
                         onClick = {
+                            //riavvio il timer
                             gameViewModel.resumeTimer()
+
                             showExitConfirmationDialog.value = false
                         }
                     ) {
@@ -492,7 +507,6 @@ fun GameBox(gameViewModel: GameViewModel, navController: NavHostController) {
         } else {
             GameBoxPortrait(gameViewModel)
         }
-
     }
 }
 
@@ -1142,16 +1156,19 @@ fun ShowAnswersPortrait(gvm: GameViewModel) {
             .padding(top = 40.dp, bottom = 40.dp)
     ) {
 
-        Log.d("Debug", "++++++ Answers list ++++++\n")
+        Log.d("GameView", "++++++ Answers list ++++++\n")
+
         for (ans in answers!!) {
             AnswerButton(
                 answerText = ans,
-                isCorrect = question?.correct_answer == ans,
-                isSelected = givenAnswer == ans,
+                isCorrect = question?.correct_answer.equals(ans),
+                isSelected = givenAnswer.equals(ans),
                 gvm = gvm
             )
         }
-        Log.d("Debug", "\n++++++ Answers list ++++++")
+
+        Log.d("GameView", "\n++++++ Answers list ++++++")
+
     }
 }
 
@@ -1170,7 +1187,8 @@ fun AnswerButton(
     val isLandscape = isLandscape()
     val isAnswerSelected = gvm.isAnswerSelected.observeAsState().value
 
-    Log.d("Debug", "Answer: $answerText -> $isCorrect")
+    Log.d("GameView", "Answer: $answerText -> $isCorrect")
+
 
     Button(
         elevation = ButtonDefaults.buttonElevation(default_elevation, pressed_elevation),
