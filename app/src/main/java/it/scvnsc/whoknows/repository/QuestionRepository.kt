@@ -49,7 +49,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             }
             NetworkResult.Success(Unit)
         } catch (e: Exception) {
-            Log.e("WhoKnows", "Error setting up interaction with API: $e")
+            Log.e("QuestionRepository", "Error setting up interaction with API: $e")
             NetworkResult.Error(e)
             throw e
         }
@@ -60,10 +60,10 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         try {
             val categories = apiService.getCategories()
             CategoryManager.buildCategoriesMap(categories.trivia_categories)
-            Log.d("WhoKnows", "Categories built: ${CategoryManager.categories}")
+            Log.d("QuestionRepository", "Categories built: ${CategoryManager.categories}")
             NetworkResult.Success(Unit)
         } catch (e: Exception) {
-            Log.e("WhoKnows", "Error building categories map: $e")
+            Log.e("QuestionRepository", "Error building categories map: $e")
             NetworkResult.Error(e)
             throw e
         }
@@ -76,7 +76,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             NetworkResult.Success(response)
         } catch (e: Exception) {
             NetworkResult.Error(e)
-            Log.e("WhoKnows", "Error getting session token: $e")
+            Log.e("QuestionRepository", "Error getting session token: $e")
             throw e
         }
     }
@@ -85,7 +85,7 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         try {
             apiService.resetToken(SESSION_TOKEN)
 
-            Log.d("WhoKnows", "Session token reset: $SESSION_TOKEN")
+            Log.d("QuestionRepository", "Session token reset: $SESSION_TOKEN")
 
             NetworkResult.Success(Unit)
         } catch (e: Exception) {
@@ -118,12 +118,8 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
             }
 
             val newFetchedQuestion = questionResponse.results[0]
-            //Log.d("Debug", "Fetched Question: $newFetchedQuestion")
-
             val newQuestionID: Long = questionDAO.insert(newFetchedQuestion)
-
             newFetchedQuestion.id = newQuestionID
-            //Log.d("Debug", "New Question ID: ${newFetchedQuestion.id}")
 
             NetworkResult.Success(newFetchedQuestion)
         } catch (e: SQLiteException) {
