@@ -185,7 +185,7 @@ fun GameView(
         )
 
         LaunchedEffect(key1 = NetworkMonitorService.isOffline.observeAsState().value) {
-            if (isOffline == false && wasOfflineBefore) {
+            if (isPlaying == true && isOffline == false && wasOfflineBefore) {
                 gameViewModel.resumeTimer()
             }
         }
