@@ -56,6 +56,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -150,6 +151,17 @@ fun StatsView(
                             contentScale = ContentScale.Crop
                         )
                         .fillMaxSize()
+                        .padding(start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                            .asPaddingValues()
+                            .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                            .asPaddingValues().
+                            calculateEndPadding(getLayoutDirection()) else 0.dp,
+                            end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                                .asPaddingValues()
+                                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                                .asPaddingValues().
+                                calculateEndPadding(getLayoutDirection()) else 0.dp
+                        )
                         .statusBarsPadding()
                         .navigationBarsPadding()
                 ) {
@@ -185,11 +197,13 @@ fun StatsView(
                         )
                     }
 
+                    Spacer(modifier = Modifier.size(8.dp) .fillMaxWidth())
 
                     //STATS PAGE
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
                     ) {
                         StatsPage(games, statsViewModel, settingsViewModel)
                     }
@@ -214,18 +228,6 @@ fun StatsPage(
     if (statsViewModel.showGameDetails.value == false && gameQuestionReady == false) {
         Box(
             modifier = Modifier
-                .padding(
-                    start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
-                        .asPaddingValues()
-                        .calculateStartPadding(getLayoutDirection()) else WindowInsets.displayCutout
-                        .asPaddingValues()
-                        .calculateEndPadding(getLayoutDirection()),
-                    end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
-                        .asPaddingValues()
-                        .calculateStartPadding(getLayoutDirection()) else WindowInsets.displayCutout
-                        .asPaddingValues()
-                        .calculateEndPadding(getLayoutDirection())
-                )
                 .fillMaxSize()
                 .padding(
                     start = if (isLandscape) 0.dp else 15.dp,

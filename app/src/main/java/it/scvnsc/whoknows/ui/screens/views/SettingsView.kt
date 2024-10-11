@@ -9,11 +9,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -57,6 +64,8 @@ import it.scvnsc.whoknows.ui.theme.icon_size_settings
 import it.scvnsc.whoknows.ui.theme.icon_size_settings_landscape
 import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
+import it.scvnsc.whoknows.utils.getLayoutDirection
+import it.scvnsc.whoknows.utils.getSurfaceRotation
 import it.scvnsc.whoknows.utils.isLandscape
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -89,15 +98,24 @@ fun SettingsView(
                             contentScale = ContentScale.Crop,
                         )
                         .fillMaxSize()
+                        .padding(start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                            .asPaddingValues()
+                            .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation() ==3) WindowInsets.displayCutout
+                            .asPaddingValues().
+                            calculateEndPadding(getLayoutDirection()) else 0.dp,
+                            end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                                .asPaddingValues()
+                                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation() ==3) WindowInsets.displayCutout
+                                .asPaddingValues().
+                                calculateEndPadding(getLayoutDirection()) else 0.dp
+                        )
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
                 ) {
                     //Top app bar
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(
-                                start = if (isLandscape) bottom_bar_padding else 0.dp,
-                                end = if (isLandscape) bottom_bar_padding else 0.dp
-                            )
                     ) {
                         TopBar(
                             navController = navController,
@@ -113,7 +131,6 @@ fun SettingsView(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = bottom_bar_padding, end = bottom_bar_padding)
                     ) {
                         SettingsButtons(
                             isDarkTheme,

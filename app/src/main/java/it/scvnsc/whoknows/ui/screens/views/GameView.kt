@@ -74,6 +74,13 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -88,6 +95,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.graphicsLayer
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
@@ -107,6 +115,7 @@ import it.scvnsc.whoknows.ui.theme.gameQuestionTextStyle
 import it.scvnsc.whoknows.ui.theme.gameScoreTextStyle
 import it.scvnsc.whoknows.ui.theme.gameTimerTextStyle
 import it.scvnsc.whoknows.ui.theme.game_buttons_height
+import it.scvnsc.whoknows.ui.theme.game_buttons_padding_landscape
 import it.scvnsc.whoknows.ui.theme.game_buttons_shape
 import it.scvnsc.whoknows.ui.theme.game_buttons_spacing
 import it.scvnsc.whoknows.ui.theme.heart_icon_size
@@ -124,6 +133,8 @@ import it.scvnsc.whoknows.ui.theme.star_icon_size_landscape
 import it.scvnsc.whoknows.ui.viewmodels.GameViewModel
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.DifficultyType
+import it.scvnsc.whoknows.utils.getLayoutDirection
+import it.scvnsc.whoknows.utils.getSurfaceRotation
 import it.scvnsc.whoknows.utils.isLandscape
 
 
@@ -146,14 +157,11 @@ fun GameView(
 
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
-            modifier = Modifier
-                .fillMaxSize(),
             content = {
                 when {
                     // Mostra la schermata di errore di rete
                     isOffline == true -> {
                         NetworkErrorScreen(navController, gameViewModel)
-
                         wasOfflineBefore = true
                     }
 
@@ -207,7 +215,20 @@ fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameView
 
     Box(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                .asPaddingValues()
+                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                .asPaddingValues().
+                calculateEndPadding(getLayoutDirection()) else 0.dp,
+                end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                    .asPaddingValues()
+                    .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                    .asPaddingValues().
+                    calculateEndPadding(getLayoutDirection()) else 0.dp
+            )
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -215,7 +236,6 @@ fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameView
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom_bar_padding),
         ) {
             Icon(
                 Icons.Filled.WifiOff,
@@ -319,20 +339,30 @@ fun GameViewInGame(
         modifier = Modifier
             .fillMaxSize()
             .paint(
+                // Replace with your image id
                 painterResource(
-                    id = if (isDark) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
+                    id = if (settingsViewModel.isDarkTheme.observeAsState().value == true) R.drawable.puzzle_bg_black else R.drawable.puzzle_bg_white
                 ),
                 contentScale = ContentScale.Crop
             )
+
+            .padding(start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                .asPaddingValues()
+                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                .asPaddingValues().
+                calculateEndPadding(getLayoutDirection()) else 0.dp,
+                end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                    .asPaddingValues()
+                    .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                    .asPaddingValues().
+                    calculateEndPadding(getLayoutDirection()) else 0.dp
+            )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    start = if (isLandscape) bottom_bar_padding else 0.dp,
-                    end = if (isLandscape) bottom_bar_padding else 0.dp,
-                    top = if (isLandscape) bottom_bar_padding else 0.dp
-                )
         ) {
             TopBar(
                 navController = navController,
@@ -355,20 +385,16 @@ fun GameViewInGame(
 
         }
 
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .size(size = small_padding)
-        )
+        Spacer(modifier = Modifier.size(10.dp) .fillMaxWidth())
 
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = if (isLandscape) 25.dp else 0.dp,
+                    /*start = if (isLandscape) 25.dp else 0.dp,
                     end = if (isLandscape) 25.dp else 0.dp,
-                    bottom = 10.dp
+                    bottom = 10.dp*/
                 )
         ) {
 
@@ -591,6 +617,7 @@ fun GameBoxPortrait(gameViewModel: GameViewModel) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .fillMaxSize()
+            .padding(start = bottom_bar_padding, end = bottom_bar_padding)
     ) {
         Row(
             modifier = Modifier
@@ -617,7 +644,7 @@ fun GameBoxPortrait(gameViewModel: GameViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.size(5.dp))
 
         Row(
             modifier = Modifier
@@ -628,7 +655,6 @@ fun GameBoxPortrait(gameViewModel: GameViewModel) {
                 modifier = Modifier
                     .weight(0.5f)
                     .align(Alignment.CenterVertically)
-                    .padding(start = 10.dp, end = 10.dp)
             ) {
                 DifficultyBox(gameViewModel)
             }
@@ -638,7 +664,6 @@ fun GameBoxPortrait(gameViewModel: GameViewModel) {
                 modifier = Modifier
                     .weight(0.5f)
                     .align(Alignment.CenterVertically)
-                    .padding(start = 10.dp, end = 10.dp)
             ) {
                 LivesBox(gameViewModel)
             }
@@ -657,7 +682,7 @@ fun GameTimer(gameViewModel: GameViewModel) {
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
-            .padding(start = 15.dp, end = 15.dp)
+            .padding(start = game_buttons_padding_landscape, end = game_buttons_padding_landscape)
             .fillMaxWidth(),
         enabled = false,
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
@@ -673,7 +698,7 @@ fun GameTimer(gameViewModel: GameViewModel) {
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(size = if (isLandscape) 40.dp else 50.dp)
+                        .size(size = if (isLandscape) 38.dp else 50.dp)
                         .fillMaxSize()
                         .padding(end = 10.dp)
                 )
@@ -706,7 +731,7 @@ fun GameScore(gameViewModel: GameViewModel) {
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
-            .padding(start = 15.dp, end = 15.dp)
+            .padding(start = game_buttons_padding_landscape, end = game_buttons_padding_landscape)
             .fillMaxWidth(),
         enabled = false,
         shape = CircleShape,
@@ -803,7 +828,7 @@ fun DifficultyBox(gameViewModel: GameViewModel) {
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
-            .padding(start = 12.dp, end = 12.dp)
+            .padding(start = game_buttons_padding_landscape, end = game_buttons_padding_landscape)
             .fillMaxWidth(),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
@@ -910,7 +935,7 @@ fun DifficultyBoxLandscape(gameViewModel: GameViewModel) {
             style = gameButtonsTextStyle,
             color = Color.White,
             modifier = Modifier
-                .padding(end = 6.dp)
+                .padding(end = 5.dp)
         )
         PrintDifficultyStars(gameViewModel)
     }
@@ -922,7 +947,7 @@ fun LivesBox(gameViewModel: GameViewModel) {
     Button(
         onClick = { /* do nothing */ },
         modifier = Modifier
-            .padding(start = 15.dp, end = 15.dp)
+            .padding(start = game_buttons_padding_landscape, end = game_buttons_padding_landscape)
             .fillMaxWidth(),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, disabled_elevation),
         enabled = false,
@@ -1076,7 +1101,6 @@ fun QuestionBox(gameViewModel: GameViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 20.dp, end = 20.dp)
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -1089,7 +1113,8 @@ fun QuestionBox(gameViewModel: GameViewModel) {
 
         Spacer(
             modifier = Modifier
-                .size(size = if (isLandscape) 8.dp else 0.dp)
+                .size(size = if (isLandscape) 10.dp else 0.dp)
+                .fillMaxWidth()
         )
 
         Box(
@@ -1114,15 +1139,11 @@ fun ShowAnswersLandscape(gvm: GameViewModel) {
     val answers = gvm.shuffledAnswers.observeAsState().value
     val givenAnswer = gvm.userAnswer.observeAsState().value
 
-    Column(
-        modifier = Modifier
-            .padding(top = 8.dp)
-    ) {
+    Column{
         LazyVerticalGrid(
             userScrollEnabled = false,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 0.dp, bottom = 10.dp),
+                .fillMaxSize(),
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(all = 8.dp),
             verticalArrangement = Arrangement.spacedBy(15.dp),
@@ -1154,6 +1175,7 @@ fun ShowQuestion(gameViewModel: GameViewModel) {
     ) {
     }
     Text(
+        //text = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         text = gameViewModel.questionForUser.observeAsState().value?.question ?: "",
         style = gameQuestionTextStyle,
         textAlign = TextAlign.Center,
@@ -1171,7 +1193,7 @@ fun ShowAnswersPortrait(gvm: GameViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 40.dp, bottom = 40.dp)
+            .padding(top = 40.dp)
     ) {
 
         Log.d("GameView", "++++++ Answers list ++++++\n")
@@ -1248,7 +1270,7 @@ fun GameViewMainPage(
 ) {
     //determino orientamento schermo
     val isLandscape = isLandscape()
-    val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value
+    val showLoading = gameViewModel.isGameTimerInterrupted.observeAsState().value!!
     val context = LocalContext.current
 
     Column(
@@ -1262,15 +1284,24 @@ fun GameViewMainPage(
                 contentScale = ContentScale.Crop
             )
 
+            .padding(start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                .asPaddingValues()
+                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                .asPaddingValues().
+                calculateEndPadding(getLayoutDirection()) else 0.dp,
+                end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                    .asPaddingValues()
+                    .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                    .asPaddingValues().
+                    calculateEndPadding(getLayoutDirection()) else 0.dp
+            )
+            .statusBarsPadding()
+            .navigationBarsPadding()
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    start = if (isLandscape) bottom_bar_padding else 0.dp,
-                    end = if (isLandscape) bottom_bar_padding else 0.dp,
-                    top = if (isLandscape) bottom_bar_padding else 0.dp
-                )
         ) {
             TopBar(
                 title = context.getString(R.string.app_name),
@@ -1278,7 +1309,8 @@ fun GameViewMainPage(
                 onLeftBtnClick = { navController.navigate("home") },
                 leftBtnIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 showTitle = isLandscape,
-                showRightButton = true,
+                showRightButton = !showLoading,
+                showLeftButton = !showLoading,
                 settingsViewModel = settingsViewModel
             )
         }
@@ -1472,7 +1504,6 @@ fun GameMenuButtons(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = bottom_bar_padding, end = bottom_bar_padding)
             ) {
                 StartGameButton(gameViewModel)
                 SelectDifficultyButton()
@@ -1773,9 +1804,9 @@ fun GameOverScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(all = if (isLandscape) 0.dp else 16.dp)
-                .padding(top = if (isLandscape) 5.dp else 0.dp),
+                .fillMaxSize(),
+                /*.padding(all = if (isLandscape) 0.dp else 16.dp)
+                .padding(top = if (isLandscape) 5.dp else 0.dp),*/
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = if (isLandscape) Arrangement.Top else Arrangement.Center
 

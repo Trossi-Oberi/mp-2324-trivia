@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 //Padding
-val small_padding = 8.dp
+val small_padding = 6.dp
 val medium_padding = 20.dp
 val big_padding = 32.dp
 
@@ -34,7 +34,7 @@ val game_buttons_shape = 30.dp
 val game_buttons_height = 70.dp
 val padding_difficulty = 20.dp
 val star_icon_size = 30.dp
-val star_icon_size_landscape = 19.dp
+val star_icon_size_landscape = 18.dp
 val heart_icon_size = 30.dp
 val heart_icon_size_landscape = 18.dp
 
@@ -72,3 +72,4 @@ val bottom_bar_padding = 15.dp
 val default_elevation = 10.dp
 val pressed_elevation = 30.dp
 val disabled_elevation = 10.dp
+val game_buttons_padding_landscape = 8.dp

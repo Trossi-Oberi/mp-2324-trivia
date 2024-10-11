@@ -63,6 +63,7 @@ fun TopBar(
     val isLandscape = isLandscape()
     val context = LocalContext.current
 
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -110,10 +111,11 @@ fun TopBar(
                 val infiniteTransition = rememberInfiniteTransition(label = "")
 
                 Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+                        .fillMaxSize()
+                        .padding(0.dp)
                 ) {
                     text.forEachIndexed { index, char ->
                         // Creiamo un'animazione per la traslazione verticale e la scala per ogni lettera

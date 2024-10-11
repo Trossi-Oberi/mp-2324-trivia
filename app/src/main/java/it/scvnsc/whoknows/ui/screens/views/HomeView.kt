@@ -8,16 +8,24 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,6 +43,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -57,6 +66,8 @@ import it.scvnsc.whoknows.ui.theme.pressed_elevation
 import it.scvnsc.whoknows.ui.theme.small_padding
 import it.scvnsc.whoknows.ui.theme.titleTextStyle
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
+import it.scvnsc.whoknows.utils.getLayoutDirection
+import it.scvnsc.whoknows.utils.getSurfaceRotation
 import it.scvnsc.whoknows.utils.isLandscape
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -73,7 +84,6 @@ fun HomeView(
 
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
             //contenuto principale
             content = {
                 if(isLandscape) {
@@ -87,11 +97,24 @@ fun HomeView(
                                 contentScale = ContentScale.Crop
                             )
                             .fillMaxSize()
+
+                            .padding(start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                                .asPaddingValues()
+                                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                                .asPaddingValues().
+                                calculateEndPadding(getLayoutDirection()) else 0.dp,
+                                end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                                    .asPaddingValues()
+                                    .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                                    .asPaddingValues().
+                                    calculateEndPadding(getLayoutDirection()) else 0.dp
+                            )
+                            .statusBarsPadding()
+                            .navigationBarsPadding()
                     ) {
                         Box (
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = bottom_bar_padding, end = bottom_bar_padding, top = bottom_bar_padding)
                         ){
                             TopBar(
                                 showTitle = true,
@@ -111,7 +134,7 @@ fun HomeView(
                             Box (
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(start = bottom_bar_padding, end = bottom_bar_padding)
+//                                    .padding(start = bottom_bar_padding, end = bottom_bar_padding)
                             ){
                                 HomeViewButtons(navController)
                             }
@@ -120,6 +143,8 @@ fun HomeView(
                 } else {
                     Column (
                         modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent)
                             .paint(
                                 // Replace with your image id
                                 painterResource(
@@ -129,6 +154,19 @@ fun HomeView(
                             )
                             .fillMaxSize()
 
+                            .padding(start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                                .asPaddingValues()
+                                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                                .asPaddingValues().
+                                calculateEndPadding(getLayoutDirection()) else 0.dp,
+                                end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                                    .asPaddingValues()
+                                    .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
+                                    .asPaddingValues().
+                                    calculateEndPadding(getLayoutDirection()) else 0.dp
+                            )
+                            .statusBarsPadding()
+                            .navigationBarsPadding()
                     ){
                         Box (
                             modifier = Modifier
@@ -145,7 +183,7 @@ fun HomeView(
                         Box (
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(bottom = bottom_bar_padding)
+//                                .padding(bottom = bottom_bar_padding)
                         ){
                             HomeViewButtons(navController)
                         }
@@ -202,7 +240,6 @@ fun HomeViewButtons(navController: NavHostController) {
                 }
 
             }
-
 
             //stats button
             Button(
