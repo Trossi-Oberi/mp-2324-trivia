@@ -65,7 +65,6 @@ fun TopBar(
 
     Row(
         modifier = Modifier
-            .padding(top = if (isLandscape) 0.dp else top_bar_padding)
             .fillMaxWidth()
             .height(top_bar_height),
         verticalAlignment = Alignment.Top
