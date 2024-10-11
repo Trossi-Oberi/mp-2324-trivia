@@ -1,6 +1,7 @@
 package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,6 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +46,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocal
+import androidx.compose.runtime.CompositionLocalContext
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -49,8 +59,10 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
@@ -73,6 +85,8 @@ import it.scvnsc.whoknows.ui.theme.row_button_height
 import it.scvnsc.whoknows.ui.theme.star_icon_size
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
+import it.scvnsc.whoknows.utils.getLayoutDirection
+import it.scvnsc.whoknows.utils.getSurfaceRotation
 import it.scvnsc.whoknows.utils.isLandscape
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -124,8 +138,6 @@ fun StatsView(
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier
-                //.safeDrawingPadding()
-
                 .fillMaxSize(),
             content = {
                 Column(
@@ -145,11 +157,6 @@ fun StatsView(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(
-                                start = if (isLandscape) bottom_bar_padding else 0.dp,
-                                end = if (isLandscape) bottom_bar_padding else 0.dp,
-                                top = if (isLandscape) bottom_bar_padding else 0.dp
-                            )
                     ) {
                         TopBar(
                             navController = navController,
@@ -202,44 +209,56 @@ fun StatsPage(
     val selectedGame = statsViewModel.selectedGame.observeAsState().value
 
     val isLandscape = isLandscape()
+    val isDarkTheme = settingsViewModel.isDarkTheme.observeAsState().value
 
     if (statsViewModel.showGameDetails.value == false && gameQuestionReady == false) {
-        //Colonna portante che racchiude tutta la schermata
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
             modifier = Modifier
+                .padding(
+                    start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                        .asPaddingValues()
+                        .calculateStartPadding(getLayoutDirection()) else WindowInsets.displayCutout
+                        .asPaddingValues()
+                        .calculateEndPadding(getLayoutDirection()),
+                    end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                        .asPaddingValues()
+                        .calculateStartPadding(getLayoutDirection()) else WindowInsets.displayCutout
+                        .asPaddingValues()
+                        .calculateEndPadding(getLayoutDirection())
+                )
                 .fillMaxSize()
                 .padding(
-                    start = if (isLandscape) bottom_bar_padding else 0.dp,
-                    end = if (isLandscape) bottom_bar_padding else 0.dp,
-                    //bottom = 10.dp
+                    start = if (isLandscape) 0.dp else 15.dp,
+                    end = if (isLandscape) 0.dp else 15.dp,
+                    bottom = if (isLandscape) 0.dp else 15.dp
                 )
         ) {
-            //HEADER
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = if (isLandscape) 10.dp else 8.dp,
-                        end = if (isLandscape) 10.dp else 8.dp
-                    )
-                    .background(
-                        if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
-                        RoundedCornerShape(8.dp)
-                    )
-                    .height(if (isLandscape) header_height_landscape else header_height)
-            ) {
-                StatsHeader(settingsViewModel)
-            }
-
-            //Al suo interno usa una LazyColumn per mostrare i game
-            Box(
+            //Colonna portante che racchiude tutta la schermata
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(if (isLandscape) 10.dp else 0.dp)
             ) {
-                ShowGames(games, statsViewModel, settingsViewModel)
+                //HEADER
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(if (isLandscape) header_height_landscape else header_height)
+                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                ) {
+                    StatsHeader(settingsViewModel)
+                }
+
+                //Al suo interno usa una LazyColumn per mostrare i game
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+
+                ) {
+                    ShowGames(games, statsViewModel, settingsViewModel)
+                }
             }
         }
     } else if (statsViewModel.showGameDetails.value == true && gameQuestionReady == false) {
@@ -437,17 +456,17 @@ fun GameDetails(
     val isLandscape = isLandscape()
 
     if (isLandscape) {
-        LazyColumn {
-            item {
-                //HEADER
-                GameDetailsHeader()
+        Column {
 
-                //GAME DETAILS
-                GameDetailsBox(game, settingsViewModel)
+            //HEADER
+            GameDetailsHeader()
 
-                //QUESTIONS BOX
-                QuestionsBox(statsViewModel)
-            }
+            //GAME DETAILS
+            GameDetailsBox(game, settingsViewModel)
+
+            //QUESTIONS BOX
+            QuestionsBox(statsViewModel)
+
         }
 
     } else {
@@ -821,7 +840,7 @@ fun QuestionsBox(statsViewModel: StatsViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            //.border(3.dp, Color.Green)
+        //.border(3.dp, Color.Green)
     ) {
         Column {
             QuestionsHeader()
@@ -847,7 +866,7 @@ fun QuestionsList(statsViewModel: StatsViewModel) {
                 top = 20.dp,
                 bottom = if (isLandScape) 20.dp else 0.dp
             )
-            //.border(3.dp, Color.Red)
+        //.border(3.dp, Color.Red)
     ) {
         LazyColumn {
             with(statsViewModel) {
