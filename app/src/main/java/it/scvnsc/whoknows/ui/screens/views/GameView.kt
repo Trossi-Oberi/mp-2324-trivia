@@ -468,13 +468,13 @@ fun ExitConfirmationDialog(
                             showExitConfirmationDialog.value = false
 
                             //mostra toast di uscita gioco avvenuta con successo
-                            context.let { ctx ->
+                            /*context.let { ctx ->
                                 Toast.makeText(
                                     ctx,
                                     "Game exited successfully",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                            }
+                            }*/
                         }
                     ) {
                         Text("Yes")

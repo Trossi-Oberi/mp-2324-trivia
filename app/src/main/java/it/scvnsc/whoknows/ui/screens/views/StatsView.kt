@@ -10,12 +10,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.safeGesturesPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -116,6 +124,8 @@ fun StatsView(
     WhoKnowsTheme(darkTheme = settingsViewModel.isDarkTheme.observeAsState().value == true) {
         Scaffold(
             modifier = Modifier
+                //.safeDrawingPadding()
+
                 .fillMaxSize(),
             content = {
                 Column(
@@ -128,6 +138,8 @@ fun StatsView(
                             contentScale = ContentScale.Crop
                         )
                         .fillMaxSize()
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
                 ) {
                     //TOP APP BAR
                     Box(
@@ -201,7 +213,7 @@ fun StatsPage(
                 .padding(
                     start = if (isLandscape) bottom_bar_padding else 0.dp,
                     end = if (isLandscape) bottom_bar_padding else 0.dp,
-                    bottom = 10.dp
+                    //bottom = 10.dp
                 )
         ) {
             //HEADER
@@ -225,7 +237,7 @@ fun StatsPage(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(if (isLandscape) 10.dp else 8.dp)
+                    .padding(if (isLandscape) 10.dp else 0.dp)
             ) {
                 ShowGames(games, statsViewModel, settingsViewModel)
             }
