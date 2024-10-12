@@ -1516,7 +1516,7 @@ fun GameMenuButtons(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 40.dp, bottom = 100.dp)
+                .padding(top = 40.dp)
         ) {
             //Difficulty Selection Dialog
             if (showDifficultySelectionDialog) {
