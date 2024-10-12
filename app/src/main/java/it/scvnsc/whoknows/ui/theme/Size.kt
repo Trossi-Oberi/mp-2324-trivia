@@ -52,8 +52,7 @@ val icon_size_settings_landscape = 40.dp
 val row_button_height = 80.dp
 val header_height = 50.dp
 val header_height_landscape = 45.dp
-val gameheader_height_landscape = 75.dp
-val gameheader_height = 80.dp
+val gameheader_height = 50.dp
 
 //Font
 val fontSizeSmall = 12.sp
@@ -67,7 +66,6 @@ val fontSizeBig = 45.sp
 val iconSize = 24.dp
 val lineHeight = 32.sp
 val top_bar_height = 90.dp
-val top_bar_padding = 35.dp
 val bottom_bar_padding = 15.dp
 val default_elevation = 10.dp
 val pressed_elevation = 30.dp
