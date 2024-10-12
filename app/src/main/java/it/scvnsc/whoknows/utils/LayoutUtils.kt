@@ -18,12 +18,10 @@ fun getLayoutDirection(): LayoutDirection {
 @Composable
 fun getSurfaceRotation(): Int? {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        Log.d("LayoutUtils", "Display rotation: ${LocalContext.current.display?.rotation}")
         return LocalContext.current.display?.rotation
     } else {
         val windowManager = LocalContext.current.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val display = windowManager.defaultDisplay
-        Log.d("LayoutUtils", "Display rotation OLD: ${display.rotation}")
         return when (display.rotation) {
             Surface.ROTATION_0 -> 0
             Surface.ROTATION_90 -> 1

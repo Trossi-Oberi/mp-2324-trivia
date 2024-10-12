@@ -202,7 +202,7 @@ fun StatsView(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+                            //.padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
                     ) {
                         StatsPage(games, statsViewModel, settingsViewModel)
                     }

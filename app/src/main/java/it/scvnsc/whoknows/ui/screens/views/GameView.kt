@@ -220,12 +220,12 @@ fun NetworkErrorScreen(navController: NavHostController, gameViewModel: GameView
                 .asPaddingValues()
                 .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
                 .asPaddingValues().
-                calculateEndPadding(getLayoutDirection()) else 0.dp,
+                calculateEndPadding(getLayoutDirection()) else bottom_bar_padding,
                 end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
                     .asPaddingValues()
                     .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
                     .asPaddingValues().
-                    calculateEndPadding(getLayoutDirection()) else 0.dp
+                    calculateEndPadding(getLayoutDirection()) else bottom_bar_padding
             )
             .statusBarsPadding()
             .navigationBarsPadding(),

@@ -2,8 +2,10 @@ package it.scvnsc.whoknows.ui.viewmodels
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.database.sqlite.SQLiteException
 import android.media.MediaPlayer
+import android.media.SoundPool
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -53,8 +55,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     //Timer per nuova richiesta API
     private var apiTimerJob: Job? = null
 
-    //MediaPlayer per riproduzione suono in base alla risposta selezionata
-    private var mediaPlayer: MediaPlayer? = null
+    //SoundPool per riproduzione suono in base alla risposta selezionata
+    private val soundPool: SoundPool
+    private val correctSoundId: Int
+    private val wrongSoundId: Int
+
+    //Creazione MediaPlayer per riproduzione soundtrack
+    private var soundtrackPlayer = MediaPlayer.create(getApplication(), R.raw.whoknows_soundtrack_long)
+
+    //Shared Preferences per il suono (abilitato/disabilitato)
+    private val sharedPreferences: SharedPreferences = getApplication<Application>().getSharedPreferences(
+        "app_prefs",
+        Context.MODE_PRIVATE
+    )
+    private val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", false)
 
     //Timer di gioco
     private var gameTimer = 0
@@ -122,6 +136,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         questionRepository = QuestionRepository(questionDAO)
         gameRepository = GameRepository(gameDAO)
         gameQuestionRepository = GameQuestionRepository(gameQuestionDAO)
+
+        // Inizializza il SoundPool e i suoni per le risposte
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(3) // Numero massimo di suoni simultanei
+            .build();
+        correctSoundId = soundPool.load(getApplication(), R.raw.correct_answer, 1)
+        wrongSoundId = soundPool.load(getApplication(), R.raw.wrong_answer, 1)
     }
 
     fun setDifficulty(difficulty: String) {
@@ -143,10 +164,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onStartClicked() {
         viewModelScope.launch {
-            _isGameOver.value = false
+            setGameOver(false)
             pauseTimer()
             startGame()
-            _isPlaying.value = true
+            setIsPlaying(true)
             resumeTimer()
         }
     }
@@ -174,7 +195,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (givenAnswer == questionForUser.value?.correct_answer) {
             //Aggiorno il punteggio e riproduco il suono di risposta corretta
             updateScore()
-            playSound(R.raw.correct_answer)
+            playSound(correctSoundId)
             delay(WAIT_TIME)
             fetchNewQuestion()
         } else {
@@ -182,7 +203,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             //Risposta sbagliata &&  Fine partita, salvataggio del game nel db, stop del timer, mostrare new record notification se nuovo record
             _lives.value = _lives.value!! - 1
             Log.d("GameViewModel", "Current lives: ${_lives.value}")
-            playSound(R.raw.wrong_answer)
+            playSound(wrongSoundId)
             delay(WAIT_TIME)
 
             if (_lives.value == 0){
@@ -201,7 +222,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 //In ogni caso salvo la partita
                 saveGameAndQuestions(playedGame, askedQuestions)
 
-                _isGameOver.postValue(true)
+                setGameOver(true)
+                stopSoundtrack()
 
                 //salvo nella variabile lastGame l'ultima partita salvata
                 _lastGame.value = gameRepository.getLastGame()
@@ -211,6 +233,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
         _isAnswerSelected.value = false
     }
+
+
 
     private suspend fun fetchNewQuestion() {
 
@@ -231,21 +255,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun playSound(answerSound: Int) {
-        val sharedPreferences = getApplication<Application>().getSharedPreferences(
-            "app_prefs",
-            Context.MODE_PRIVATE
-        )
-        val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", false)
-
-        //Se il suono è disabilitato non riproduco il suono
-        if (!isSoundEnabled) return
-
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer.create(getApplication(), answerSound)
-        mediaPlayer?.start()
-        mediaPlayer?.setOnCompletionListener {
-            mediaPlayer?.release()
-            mediaPlayer = null
+        //Se il suono è abilitato riproduco il suono
+        if (isSoundEnabled){
+            soundPool.play(answerSound,1f,1f,0,0,1f)
         }
     }
 
@@ -305,6 +317,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         Log.d("GameViewModel", "Current question: ${_questionForUser.value}")
         //Start timer della partita
         startTimer()
+        startSoundtrack()
+    }
+
+    private fun startSoundtrack() {
+        if (isSoundEnabled){
+            Log.d("GameViewModel", "Soundtrack started")
+            soundtrackPlayer.isLooping = true
+            soundtrackPlayer.start()
+        }
+    }
+
+    private fun stopSoundtrack() {
+        if (soundtrackPlayer.isPlaying){
+            soundtrackPlayer.stop()
+            soundtrackPlayer.prepare()
+        }
+        Log.d("GameViewModel", "Soundtrack stopped")
     }
 
     //Funzione che converte la stringa "mixed" in "" in modo da far funzionare la richiesta all'API
@@ -427,7 +456,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun quitGame() {
         //imposto gameOver a true in modo da far comparire la schermata di gameOver
-        _isGameOver.value = true
+        setGameOver(true)
+        stopSoundtrack()
 
         //imposto la risposta come non data
         _questionForUser.value?.givenAnswer = ""

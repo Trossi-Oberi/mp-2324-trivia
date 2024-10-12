@@ -42,7 +42,6 @@ import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.ui.theme.DarkYellow
 import it.scvnsc.whoknows.ui.theme.topBarTextStyle
 import it.scvnsc.whoknows.ui.theme.top_bar_height
-import it.scvnsc.whoknows.ui.theme.top_bar_padding
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.utils.isLandscape
 
