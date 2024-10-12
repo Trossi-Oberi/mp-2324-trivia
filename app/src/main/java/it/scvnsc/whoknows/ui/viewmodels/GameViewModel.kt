@@ -61,7 +61,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val wrongSoundId: Int
 
     //Creazione MediaPlayer per riproduzione soundtrack
-    private var soundtrackPlayer = MediaPlayer.create(getApplication(), R.raw.whoknows_soundtrack_long)
+    private var soundtrackPlayer: MediaPlayer = MediaPlayer.create(getApplication(), R.raw.soundtrack_whoknows_long)
 
     //Shared Preferences per il suono (abilitato/disabilitato)
     private val sharedPreferences: SharedPreferences = getApplication<Application>().getSharedPreferences(
@@ -140,7 +140,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         // Inizializza il SoundPool e i suoni per le risposte
         soundPool = SoundPool.Builder()
             .setMaxStreams(3) // Numero massimo di suoni simultanei
-            .build();
+            .build()
         correctSoundId = soundPool.load(getApplication(), R.raw.correct_answer, 1)
         wrongSoundId = soundPool.load(getApplication(), R.raw.wrong_answer, 1)
     }
