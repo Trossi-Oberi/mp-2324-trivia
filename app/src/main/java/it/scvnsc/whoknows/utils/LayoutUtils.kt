@@ -2,7 +2,6 @@ package it.scvnsc.whoknows.utils
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.view.Surface
 import android.view.WindowManager
 import androidx.compose.runtime.Composable

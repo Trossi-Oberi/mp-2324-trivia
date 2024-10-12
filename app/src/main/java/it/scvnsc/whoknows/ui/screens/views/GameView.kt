@@ -2,7 +2,6 @@ package it.scvnsc.whoknows.ui.screens.views
 
 import android.annotation.SuppressLint
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -95,7 +94,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.graphicsLayer
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
@@ -1000,29 +998,6 @@ fun PrintRemainingLives(gameViewModel: GameViewModel) {
     fun AnimatedHeart(show: Boolean) {
         val infiniteTransition = rememberInfiniteTransition(label = "")
 
-        /*
-
-        TODO:: animazione cuori fade out
-        val scale = animateFloatAsState(
-            targetValue = if (show) 1f else 0f,
-            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing), label = ""
-        )
-        val alpha = animateFloatAsState(
-            targetValue = if (show) 1f else 0f,
-            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing), label = ""
-        )
-
-        Icon(
-            Icons.Default.Favorite,
-            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = alpha.value),
-            contentDescription = null,
-            modifier = Modifier
-                .size(if (isLandscape) heart_icon_size_landscape else heart_icon_size)
-                .scale(scale.value)
-                .alpha(alpha.value)
-        )
-        */
-
         // Animating the scale to pulse between 0.9f and 1.1f
         val scale by infiniteTransition.animateFloat(
             initialValue = 0.9f,
@@ -1318,15 +1293,6 @@ fun GameViewMainPage(
         when (showLoading) {
             true -> LoadingScreen()
             false -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    GameMenuButtons(gameViewModel)
-                }
-            }
-
-            null -> {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
