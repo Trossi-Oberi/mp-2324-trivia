@@ -77,7 +77,6 @@ import it.scvnsc.whoknows.ui.theme.difficulty_icon_size
 import it.scvnsc.whoknows.ui.theme.fontSizeMedium
 import it.scvnsc.whoknows.ui.theme.fontSizeNormal
 import it.scvnsc.whoknows.ui.theme.gameheader_height
-import it.scvnsc.whoknows.ui.theme.gameheader_height_landscape
 import it.scvnsc.whoknows.ui.theme.header_height
 import it.scvnsc.whoknows.ui.theme.header_height_landscape
 import it.scvnsc.whoknows.ui.theme.medium_padding
@@ -223,9 +222,9 @@ fun StatsPage(
     val selectedGame = statsViewModel.selectedGame.observeAsState().value
 
     val isLandscape = isLandscape()
-    val isDarkTheme = settingsViewModel.isDarkTheme.observeAsState().value
 
     if (statsViewModel.showGameDetails.value == false && gameQuestionReady == false) {
+        //MAIN BOX
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -458,7 +457,12 @@ fun GameDetails(
     val isLandscape = isLandscape()
 
     if (isLandscape) {
-        Column {
+        Column (
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
 
             //HEADER
             GameDetailsHeader()
@@ -478,7 +482,6 @@ fun GameDetails(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = bottom_bar_padding)
         ) {
             //HEADER
             GameDetailsHeader()
@@ -500,7 +503,7 @@ fun GameDetailsHeader() {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .height(if (isLandScape) gameheader_height_landscape else gameheader_height)
+            .height(gameheader_height)
             .padding(
                 start = if (isLandScape) 300.dp else 50.dp,
                 end = if (isLandScape) 300.dp else 50.dp,
@@ -839,15 +842,20 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
 
 @Composable
 fun QuestionsBox(statsViewModel: StatsViewModel) {
+    val isLandScape = isLandscape()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-        //.border(3.dp, Color.Green)
+            .padding(
+                start = if (isLandScape) 100.dp else 30.dp,
+                end = if (isLandScape) 100.dp else 30.dp,
+                top = 20.dp,
+                bottom = 20.dp
+            )
     ) {
         Column {
             QuestionsHeader()
-
-            Spacer(modifier = Modifier.height(10.dp))
 
             QuestionsList(statsViewModel)
         }
@@ -855,27 +863,42 @@ fun QuestionsBox(statsViewModel: StatsViewModel) {
 }
 
 @Composable
-fun QuestionsList(statsViewModel: StatsViewModel) {
-    val isLandScape = isLandscape()
-
+fun QuestionsHeader() {
     Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(gameheader_height)
+            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+    ) {
+        Text(
+            text = "Questions",
+            style = buttonsTextStyle,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+}
 
+@Composable
+fun QuestionsList(statsViewModel: StatsViewModel) {
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                start = if (isLandScape) 100.dp else 10.dp,
-                end = if (isLandScape) 100.dp else 10.dp,
-                top = 20.dp,
-                bottom = if (isLandScape) 20.dp else 0.dp
-            )
-        //.border(3.dp, Color.Red)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
     ) {
         LazyColumn {
             with(statsViewModel) {
                 items(selectedGameQuestions.value!!.size) { index ->
+
                     val question = selectedGameQuestions.value!![index]
+
                     Box(
                         modifier = Modifier
+                            .padding(
+                                start = 10.dp,
+                                end = 10.dp,
+                                top = 5.dp,
+                            )
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                     ) {
@@ -912,27 +935,4 @@ fun QuestionsList(statsViewModel: StatsViewModel) {
     }
 }
 
-@Composable
-fun QuestionsHeader() {
-    val isLandScape = isLandscape()
 
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(if (isLandScape) gameheader_height_landscape else gameheader_height)
-            .padding(
-                start = if (isLandScape) 300.dp else 50.dp,
-                end = if (isLandScape) 300.dp else 50.dp,
-                top = 20.dp,
-                bottom = 10.dp
-            )
-            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
-    ) {
-        Text(
-            text = "Questions",
-            style = buttonsTextStyle,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
-    }
-}
