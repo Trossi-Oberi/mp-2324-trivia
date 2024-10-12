@@ -68,7 +68,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         "app_prefs",
         Context.MODE_PRIVATE
     )
-    private val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", false)
+    private val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", true)
 
     //Timer di gioco
     private var gameTimer = 0
