@@ -154,16 +154,17 @@ fun StatsView(
                             contentScale = ContentScale.Crop
                         )
                         .fillMaxSize()
-                        .padding(start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
-                            .asPaddingValues()
-                            .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
-                            .asPaddingValues().
-                            calculateEndPadding(getLayoutDirection()) else 0.dp,
+                        .padding(
+                            start = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
+                                .asPaddingValues()
+                                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation() == 3) WindowInsets.displayCutout
+                                .asPaddingValues()
+                                .calculateEndPadding(getLayoutDirection()) else 0.dp,
                             end = if (getSurfaceRotation() == 1) WindowInsets.displayCutout
                                 .asPaddingValues()
-                                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation()==3) WindowInsets.displayCutout
-                                .asPaddingValues().
-                                calculateEndPadding(getLayoutDirection()) else 0.dp
+                                .calculateStartPadding(getLayoutDirection()) else if (getSurfaceRotation() == 3) WindowInsets.displayCutout
+                                .asPaddingValues()
+                                .calculateEndPadding(getLayoutDirection()) else 0.dp
                         )
                         .statusBarsPadding()
                         .navigationBarsPadding()
@@ -247,7 +248,10 @@ fun StatsPage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(if (isLandscape) header_height_landscape else header_height)
-                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                        .background(
+                            MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+                        )
                 ) {
                     StatsHeader(settingsViewModel)
                 }
@@ -256,7 +260,10 @@ fun StatsPage(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                        .background(
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                            RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)
+                        )
 
                 ) {
                     ShowGames(games, statsViewModel, settingsViewModel)
@@ -458,7 +465,7 @@ fun GameDetails(
     val isLandscape = isLandscape()
 
     if (isLandscape) {
-        Column (
+        Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -512,7 +519,7 @@ fun GameDetails(
 fun DetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
     val isLandScape = isLandscape()
 
-    Box (
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
@@ -520,7 +527,7 @@ fun DetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                 end = if (isLandScape) 100.dp else 15.dp,
                 top = 10.dp
             )
-    ){
+    ) {
         Column {
             //HEADER
             GameDetailsHeader()
@@ -538,7 +545,10 @@ fun GameDetailsHeader() {
         modifier = Modifier
             .fillMaxWidth()
             .height(gameheader_height)
-            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+            .background(
+                MaterialTheme.colorScheme.primary,
+                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+            )
     ) {
         Text(
             text = "Game details",
@@ -556,195 +566,250 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if(isLandScape) 120.dp else 170.dp)
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)),
+            .height(if (isLandScape) 80.dp else 170.dp)
+            .background(
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)
+            ),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            //First row
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(0.5f),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
+        if (isLandScape) {
+            Row {
+                //Score column
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
+                        .weight(0.25F)
+                        .fillMaxSize()
                 ) {
                     Text(
                         text = "Score: ${game.score}",
                         style = buttonsTextStyle,
-                        modifier = Modifier
-                            .weight(0.5F),
-                        textAlign = TextAlign.Center,
-                        fontSize = fontSizeUpperNormal
-                    )
-
-                    Text(
-                        text = "Duration: ${game.duration}",
-                        style = buttonsTextStyle,
-                        modifier = Modifier
-                            .weight(0.5F),
                         textAlign = TextAlign.Center,
                         fontSize = fontSizeUpperNormal
                     )
                 }
-            }
 
-            //Secondo row
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.5f)
-            ) {
-                Row(
+
+                //Duration column
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .weight(0.25F)
+                        .fillMaxSize()
                 ) {
-                    //Date column
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .weight(0.5F)
-                            .fillMaxSize()
-                    ) {
-                        val date = game.date
-                        val dateParts = date.split(" ")
+                    Text(
+                        text = "Duration: ${game.duration}",
+                        style = buttonsTextStyle,
+                        textAlign = TextAlign.Center,
+                        fontSize = fontSizeUpperNormal
+                    )
+                }
 
-                        Text(
-                            text = "${dateParts[0]}\n${dateParts[1]}",
-                            style = buttonsTextStyle,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            fontSize = fontSizeUpperNormal
-                        )
-                    }
+                //Date column
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .weight(0.25F)
+                        .fillMaxSize()
+                ) {
+                    val date = game.date
+                    val dateParts = date.split(" ")
 
-                    if (isLandScape) {
-                        //Difficulty column
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .weight(0.5F)
-                                .fillMaxSize()
-                        ) {
-                            when (game.difficulty) {
-                                "easy" -> {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Star,
-                                            tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(difficulty_icon_size)
-                                        )
+                    Text(
+                        text = "${dateParts[0]}\n${dateParts[1]}",
+                        style = buttonsTextStyle,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        fontSize = fontSizeUpperNormal
+                    )
+                }
 
-                                        Spacer(modifier = Modifier.size(15.dp))
+                //Difficulty column
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .weight(0.25F)
+                        .fillMaxSize()
+                ) {
+                    when (game.difficulty) {
+                        "easy" -> {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(difficulty_icon_size)
+                                )
 
-                                        Text(
-                                            text = "Easy",
-                                            fontSize = fontSizeUpperNormal
-                                        )
-                                    }
-                                }
+                                Spacer(modifier = Modifier.size(5.dp))
 
-                                "medium" -> {
-
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-
-                                        Row {
-                                            for (i in 1..2) {
-                                                Icon(
-                                                    Icons.Default.Star,
-                                                    tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
-                                                    contentDescription = null,
-                                                    modifier = Modifier
-                                                        .size(difficulty_icon_size)
-                                                        .fillMaxSize()
-                                                )
-                                            }
-                                        }
-
-                                        Spacer(modifier = Modifier.size(15.dp))
-
-                                        Text(
-                                            text = "Medium",
-                                            fontSize = fontSizeUpperNormal
-                                        )
-                                    }
-                                }
-
-                                "hard" -> {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-
-                                        Row {
-                                            for (i in 1..3) {
-                                                Icon(
-                                                    Icons.Default.Star,
-                                                    tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
-                                                    contentDescription = null,
-                                                    modifier = Modifier
-                                                        .size(difficulty_icon_size)
-                                                        .fillMaxSize()
-                                                )
-                                            }
-                                        }
-
-                                        Spacer(modifier = Modifier.size(15.dp))
-
-                                        Text(
-                                            text = "Hard",
-                                            fontSize = fontSizeUpperNormal
-                                        )
-                                    }
-
-                                }
-
-                                else -> {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Shuffle,
-                                            tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(difficulty_icon_size)
-                                                .fillMaxSize()
-                                        )
-
-                                        Spacer(modifier = Modifier.size(15.dp))
-
-                                        Text(
-                                            text = "Mixed",
-                                            fontSize = fontSizeUpperNormal
-                                        )
-
-                                    }
-                                }
+                                Text(
+                                    text = "Easy",
+                                    fontSize = fontSizeUpperNormal
+                                )
                             }
                         }
 
+                        "medium" -> {
 
-                    } else {  //NO LANDSCAPE
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+
+                                Row {
+                                    for (i in 1..2) {
+                                        Icon(
+                                            Icons.Default.Star,
+                                            tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(difficulty_icon_size)
+                                                .fillMaxSize()
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.size(5.dp))
+
+                                Text(
+                                    text = "Medium",
+                                    fontSize = fontSizeUpperNormal
+                                )
+                            }
+                        }
+
+                        "hard" -> {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+
+                                Row {
+                                    for (i in 1..3) {
+                                        Icon(
+                                            Icons.Default.Star,
+                                            tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(difficulty_icon_size)
+                                                .fillMaxSize()
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.size(5.dp))
+
+                                Text(
+                                    text = "Hard",
+                                    fontSize = fontSizeUpperNormal
+                                )
+                            }
+
+                        }
+
+                        else -> {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+
+                                Icon(
+                                    Icons.Default.Shuffle,
+                                    tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(difficulty_icon_size)
+                                        .fillMaxSize()
+                                )
+
+                                Spacer(modifier = Modifier.size(5.dp))
+
+                                Text(
+                                    text = "Mixed",
+                                    fontSize = fontSizeUpperNormal
+                                )
+                            }
+                        }
+                    }
+                }
+
+
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                //First row
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(0.5f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            text = "Score: ${game.score}",
+                            style = buttonsTextStyle,
+                            modifier = Modifier
+                                .weight(0.5F),
+                            textAlign = TextAlign.Center,
+                            fontSize = fontSizeUpperNormal
+                        )
+
+                        Text(
+                            text = "Duration: ${game.duration}",
+                            style = buttonsTextStyle,
+                            modifier = Modifier
+                                .weight(0.5F),
+                            textAlign = TextAlign.Center,
+                            fontSize = fontSizeUpperNormal
+                        )
+                    }
+                }
+
+                //Secondo row
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.5f)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        //Date column
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .weight(0.5F)
+                                .fillMaxSize()
+                        ) {
+                            val date = game.date
+                            val dateParts = date.split(" ")
+
+                            Text(
+                                text = "${dateParts[0]}\n${dateParts[1]}",
+                                style = buttonsTextStyle,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                                fontSize = fontSizeUpperNormal
+                            )
+                        }
+
                         //Difficulty column
                         Box(
                             contentAlignment = Alignment.Center,
@@ -754,9 +819,9 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                         ) {
                             when (game.difficulty) {
                                 "easy" -> {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
                                             Icons.Default.Star,
@@ -766,7 +831,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                                 .size(difficulty_icon_size)
                                         )
 
-                                        Spacer(modifier = Modifier.size(5.dp))
+                                        Spacer(modifier = Modifier.size(15.dp))
 
                                         Text(
                                             text = "Easy",
@@ -777,9 +842,9 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
 
                                 "medium" -> {
 
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
 
                                         Row {
@@ -795,7 +860,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                             }
                                         }
 
-                                        Spacer(modifier = Modifier.size(5.dp))
+                                        Spacer(modifier = Modifier.size(15.dp))
 
                                         Text(
                                             text = "Medium",
@@ -805,9 +870,9 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                 }
 
                                 "hard" -> {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
 
                                         Row {
@@ -823,7 +888,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                             }
                                         }
 
-                                        Spacer(modifier = Modifier.size(5.dp))
+                                        Spacer(modifier = Modifier.size(15.dp))
 
                                         Text(
                                             text = "Hard",
@@ -834,11 +899,10 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                 }
 
                                 else -> {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
-
                                         Icon(
                                             Icons.Default.Shuffle,
                                             tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
@@ -848,15 +912,17 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                                 .fillMaxSize()
                                         )
 
-                                        Spacer(modifier = Modifier.size(5.dp))
+                                        Spacer(modifier = Modifier.size(15.dp))
 
                                         Text(
                                             text = "Mixed",
                                             fontSize = fontSizeUpperNormal
                                         )
+
                                     }
                                 }
                             }
+
                         }
                     }
                 }
@@ -894,7 +960,10 @@ fun QuestionsHeader() {
         modifier = Modifier
             .fillMaxWidth()
             .height(gameheader_height)
-            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+            .background(
+                MaterialTheme.colorScheme.primary,
+                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+            )
     ) {
         Text(
             text = "Questions",
@@ -909,9 +978,12 @@ fun QuestionsList(statsViewModel: StatsViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+            .background(
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)
+            )
     ) {
-        if(isLandscape()) {
+        if (isLandscape()) {
 
             Column() {
                 with(statsViewModel) {
