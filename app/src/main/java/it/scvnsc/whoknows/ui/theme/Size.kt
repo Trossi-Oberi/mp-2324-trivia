@@ -39,7 +39,7 @@ val heart_icon_size = 30.dp
 val heart_icon_size_landscape = 18.dp
 
 //SettingsView
-val difficulty_icon_size = 45.dp
+val difficulty_icon_size = 30.dp
 val difficulty_buttons_shape = 30.dp
 val difficulty_buttons_width = 300.dp
 val difficulty_buttons_height = 150.dp
