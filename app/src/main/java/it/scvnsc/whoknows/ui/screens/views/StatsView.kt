@@ -68,6 +68,7 @@ import it.scvnsc.whoknows.ui.theme.row_button_height
 import it.scvnsc.whoknows.ui.theme.star_icon_size
 import it.scvnsc.whoknows.ui.viewmodels.SettingsViewModel
 import it.scvnsc.whoknows.ui.viewmodels.StatsViewModel
+import it.scvnsc.whoknows.utils.DifficultyType
 import it.scvnsc.whoknows.utils.getLayoutDirection
 import it.scvnsc.whoknows.utils.getSurfaceRotation
 import it.scvnsc.whoknows.utils.isLandscape
@@ -363,7 +364,7 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
 
         ) {
             when (game.difficulty) {
-                "Easy" -> {
+                DifficultyType.Easy.toString() -> {
                     Icon(
                         Icons.Default.Star,
                         tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
@@ -374,7 +375,7 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
                     )
                 }
 
-                "Medium" -> {
+                DifficultyType.Medium.toString() -> {
                     Row {
                         for (i in 1..2) {
                             Icon(
@@ -389,7 +390,7 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
                     }
                 }
 
-                "Hard" -> {
+                DifficultyType.Hard.toString() -> {
                     Row {
                         for (i in 1..3) {
                             Icon(
@@ -617,7 +618,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                         .fillMaxSize()
                 ) {
                     when (game.difficulty) {
-                        "easy" -> {
+                        DifficultyType.Easy.toString() -> {
                             Column(
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -639,7 +640,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                             }
                         }
 
-                        "medium" -> {
+                        DifficultyType.Medium.toString() -> {
 
                             Column(
                                 verticalArrangement = Arrangement.Center,
@@ -668,7 +669,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                             }
                         }
 
-                        "hard" -> {
+                        DifficultyType.Hard.toString() -> {
                             Column(
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -802,7 +803,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                 .fillMaxSize()
                         ) {
                             when (game.difficulty) {
-                                "easy" -> {
+                                DifficultyType.Easy.toString() -> {
                                     Row(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically,
@@ -824,7 +825,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                     }
                                 }
 
-                                "medium" -> {
+                                DifficultyType.Medium.toString() -> {
 
                                     Row(
                                         horizontalArrangement = Arrangement.Center,
@@ -853,7 +854,7 @@ fun GameDetailsBox(game: Game, settingsViewModel: SettingsViewModel) {
                                     }
                                 }
 
-                                "hard" -> {
+                                DifficultyType.Hard.toString() -> {
                                     Row(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically,

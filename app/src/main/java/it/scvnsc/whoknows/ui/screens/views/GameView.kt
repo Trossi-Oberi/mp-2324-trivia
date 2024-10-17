@@ -95,6 +95,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.toLowerCase
 import it.scvnsc.whoknows.R
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.ui.screens.components.TopBar
@@ -870,7 +871,7 @@ fun PrintDifficultyStars(gameViewModel: GameViewModel) {
     val isLandscape = isLandscape()
 
     when (gameViewModel.questionForUser.observeAsState().value?.difficulty) {
-        "easy" -> {
+        DifficultyType.Easy.toString().lowercase() -> {
             Icon(
                 Icons.Default.Star,
                 tint = MaterialTheme.colorScheme.onPrimary,
@@ -881,7 +882,7 @@ fun PrintDifficultyStars(gameViewModel: GameViewModel) {
             )
         }
 
-        "medium" -> {
+        DifficultyType.Medium.toString().lowercase() -> {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
             ) {
@@ -898,7 +899,7 @@ fun PrintDifficultyStars(gameViewModel: GameViewModel) {
             }
         }
 
-        "hard" -> {
+        DifficultyType.Hard.toString().lowercase() -> {
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(2.dp)

@@ -21,6 +21,7 @@ import it.scvnsc.whoknows.repository.GameRepository
 import it.scvnsc.whoknows.repository.QuestionRepository
 import it.scvnsc.whoknows.services.NetworkMonitorService
 import it.scvnsc.whoknows.utils.CategoryManager
+import it.scvnsc.whoknows.utils.DifficultyType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -436,9 +437,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private fun updateScore() {
 
         val increment = when (_questionForUser.value?.difficulty) {
-            "easy" -> SCORE_EASY_DIFFICULTY
-            "medium" -> SCORE_MEDIUM_DIFFICULTY
-            "hard" -> SCORE_HARD_DIFFICULTY
+            DifficultyType.Easy.toString().lowercase() -> SCORE_EASY_DIFFICULTY
+            DifficultyType.Medium.toString().lowercase() -> SCORE_MEDIUM_DIFFICULTY
+            DifficultyType.Hard.toString().lowercase() -> SCORE_HARD_DIFFICULTY
             else -> 1
         }
         _score.postValue(_score.value!! + increment)
