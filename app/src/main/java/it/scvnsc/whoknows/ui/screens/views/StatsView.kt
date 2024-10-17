@@ -363,7 +363,7 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
 
         ) {
             when (game.difficulty) {
-                "easy" -> {
+                "Easy" -> {
                     Icon(
                         Icons.Default.Star,
                         tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
@@ -374,7 +374,7 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
                     )
                 }
 
-                "medium" -> {
+                "Medium" -> {
                     Row {
                         for (i in 1..2) {
                             Icon(
@@ -389,7 +389,7 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
                     }
                 }
 
-                "hard" -> {
+                "Hard" -> {
                     Row {
                         for (i in 1..3) {
                             Icon(
@@ -405,11 +405,19 @@ fun StatsRow(game: Game, statsViewModel: StatsViewModel, settingsViewModel: Sett
                 }
 
                 else -> {
-                    Text(
+                    Icon(
+                        Icons.Default.Shuffle,
+                        tint = if (settingsViewModel.isDarkTheme.observeAsState().value == true) MaterialTheme.colorScheme.onPrimary else Color.Black,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(star_icon_size)
+                            .fillMaxSize()
+                    )
+                    /*Text(
                         text = "Mixed",
                         style = rowButtonTextStyle,
                         fontSize = fontSizeMedium
-                    )
+                    )*/
                 }
             }
         }
