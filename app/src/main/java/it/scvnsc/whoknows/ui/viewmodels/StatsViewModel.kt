@@ -84,16 +84,8 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
             //eseguo l'operazione di get delle domande
             val questionIDs = gameQuestionRepository.getQuestionsIDs(_selectedGame.value!!)
 
-            //Provo ad ottenere le domande della partita selezionata tramite l'ID delle domande
-            when(val questions = questionRepository.getQuestionsByIDs(questionIDs)){
-                is NetworkResult.Success -> {
-                    _selectedGameQuestions.value = questions.data
-                }
-                is NetworkResult.Error -> {
-                    //non succede nulla
-                    return@launch
-                }
-            }
+            //Ottengo le domande della partita selezionata tramite l'ID delle domande
+            _selectedGameQuestions.value = questionRepository.getQuestionsByIDs(questionIDs)
 
             _gameQuestionsReady.value = true
         }

@@ -133,23 +133,21 @@ class QuestionRepository(private val questionDAO: QuestionDAO) {
         }
     }
 
-    suspend fun updateLastQuestion(questionID: Long, givenAnswer: String): NetworkResult<Unit> = withContext(Dispatchers.IO) {
+    suspend fun updateLastQuestion(questionID: Long, givenAnswer: String) {
         try {
             questionDAO.updateLastQuestion(questionID.toInt(), givenAnswer)
-            NetworkResult.Success(Unit)
         } catch (e: SQLiteException) {
             Log.e("Database", "Error updating last question in database: $e")
-            NetworkResult.Error(e)
+            throw e
         }
     }
 
-    suspend fun getQuestionsByIDs(questionsIDs: List<Int>): NetworkResult<List<Question>> = withContext(Dispatchers.IO) {
+    suspend fun getQuestionsByIDs(questionsIDs: List<Int>): List<Question> {
         try {
-            val questions = questionDAO.getQuestionsByIDs(questionsIDs)
-            NetworkResult.Success(questions)
+            return questionDAO.getQuestionsByIDs(questionsIDs)
         } catch (e: SQLiteException) {
             Log.e("Database", "Error retrieving questions by IDs", e)
-            NetworkResult.Error(e)
+            throw e
         }
     }
 }
