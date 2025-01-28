@@ -69,7 +69,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         "app_prefs",
         Context.MODE_PRIVATE
     )
-    private val isSoundEnabled = sharedPreferences.getBoolean("isSoundEnabled", true)
 
     //Timer di gioco
     private var gameTimer = 0
@@ -144,6 +143,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             .build()
         correctSoundId = soundPool.load(getApplication(), R.raw.correct_answer, 1)
         wrongSoundId = soundPool.load(getApplication(), R.raw.wrong_answer, 1)
+    }
+
+    private fun checkSoundEnabled(): Boolean {
+        return sharedPreferences.getBoolean("isSoundEnabled", true)
     }
 
     fun setDifficulty(difficulty: String) {
@@ -257,7 +260,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun playSound(answerSound: Int) {
         //Se il suono è abilitato riproduco il suono
-        if (isSoundEnabled){
+        if (checkSoundEnabled()){
             soundPool.play(answerSound,1f,1f,0,0,1f)
         }
     }
@@ -322,7 +325,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun startSoundtrack() {
-        if (isSoundEnabled){
+        if (checkSoundEnabled()){
             Log.d("GameViewModel", "Soundtrack started")
             soundtrackPlayer.isLooping = true
             soundtrackPlayer.start()

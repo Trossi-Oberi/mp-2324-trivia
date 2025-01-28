@@ -43,7 +43,5 @@ abstract class DatabaseWK : RoomDatabase() {
         }
 
     }
-
-
 }
 
