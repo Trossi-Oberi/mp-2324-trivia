@@ -59,12 +59,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        //fermo il monitoraggio della rete
+        NetworkMonitorService.stopMonitoring(this)
+        Log.d("MainActivity", "Network monitoring service stopped...")
+
+        //stoppo la musica di gioco
+        if (::gameViewModel.isInitialized){
+            gameViewModel.stopSoundtrack()
+        }
+    }
+
     override fun onResume() {
         super.onResume()
-
         //avvio il monitoraggio della rete
         NetworkMonitorService.startMonitoring(this)
         Log.d("MainActivity", "Network monitoring service started...")
+
+        //riproduco la musica di gioco
+        if (::gameViewModel.isInitialized){
+            gameViewModel.startSoundtrack()
+        }
+
     }
 
 

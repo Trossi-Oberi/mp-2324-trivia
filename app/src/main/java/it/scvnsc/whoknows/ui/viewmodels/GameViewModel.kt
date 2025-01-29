@@ -324,7 +324,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         startSoundtrack()
     }
 
-    private fun startSoundtrack() {
+    fun startSoundtrack() {
         if (checkSoundEnabled()){
             Log.d("GameViewModel", "Soundtrack started")
             soundtrackPlayer.isLooping = true
@@ -332,7 +332,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun stopSoundtrack() {
+    fun stopSoundtrack() {
         if (soundtrackPlayer.isPlaying){
             soundtrackPlayer.stop()
             soundtrackPlayer.prepare()
