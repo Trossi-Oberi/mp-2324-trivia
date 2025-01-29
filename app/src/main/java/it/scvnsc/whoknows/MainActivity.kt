@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
         Log.d("MainActivity", "Network monitoring service started...")
 
         //riproduco la musica di gioco
-        if (::gameViewModel.isInitialized){
+        if (::gameViewModel.isInitialized && gameViewModel.isPlaying.value == true && gameViewModel.isGameOver.value == false){
             gameViewModel.startSoundtrack()
         }
 
